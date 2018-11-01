@@ -12,7 +12,7 @@ new insertArbitrary(`rho:registry:insertArbitrary`), stdout(`rho:io:stdout`), de
     |
     store!({})
     |
-    contract @(*membership, "add")(@cert, return) = {
+    contract membership(@"add", @cert, return) = {
       // debug!("membership(...")|
       match cert {
         {@"claim"!(
@@ -44,7 +44,7 @@ new insertArbitrary(`rho:registry:insertArbitrary`), stdout(`rho:io:stdout`), de
       }
     }
     |
-    contract @(*membership, "lookup")(@id, return) = {
+    contract membership(@"lookup", @id, return) = {
       // debug!(["lookup", id]) |
       for(@db <- store) {
         // debug!(["found:", db.get(id)])|
@@ -56,7 +56,7 @@ new insertArbitrary(`rho:registry:insertArbitrary`), stdout(`rho:io:stdout`), de
     // Testing...
 
     new added, found in {
-      @(*membership, "add")!(
+      membership!("add",
         {
           @"claim"!(@"binding"!(@"discord"!(@"guild"!("257555930173014017") |
             @"id"!("358096357862408195") |
@@ -70,7 +70,7 @@ new insertArbitrary(`rho:registry:insertArbitrary`), stdout(`rho:io:stdout`), de
       |
       for (@what <- added) {
         debug!(["added", what]) |
-        @(*membership, "lookup")!("358096357862408195", *found) |
+        membership!("lookup", "358096357862408195", *found) |
         for (@it <- found) {
           stdout!(["lookup got:", it])
         }
