@@ -4,7 +4,7 @@
  */
 // @flow strict
 // $FlowFixMe
-const Capper = require('Capper');
+import Capper from 'Capper';
 
 /*::
 type DropCommand = {|
@@ -49,13 +49,13 @@ export interface Persistent {
  */
 
 
-exports.command = command;
 /**
  * Handle make / drop / post commands.
  *
  * @return true if cli command was handled; false if there was no
  *         command, which indicates the server should be started.
  */
+export
 function command(cli /*: CLI*/, config /*: Config */, saver /*: Saver */, sturdy /*: Sturdy */) {
     const parseArg = Capper.caplib.makeParseArg(sturdy.wkeyStringToLive);
 
@@ -85,7 +85,7 @@ function command(cli /*: CLI*/, config /*: Config */, saver /*: Saver */, sturdy
 }
 
 
-exports.makeReviver = makeReviver;
+export
 function makeReviver(apps /*: { [string]: { [string]: mixed } } */) /*: Reviver */ {
     function check(name, cond) {
         if (!cond) {
@@ -121,7 +121,7 @@ function makeReviver(apps /*: { [string]: { [string]: mixed } } */) /*: Reviver 
     });
 }
 
-module.exports.once = once;
+export
 function once/*:: <T: {}>*/(state/*: T | {| |}*/) /*: void*/{
   if (Object.keys(state).length > 0) { throw new TypeError('do not call init() more than once.'); }
 }
@@ -130,7 +130,7 @@ function once/*:: <T: {}>*/(state/*: T | {| |}*/) /*: void*/{
  * persisted
  * ISSUE: not typesafe. Assumes de-serialized data is of the right type.
  */
-module.exports.persisted = persisted;
+export
 function persisted/*:: <T>*/(something /*: mixed*/) /*: T*/ {
   // $FlowFixMe
   return ((something/*: any*/)/*: T*/);

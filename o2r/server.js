@@ -7,14 +7,13 @@
 // @flow strict
 
 // $FlowFixMe ISSUE: flow strict in capper
-const Capper = require('Capper');
-const docopt = require('docopt').docopt;
+import Capper from 'Capper';
+import $docopt from 'docopt';
 
-const rnodeAPI = require('./lib/rchain-api/rnodeAPI');
-const capperStart = require('./capper_start');
-const gateway = require('./gateway/server/main');
-const keyPair = require('./gateway/server/keyPair');
-const gameSession = require('./gateway/server/gameSession');
+import * as capperStart from './capper_start.js';
+import * as gateway from './gateway/server/main.js';
+import * as keyPair from './gateway/server/keyPair.js';
+import * as gameSession from './gateway/server/gameSession.js';
 
 const usage = `
 Start with "make game.gameBoard MyGame" to generate (and save) your initial
@@ -57,10 +56,10 @@ ISSUE: add option to list all REVIVERs?
 const def = obj => Object.freeze(obj);
 
 
-function main(argv, { fs, join, clock, randomBytes, http, https, express, passport, grpc }) {
+function main(argv, { fs, join, clock, randomBytes, http, https, express, passport }) {
   const unique = Capper.caplib.makeUnique(randomBytes);
 
-  const cli = docopt(usage, { argv: argv.slice(2) });
+  const cli = $docopt.docopt(usage, { argv: argv.slice(2) });
   // console.log('DEBUG: cli:', cli);
 
   const dbfile = Capper.fsSyncAccess(fs, join, cli['--db']);
@@ -155,7 +154,8 @@ function main(argv, { fs, join, clock, randomBytes, http, https, express, passpo
 }
 
 
-if (require.main === module) {
+export
+function run(require, process) {
   // Import primitive effects only when invoked as main module.
   //
   // See Object capability discipline design note in
@@ -181,8 +181,6 @@ if (require.main === module) {
          // If express followed ocap discipine, we would pass it
          // access to files and the network and such.
          express: require('express'),
-         // grpc is much like express
-         grpc: require('grpc'),
          // The top-level passport strategy registry seems to be
          // global mutable state.
          // ISSUE: use passport constructors to avoid global mutable state?

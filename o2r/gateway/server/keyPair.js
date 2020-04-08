@@ -9,10 +9,10 @@
 // for customizing the way objects appear in logs
 // ref https://nodejs.org/api/util.html#util_custom_inspection_functions_on_objects
 // ack: https://stackoverflow.com/a/46870568
-const inspect = require('util').inspect;
+import { inspect } from 'util';
 
-const rchain = require('../../lib/rchain-api/rnodeAPI');
-const { once } = require('../../capper_start');
+//@@ const rchain = require('../../lib/rchain-api/rnodeAPI');
+import { once } from '../../capper_start.js';
 
 /*::  // ISSUE: belongs in rchain-api?
 
@@ -48,12 +48,12 @@ type KeyGenPowers = {
 }
 */
 
-const { RHOCore, b2h, h2b, verify } = rchain;
-const { fromJSData, toByteArray } = RHOCore;
+//@@ const { RHOCore, b2h, h2b, verify } = rchain;
+//@@ const { fromJSData, toByteArray } = RHOCore;
 const def = Object.freeze; // cf. ocap design note
 
 
-module.exports.appFactory = appFactory;
+export
 function appFactory({ randomBytes } /*: KeyGenPowers */) {
   return def({ keyPair });
 
@@ -92,7 +92,7 @@ function appFactory({ randomBytes } /*: KeyGenPowers */) {
 }
 
 
-exports.verifyDataSigHex = verifyDataSigHex;
+export
 function verifyDataSigHex(data /*: Json */, sigHex /*: string */, pubKeyHex /*: string */) {
   const message = toByteArray(fromJSData(data));
   console.log({ sigHex, pubKeyHex, dataHex: b2h(message) });
@@ -114,7 +114,8 @@ function integrationTest({ randomBytes }) {
 }
 
 
-if (require.main === module) {
+export
+function run(require) {
   // ocap: Import powerful references only when invoked as a main module.
   /* eslint-disable global-require */
   integrationTest({ randomBytes: require('crypto').randomBytes });

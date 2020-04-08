@@ -10,15 +10,14 @@
 */
 /* global require, module, exports, Buffer */
 // @flow strict
-const URL = require('url').URL;
+import { URL } from 'url';
 
-const discord = require('passport-discord');
-const github = require('passport-github');
+import discord from 'passport-discord';
+import github from 'passport-github';
 
-const rnodeAPI = require('../../lib/rchain-api/rnodeAPI');
-const { once, persisted } = require('../../capper_start');
-const keyPair = require('./keyPair');
-const { rhol } = rnodeAPI.RHOCore;
+import { once, persisted } from '../../capper_start.js';
+import * as keyPair from './keyPair.js';
+//@@const { rhol } = rnodeAPI.RHOCore;
 
 const def = Object.freeze; // cf. ocap design note
 
@@ -110,7 +109,7 @@ interface GithubAccount {
  *           ISSUE: use passport constructors
  * baseURL: base URL for mounting OAuth login, callback URLs
  */
-exports.appFactory = appFactory;
+export
 function appFactory({ app, get, passport, baseURL, setSignIn, sturdyPath } /*: Powers*/) {
   // ISSUE: reduce scope of app, get?
   app.use(passport.initialize());
@@ -333,7 +332,8 @@ function trustCertTest(argv, { clock, randomBytes, grpc }) {
 }
 
 
-if (require.main === module) {
+export
+function run(require, process) {
   // ocap: Import powerful references only when invoked as a main module.
   /* eslint-disable global-require */
   /* global process */

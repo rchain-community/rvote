@@ -6,9 +6,9 @@
 */
 // @flow strict
 
-const { rhol } = require('../../lib/rchain-api/RHOCore');
-const { once, persisted } = require('../../capper_start');
-const { verifyDataSigHex } = require('./keyPair');
+//#@@ const { rhol } = require('../../lib/rchain-api/RHOCore');
+import { once, persisted } from '../../capper_start.js';
+import { verifyDataSigHex } from './keyPair.js';
 
 /*:: // ISSUE: belongs in RChain-API
 import { RNode } from '../../lib/rchain-api/rnodeAPI';
@@ -63,7 +63,7 @@ type GamePowers = {
 
 const def = Object.freeze;
 
-module.exports.appFactory = appFactory;
+export
 function appFactory(parent /*: string*/, { clock, rchain } /*: GamePowers*/) {
   return def({ gameSession, gameBoard });
 
