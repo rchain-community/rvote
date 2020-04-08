@@ -1,0 +1,16 @@
+new lookup(`rho:registry:lookup`), stdout(`rho:io:stdout`), debug(`rho:io:stderr`) in {
+  new lookupReturn, certReturn in {
+    // Lookup x using its URI from location (A) above
+    lookup!(`rho:id:wabco5csa4rsj5oepafpquprpzgib8ow4qc5rco1q1zebyiz6fkahy`, *lookupReturn) |
+ 
+    // x is returned, calling it xFromRegistry here
+    for (membershipBundle <- lookupReturn) {
+      debug!(["registry gave back:", *membershipBundle])|
+      // Send on the name retrieved from the registry (which is really x)
+      membershipBundle!("lookup", "358096357862408195", *certReturn) |
+      for (@cert <- certReturn) {
+        stdout!(["found cert for", "358096357862408195", cert])
+      }
+    }
+  }
+}

@@ -2,9 +2,12 @@
 <html>
   <head>
     <title>
-      RChain Community Trust Metric
+      RChain Springboard
     </title>
     <link rel="stylesheet" href="/apps/gateway/ui/formTidy.css" />
+    <style>
+      #status { color: red }
+    </style>
   </head>
   <body>
     <div align="right" id="greeting">
@@ -12,6 +15,60 @@
       <br /><em id="session"></em>
     </div>
     <div class="main">
+      <h1>RChain Members Springboard</h1>
+      <h2>Membership Certificate</h2>
+      <!-- ISSUE: TODO: parameterize discord server name, role name. -->
+      <p>
+        This service, with public
+        key <strong><small><code id="certKey">____</code></small></strong>,
+        provides a sort of membership certificate; that is: a
+        verified credential binding an authorized discord user with
+        a public key provided by that user.
+      </p>
+      <p>
+        We authenticated you with
+        <a href="https://discordapp.com/developers/docs/topics/oauth2">discord
+          OAuth2</a> and verified that you have the
+        <strong id="memberRole">ROLE</strong> role in
+        the <strong id="guild">GUILD</strong> discord server, which you
+        joined at <input id="joined_at" readonly
+        value="2018-07-01 12:12:12" type="datetime-local" /> .
+      </p>
+
+      <h3>Instructions</h3>
+      <ol>
+        <li>Copy your public key from <b>RSign</b> and paste it below.</li>
+        <li>The binding between this key and your discord identity
+        will be formatted as JSON (interoperable with Rholang as
+        RHOCore).</li>
+        <li>Use <b>RSign</b> to sign the binding.</li>
+        <li>Invoke <b>Request Certificate</b>.</li>
+        <li>This service verifies your signature, counter-signs, and
+          sends the result to RChain.
+          <br /><em>ISSUE: where on RChain? On what channel?</em>
+        </li>
+      </ol>
+      <fieldset class="tidy">
+        <label><b>Public Key:</b> <input id="memberPublicKey" size="64"/></label>
+	<label><b>Binding:</b>
+	  <textarea id="certBinding" readonly rows="15" cols="50" ></textarea>
+	</label>
+	<label><b>Signature:</b> <input id="memberSig" size="25" /></label>
+	<label><b>Signed at:</b> <input id="memberSigTime" readonly
+					value="2018-07-01 12:12:12" type="datetime-local" /> </label>
+	<br clear="all" />
+	<div><label><b><button id="requestCert">Request Certificate</button></b></label></div>
+      </fieldset>
+
+      <div id="status"></div>
+      <div id="results">
+        <h3>Verified Credential</h3>
+        <pre id="verifiedCredential">
+        </pre>
+      </div>
+
+      <hr />
+      <div style="display:none">
       <h1>RChain Community Trust Metric</h1>
       <!-- ISSUE: parameterize title? -->
 
@@ -36,7 +93,7 @@
 	<br clear="all" />
 	<div><label><b><button id="certify">Save</button></b></label></div>
 	<br clear="all" />
-	<div id="results">
+	<div id="results@@">
 	  <label><b>Record Key:</b> <input id="recordKey" readonly size="50" /></label>
 	  <label><b>Rholang Deployed:</b>
 	    <textarea id="takeTurnTerm" readonly rows="15" cols="50" ></textarea>
@@ -45,6 +102,25 @@
 	</div>
       </fieldset>
     </div>
+    <address>
+      by Dan Connolly<br />
+      copyright (c) RChain Cooperative<br />
+      share and enjoy:
+      <a href="https://github.com/dckc/rchain-dbr/tree/oauth_gateway/o2r">rchain-dbr/oauth_gateway</a>
+    <script>
+    </div>
+
+function query2hash(loc) {
+  const parts = loc.href.match(/([^?]+)\?(.*)/);
+  if (!parts) { return; }
+  const [_, addr, query] = parts;
+  loc.href = `${addr}#${query}`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  query2hash(window.location);
+});
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
             integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"

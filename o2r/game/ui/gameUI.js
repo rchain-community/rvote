@@ -5,7 +5,10 @@ function gameUI(gameBoard, $) {
     const ui = {
 	path: $('#path'),
 	callbackPath: $('#callbackPath'),
-	strategy: $('#strategy'),
+	provider: $('#provider'),
+	locus: $('#locus'),
+	role: $('#role'),
+	token: $('#token'),
 	id: $('#clientID'),
 	secret: $('#clientSecret'),
 	makeSignIn: $('#makeSignIn')
@@ -21,23 +24,27 @@ function gameUI(gameBoard, $) {
 	.map(_ => ({
 	    path: ui.path.val(),
 	    callbackPath: ui.callbackPath.val(),
-	    strategy: ui.strategy.val(),
+	    provider: ui.provider.val(),
+	    locus: ui.locus.val(),
+	    role: ui.role.val(),
+	    token: ui.token.val(),
 	    id: ui.id.val(),
 	    secret: ui.secret.val()
 	})).log('fields')
 	.flatMap(fields => Bacon.fromPromise(gameBoard.post(
 	    'makeSignIn',
-	    fields.path, fields.callbackPath, fields.strategy,
-	    fields.id, fields.secret))
+  	    fields.path, fields.callbackPath,
+            fields.provider, fields.locus, fields.role, fields.token,
+            fields.id, fields.secret))
 		 .log('makeClient')
 		 .zip(Bacon.once(fields), (c, f) => [c, f])).log('@@flatMap |> zip')
 	.onValue(addClient);
 
-    function addClient([it, {path, strategy, id}]) {
+    function addClient([it, {path, provider, id}]) {
         $('#clients').append(
             $('<a />',
               {href: it.webkey,
-               text: `${path}: ${strategy}: ${id}`})
+               text: `${path}: ${provider}: ${id}`})
                 .wrap('<li />').parent());
     }
 }

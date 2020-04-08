@@ -1,0 +1,65 @@
+new debug(`rho:io:stderr`), makeCareTaker, makeGovernanceCommittee in {
+  debug!("orgEvolve") |
+
+  contract makeGovernanceCommittee(return) = {
+    new alwaysDecline, outCh in {
+      contract alwaysDecline(@("propose", proposal), return) = {
+        debug!({"proposal": proposal}) |
+        return!(false)
+      }
+      |
+      makeCareTaker!(*alwaysDecline, *outCh) |
+      for(port, kill <- outCh) {
+        debug!({"GC caretaker port": *port,
+                "alwaysDecline:": *alwaysDecline}) |
+        return!(*port)
+      }
+    }
+  }
+  |
+  new gcCh, decisionCh in {
+    makeGovernanceCommittee!(*gcCh) | for(gc <- gcCh) {
+      debug!({"gc": *gc}) |
+      gc!(("propose", "climb hill"), *decisionCh) |
+      for(@decision <- decisionCh) {
+        debug!({"gc": *gc, "decision:": decision})
+      }
+    }
+  }
+  |
+  // CareTaker
+  // adapted from https://developer.rchain.coop/tutorial/#revocation
+  // revised to add ack channels
+  contract makeCareTaker(target, ret) = {
+    new port, kill, forwardFlag in {
+      ret!(*port, *kill) |
+      forwardFlag!(true) |
+      contract port(msg, ack) = {
+        for (@status <- forwardFlag) {
+          forwardFlag!(status) |
+          match status {
+            true => { target!(*msg, *ack) }
+            false => { ack!(false) }
+          }
+        }
+      } |
+      for (ret <- kill; _ <- forwardFlag) {
+        forwardFlag!(false) | ret!(Nil)
+      }
+    }
+  }
+  |
+  // test caretaker
+  new port, kill, ret in {
+    makeCareTaker!(*debug, *ret) |
+    for(port, kill <- ret) {
+      port!("caretaker test: before kill", *ret) |
+      for (_ <- ret) {
+        kill!(*ret) | for (_ <- ret) {
+          port!("after kill")
+        }
+      }
+    }
+  }
+
+}
