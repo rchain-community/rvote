@@ -28,7 +28,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dckc/rchain-dbr.git"
+    "url": "git+https://github.com/rchain-community/voting.git"
   },
   "author": "Dan Connolly",
   "license": "Apache-2.0",
