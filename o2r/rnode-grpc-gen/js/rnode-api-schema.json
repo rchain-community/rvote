@@ -1,0 +1,2765 @@
+[
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "HasBlockRequest",
+    "fields": {
+      "hash": {
+        "type": "bytes",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "HasBlock",
+    "fields": {
+      "hash": {
+        "type": "bytes",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "BlockRequest",
+    "fields": {
+      "hash": {
+        "type": "bytes",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ForkChoiceTipRequest",
+    "fields": {},
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ApprovedBlockCandidate",
+    "fields": {
+      "block": {
+        "type": "BlockMessage",
+        "id": 1
+      },
+      "requiredsigs": {
+        "type": "int32",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "UnapprovedBlock",
+    "fields": {
+      "candidate": {
+        "type": "ApprovedBlockCandidate",
+        "id": 1
+      },
+      "timestamp": {
+        "type": "int64",
+        "id": 2
+      },
+      "duration": {
+        "type": "int64",
+        "id": 3
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "Signature",
+    "fields": {
+      "publickey": {
+        "type": "bytes",
+        "id": 1
+      },
+      "algorithm": {
+        "type": "string",
+        "id": 2
+      },
+      "sig": {
+        "type": "bytes",
+        "id": 3
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "BlockApproval",
+    "fields": {
+      "candidate": {
+        "type": "ApprovedBlockCandidate",
+        "id": 1
+      },
+      "sig": {
+        "type": "Signature",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ApprovedBlock",
+    "fields": {
+      "candidate": {
+        "type": "ApprovedBlockCandidate",
+        "id": 1
+      },
+      "sigsList": {
+        "rule": "repeated",
+        "type": "Signature",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ApprovedBlockRequest",
+    "fields": {
+      "identifier": {
+        "type": "string",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "NoApprovedBlockAvailable",
+    "fields": {
+      "identifier": {
+        "type": "string",
+        "id": 1
+      },
+      "nodeidentifer": {
+        "type": "string",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "BlockMessage",
+    "fields": {
+      "blockhash": {
+        "type": "bytes",
+        "id": 1
+      },
+      "header": {
+        "type": "Header",
+        "id": 2
+      },
+      "body": {
+        "type": "Body",
+        "id": 3
+      },
+      "justificationsList": {
+        "rule": "repeated",
+        "type": "Justification",
+        "id": 4
+      },
+      "sender": {
+        "type": "bytes",
+        "id": 5
+      },
+      "seqnum": {
+        "type": "int32",
+        "id": 6
+      },
+      "sig": {
+        "type": "bytes",
+        "id": 7
+      },
+      "sigalgorithm": {
+        "type": "string",
+        "id": 8
+      },
+      "shardid": {
+        "type": "string",
+        "id": 9
+      },
+      "extrabytes": {
+        "type": "bytes",
+        "id": 10
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "BlockMetadataInternal",
+    "fields": {
+      "blockhash": {
+        "type": "bytes",
+        "id": 1
+      },
+      "parentsList": {
+        "rule": "repeated",
+        "type": "bytes",
+        "id": 2,
+        "options": {
+          "(scalapb.field).collection_type": "collection.immutable.List"
+        }
+      },
+      "sender": {
+        "type": "bytes",
+        "id": 3
+      },
+      "justificationsList": {
+        "rule": "repeated",
+        "type": "Justification",
+        "id": 4,
+        "options": {
+          "(scalapb.field).collection_type": "collection.immutable.List"
+        }
+      },
+      "bondsList": {
+        "rule": "repeated",
+        "type": "Bond",
+        "id": 5,
+        "options": {
+          "(scalapb.field).collection_type": "collection.immutable.List"
+        }
+      },
+      "blocknum": {
+        "type": "int64",
+        "id": 6
+      },
+      "seqnum": {
+        "type": "int32",
+        "id": 7
+      },
+      "invalid": {
+        "type": "bool",
+        "id": 8
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "Header",
+    "fields": {
+      "parentshashlistList": {
+        "rule": "repeated",
+        "type": "bytes",
+        "id": 1
+      },
+      "poststatehash": {
+        "type": "bytes",
+        "id": 2
+      },
+      "deployshash": {
+        "type": "bytes",
+        "id": 3
+      },
+      "timestamp": {
+        "type": "int64",
+        "id": 5
+      },
+      "version": {
+        "type": "int64",
+        "id": 6
+      },
+      "deploycount": {
+        "type": "int32",
+        "id": 7
+      },
+      "extrabytes": {
+        "type": "bytes",
+        "id": 8
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "DeployData",
+    "fields": {
+      "deployer": {
+        "type": "bytes",
+        "id": 1
+      },
+      "term": {
+        "type": "string",
+        "id": 2
+      },
+      "timestamp": {
+        "type": "int64",
+        "id": 3
+      },
+      "sig": {
+        "type": "bytes",
+        "id": 4
+      },
+      "sigalgorithm": {
+        "type": "string",
+        "id": 5
+      },
+      "phloprice": {
+        "type": "int64",
+        "id": 7
+      },
+      "phlolimit": {
+        "type": "int64",
+        "id": 8
+      },
+      "validafterblocknumber": {
+        "type": "int64",
+        "id": 10
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ProcessedDeploy",
+    "fields": {
+      "deploy": {
+        "type": "DeployData",
+        "id": 1
+      },
+      "cost": {
+        "type": "PCost",
+        "id": 2
+      },
+      "deploylogList": {
+        "rule": "repeated",
+        "type": "Event",
+        "id": 3
+      },
+      "paymentlogList": {
+        "rule": "repeated",
+        "type": "Event",
+        "id": 4
+      },
+      "errored": {
+        "type": "bool",
+        "id": 5
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "Body",
+    "fields": {
+      "state": {
+        "type": "RChainState",
+        "id": 1
+      },
+      "deploysList": {
+        "rule": "repeated",
+        "type": "ProcessedDeploy",
+        "id": 2
+      },
+      "extrabytes": {
+        "type": "bytes",
+        "id": 3
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "Justification",
+    "fields": {
+      "validator": {
+        "type": "bytes",
+        "id": 1
+      },
+      "latestblockhash": {
+        "type": "bytes",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "RChainState",
+    "fields": {
+      "prestatehash": {
+        "type": "bytes",
+        "id": 1
+      },
+      "poststatehash": {
+        "type": "bytes",
+        "id": 2
+      },
+      "bondsList": {
+        "rule": "repeated",
+        "type": "Bond",
+        "id": 3
+      },
+      "blocknumber": {
+        "type": "int64",
+        "id": 4
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "Event",
+    "fields": {
+      "produce": {
+        "type": "ProduceEvent",
+        "id": 1
+      },
+      "consume": {
+        "type": "ConsumeEvent",
+        "id": 2
+      },
+      "comm": {
+        "type": "CommEvent",
+        "id": 3
+      }
+    },
+    "nullables": [
+      "produce",
+      "consume",
+      "comm"
+    ]
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ProduceEvent",
+    "fields": {
+      "channelshash": {
+        "type": "bytes",
+        "id": 1
+      },
+      "hash": {
+        "type": "bytes",
+        "id": 2
+      },
+      "persistent": {
+        "type": "bool",
+        "id": 3
+      },
+      "sequencenumber": {
+        "type": "int32",
+        "id": 4
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ConsumeEvent",
+    "fields": {
+      "channelshashesList": {
+        "rule": "repeated",
+        "type": "bytes",
+        "id": 1
+      },
+      "hash": {
+        "type": "bytes",
+        "id": 2
+      },
+      "persistent": {
+        "type": "bool",
+        "id": 3
+      },
+      "sequencenumber": {
+        "type": "int32",
+        "id": 4
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "CommEvent",
+    "fields": {
+      "consume": {
+        "type": "ConsumeEvent",
+        "id": 1
+      },
+      "producesList": {
+        "rule": "repeated",
+        "type": "ProduceEvent",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "Bond",
+    "fields": {
+      "validator": {
+        "type": "bytes",
+        "id": 1
+      },
+      "stake": {
+        "type": "int64",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "service",
+    "name": "DeployService",
+    "methods": {
+      "DoDeploy": {
+        "requestType": "DeployData",
+        "responseType": "Either"
+      },
+      "getBlock": {
+        "requestType": "BlockQuery",
+        "responseType": "Either"
+      },
+      "visualizeDag": {
+        "requestType": "VisualizeDagQuery",
+        "responseType": "Either",
+        "responseStream": true
+      },
+      "machineVerifiableDag": {
+        "requestType": "MachineVerifyQuery",
+        "responseType": "Either"
+      },
+      "showMainChain": {
+        "requestType": "BlocksQuery",
+        "responseType": "Either",
+        "responseStream": true
+      },
+      "getBlocks": {
+        "requestType": "BlocksQuery",
+        "responseType": "Either",
+        "responseStream": true
+      },
+      "listenForDataAtName": {
+        "requestType": "DataAtNameQuery",
+        "responseType": "Either"
+      },
+      "listenForContinuationAtName": {
+        "requestType": "ContinuationAtNameQuery",
+        "responseType": "Either"
+      },
+      "findBlockWithDeploy": {
+        "requestType": "FindDeployInBlockQuery",
+        "responseType": "Either"
+      },
+      "findDeploy": {
+        "requestType": "FindDeployQuery",
+        "responseType": "Either"
+      },
+      "previewPrivateNames": {
+        "requestType": "PrivateNamePreviewQuery",
+        "responseType": "Either"
+      },
+      "lastFinalizedBlock": {
+        "requestType": "LastFinalizedBlockQuery",
+        "responseType": "Either"
+      }
+    }
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "FindDeployQuery",
+    "fields": {
+      "deployid": {
+        "type": "bytes",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "FindDeployInBlockQuery",
+    "fields": {
+      "user": {
+        "type": "bytes",
+        "id": 1
+      },
+      "timestamp": {
+        "type": "int64",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "BlockQuery",
+    "fields": {
+      "hash": {
+        "type": "string",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "BlocksQuery",
+    "fields": {
+      "depth": {
+        "type": "int32",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "DataAtNameQuery",
+    "fields": {
+      "depth": {
+        "type": "int32",
+        "id": 1
+      },
+      "name": {
+        "type": "Par",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ContinuationAtNameQuery",
+    "fields": {
+      "depth": {
+        "type": "int32",
+        "id": 1
+      },
+      "namesList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "DeployServiceResponse",
+    "fields": {
+      "message": {
+        "type": "string",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "BlockQueryResponse",
+    "fields": {
+      "blockinfo": {
+        "type": "BlockInfo",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "LightBlockQueryResponse",
+    "fields": {
+      "blockinfo": {
+        "type": "LightBlockInfo",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "VisualizeDagQuery",
+    "fields": {
+      "depth": {
+        "type": "int32",
+        "id": 1
+      },
+      "showjustificationlines": {
+        "type": "bool",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "VisualizeBlocksResponse",
+    "fields": {
+      "content": {
+        "type": "string",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "MachineVerifyQuery",
+    "fields": {},
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "MachineVerifyResponse",
+    "fields": {
+      "content": {
+        "type": "string",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ListeningNameDataResponse",
+    "fields": {
+      "blockresultsList": {
+        "rule": "repeated",
+        "type": "DataWithBlockInfo",
+        "id": 1
+      },
+      "length": {
+        "type": "int32",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ListeningNameContinuationResponse",
+    "fields": {
+      "blockresultsList": {
+        "rule": "repeated",
+        "type": "ContinuationsWithBlockInfo",
+        "id": 1
+      },
+      "length": {
+        "type": "int32",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "PrivateNamePreviewQuery",
+    "fields": {
+      "user": {
+        "type": "bytes",
+        "id": 1
+      },
+      "timestamp": {
+        "type": "int64",
+        "id": 2
+      },
+      "nameqty": {
+        "type": "int32",
+        "id": 3
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "PrivateNamePreviewResponse",
+    "fields": {
+      "idsList": {
+        "rule": "repeated",
+        "type": "bytes",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "LastFinalizedBlockQuery",
+    "fields": {},
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "LastFinalizedBlockResponse",
+    "fields": {
+      "blockinfo": {
+        "type": "BlockInfo",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "LightBlockInfo",
+    "fields": {
+      "blockhash": {
+        "type": "string",
+        "id": 1
+      },
+      "blocksize": {
+        "type": "string",
+        "id": 2
+      },
+      "blocknumber": {
+        "type": "int64",
+        "id": 3
+      },
+      "version": {
+        "type": "int64",
+        "id": 4
+      },
+      "deploycount": {
+        "type": "int32",
+        "id": 5
+      },
+      "tuplespacehash": {
+        "type": "string",
+        "id": 6
+      },
+      "timestamp": {
+        "type": "int64",
+        "id": 7
+      },
+      "faulttolerance": {
+        "type": "float",
+        "id": 8
+      },
+      "mainparenthash": {
+        "type": "string",
+        "id": 9
+      },
+      "parentshashlistList": {
+        "rule": "repeated",
+        "type": "string",
+        "id": 10
+      },
+      "sender": {
+        "type": "string",
+        "id": 11
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "BlockInfo",
+    "fields": {
+      "blockhash": {
+        "type": "string",
+        "id": 1
+      },
+      "blocksize": {
+        "type": "string",
+        "id": 2
+      },
+      "blocknumber": {
+        "type": "int64",
+        "id": 3
+      },
+      "version": {
+        "type": "int64",
+        "id": 4
+      },
+      "deploycount": {
+        "type": "int32",
+        "id": 5
+      },
+      "tuplespacehash": {
+        "type": "string",
+        "id": 6
+      },
+      "timestamp": {
+        "type": "int64",
+        "id": 7
+      },
+      "faulttolerance": {
+        "type": "float",
+        "id": 8
+      },
+      "mainparenthash": {
+        "type": "string",
+        "id": 9
+      },
+      "parentshashlistList": {
+        "rule": "repeated",
+        "type": "string",
+        "id": 10
+      },
+      "sender": {
+        "type": "string",
+        "id": 11
+      },
+      "shardid": {
+        "type": "string",
+        "id": 12
+      },
+      "bondsvalidatorlistList": {
+        "rule": "repeated",
+        "type": "string",
+        "id": 13
+      },
+      "deploycostList": {
+        "rule": "repeated",
+        "type": "string",
+        "id": 14
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "DataWithBlockInfo",
+    "fields": {
+      "postblockdataList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 1
+      },
+      "block": {
+        "type": "LightBlockInfo",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "ContinuationsWithBlockInfo",
+    "fields": {
+      "postblockcontinuationsList": {
+        "rule": "repeated",
+        "type": "WaitingContinuationInfo",
+        "id": 1
+      },
+      "block": {
+        "type": "LightBlockInfo",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "WaitingContinuationInfo",
+    "fields": {
+      "postblockpatternsList": {
+        "rule": "repeated",
+        "type": "BindPattern",
+        "id": 1
+      },
+      "postblockcontinuation": {
+        "type": "Par",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "service",
+    "name": "ProposeService",
+    "methods": {
+      "propose": {
+        "requestType": "PrintUnmatchedSendsQuery",
+        "responseType": "Either"
+      }
+    }
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "casper",
+      "protocol"
+    ],
+    "type": "type",
+    "name": "PrintUnmatchedSendsQuery",
+    "fields": {
+      "printunmatchedsends": {
+        "type": "bool",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "node",
+      "model"
+    ],
+    "type": "service",
+    "name": "Repl",
+    "methods": {
+      "Run": {
+        "requestType": "CmdRequest",
+        "responseType": "ReplResponse"
+      },
+      "Eval": {
+        "requestType": "EvalRequest",
+        "responseType": "ReplResponse"
+      }
+    }
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "node",
+      "model"
+    ],
+    "type": "type",
+    "name": "CmdRequest",
+    "fields": {
+      "line": {
+        "type": "string",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "node",
+      "model"
+    ],
+    "type": "type",
+    "name": "EvalRequest",
+    "fields": {
+      "program": {
+        "type": "string",
+        "id": 1
+      },
+      "printunmatchedsendsonly": {
+        "type": "bool",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [
+      "coop",
+      "rchain",
+      "node",
+      "model"
+    ],
+    "type": "type",
+    "name": "ReplResponse",
+    "fields": {
+      "output": {
+        "type": "string",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "Par",
+    "fields": {
+      "sendsList": {
+        "rule": "repeated",
+        "type": "Send",
+        "id": 1
+      },
+      "receivesList": {
+        "rule": "repeated",
+        "type": "Receive",
+        "id": 2
+      },
+      "newsList": {
+        "rule": "repeated",
+        "type": "New",
+        "id": 4
+      },
+      "exprsList": {
+        "rule": "repeated",
+        "type": "Expr",
+        "id": 5
+      },
+      "matchesList": {
+        "rule": "repeated",
+        "type": "Match",
+        "id": 6
+      },
+      "unforgeablesList": {
+        "rule": "repeated",
+        "type": "GUnforgeable",
+        "id": 7
+      },
+      "bundlesList": {
+        "rule": "repeated",
+        "type": "Bundle",
+        "id": 11
+      },
+      "connectivesList": {
+        "rule": "repeated",
+        "type": "Connective",
+        "id": 8
+      },
+      "locallyfree": {
+        "type": "bytes",
+        "id": 9,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+        }
+      },
+      "connectiveUsed": {
+        "type": "bool",
+        "id": 10
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "TaggedContinuation",
+    "fields": {
+      "parBody": {
+        "type": "ParWithRandom",
+        "id": 1
+      },
+      "scalaBodyRef": {
+        "type": "int64",
+        "id": 2
+      }
+    },
+    "nullables": [
+      "parBody",
+      "scalaBodyRef"
+    ]
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ParWithRandom",
+    "fields": {
+      "body": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "randomstate": {
+        "type": "bytes",
+        "id": 2,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.crypto.hash.Blake2b512Random"
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "PCost",
+    "fields": {
+      "cost": {
+        "type": "uint64",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ListParWithRandom",
+    "fields": {
+      "parsList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 1
+      },
+      "randomstate": {
+        "type": "bytes",
+        "id": 2,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.crypto.hash.Blake2b512Random"
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "Var",
+    "fields": {
+      "boundVar": {
+        "type": "sint32",
+        "id": 1
+      },
+      "freeVar": {
+        "type": "sint32",
+        "id": 2
+      },
+      "wildcard": {
+        "type": "WildcardMsg",
+        "id": 3
+      }
+    },
+    "nullables": [
+      "boundVar",
+      "freeVar",
+      "wildcard"
+    ]
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "Bundle",
+    "fields": {
+      "body": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "writeflag": {
+        "type": "bool",
+        "id": 2
+      },
+      "readflag": {
+        "type": "bool",
+        "id": 3
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "Send",
+    "fields": {
+      "chan": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "dataList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 2
+      },
+      "persistent": {
+        "type": "bool",
+        "id": 3
+      },
+      "locallyfree": {
+        "type": "bytes",
+        "id": 5,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+        }
+      },
+      "connectiveUsed": {
+        "type": "bool",
+        "id": 6
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ReceiveBind",
+    "fields": {
+      "patternsList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 1
+      },
+      "source": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "remainder": {
+        "type": "Var",
+        "id": 3
+      },
+      "freecount": {
+        "type": "int32",
+        "id": 4
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "BindPattern",
+    "fields": {
+      "patternsList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 1
+      },
+      "remainder": {
+        "type": "Var",
+        "id": 2
+      },
+      "freecount": {
+        "type": "int32",
+        "id": 3
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ListBindPatterns",
+    "fields": {
+      "patternsList": {
+        "rule": "repeated",
+        "type": "BindPattern",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "Receive",
+    "fields": {
+      "bindsList": {
+        "rule": "repeated",
+        "type": "ReceiveBind",
+        "id": 1
+      },
+      "body": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "persistent": {
+        "type": "bool",
+        "id": 3
+      },
+      "peek": {
+        "type": "bool",
+        "id": 4
+      },
+      "bindcount": {
+        "type": "int32",
+        "id": 5
+      },
+      "locallyfree": {
+        "type": "bytes",
+        "id": 6,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+        }
+      },
+      "connectiveUsed": {
+        "type": "bool",
+        "id": 7
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "New",
+    "fields": {
+      "bindcount": {
+        "type": "sint32",
+        "id": 1
+      },
+      "p": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "uriList": {
+        "rule": "repeated",
+        "type": "string",
+        "id": 3
+      },
+      "deployid": {
+        "type": "DeployId",
+        "id": 4
+      },
+      "deployerid": {
+        "type": "DeployerId",
+        "id": 5
+      },
+      "locallyfree": {
+        "type": "bytes",
+        "id": 6,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "MatchCase",
+    "fields": {
+      "pattern": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "source": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "freecount": {
+        "type": "int32",
+        "id": 3
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "Match",
+    "fields": {
+      "target": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "casesList": {
+        "rule": "repeated",
+        "type": "MatchCase",
+        "id": 2
+      },
+      "locallyfree": {
+        "type": "bytes",
+        "id": 4,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+        }
+      },
+      "connectiveUsed": {
+        "type": "bool",
+        "id": 5
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "Expr",
+    "fields": {
+      "gBool": {
+        "type": "bool",
+        "id": 1
+      },
+      "gInt": {
+        "type": "sint64",
+        "id": 2
+      },
+      "gString": {
+        "type": "string",
+        "id": 3
+      },
+      "gUri": {
+        "type": "string",
+        "id": 4
+      },
+      "gByteArray": {
+        "type": "bytes",
+        "id": 25
+      },
+      "eNotBody": {
+        "type": "ENot",
+        "id": 5
+      },
+      "eNegBody": {
+        "type": "ENeg",
+        "id": 6
+      },
+      "eMultBody": {
+        "type": "EMult",
+        "id": 7
+      },
+      "eDivBody": {
+        "type": "EDiv",
+        "id": 8
+      },
+      "ePlusBody": {
+        "type": "EPlus",
+        "id": 9
+      },
+      "eMinusBody": {
+        "type": "EMinus",
+        "id": 10
+      },
+      "eLtBody": {
+        "type": "ELt",
+        "id": 11
+      },
+      "eLteBody": {
+        "type": "ELte",
+        "id": 12
+      },
+      "eGtBody": {
+        "type": "EGt",
+        "id": 13
+      },
+      "eGteBody": {
+        "type": "EGte",
+        "id": 14
+      },
+      "eEqBody": {
+        "type": "EEq",
+        "id": 15
+      },
+      "eNeqBody": {
+        "type": "ENeq",
+        "id": 16
+      },
+      "eAndBody": {
+        "type": "EAnd",
+        "id": 17
+      },
+      "eOrBody": {
+        "type": "EOr",
+        "id": 18
+      },
+      "eVarBody": {
+        "type": "EVar",
+        "id": 19
+      },
+      "eListBody": {
+        "type": "EList",
+        "id": 20
+      },
+      "eTupleBody": {
+        "type": "ETuple",
+        "id": 21
+      },
+      "eSetBody": {
+        "type": "ESet",
+        "id": 22,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.ParSet"
+        }
+      },
+      "eMapBody": {
+        "type": "EMap",
+        "id": 23,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.ParMap"
+        }
+      },
+      "eMethodBody": {
+        "type": "EMethod",
+        "id": 24
+      },
+      "eMatchesBody": {
+        "type": "EMatches",
+        "id": 27
+      },
+      "ePercentPercentBody": {
+        "type": "EPercentPercent",
+        "id": 28
+      },
+      "ePlusPlusBody": {
+        "type": "EPlusPlus",
+        "id": 29
+      },
+      "eMinusMinusBody": {
+        "type": "EMinusMinus",
+        "id": 30
+      },
+      "eModBody": {
+        "type": "EMod",
+        "id": 31
+      }
+    },
+    "nullables": [
+      "gBool",
+      "gInt",
+      "gString",
+      "gUri",
+      "gByteArray",
+      "eNotBody",
+      "eNegBody",
+      "eMultBody",
+      "eDivBody",
+      "ePlusBody",
+      "eMinusBody",
+      "eLtBody",
+      "eLteBody",
+      "eGtBody",
+      "eGteBody",
+      "eEqBody",
+      "eNeqBody",
+      "eAndBody",
+      "eOrBody",
+      "eVarBody",
+      "eListBody",
+      "eTupleBody",
+      "eSetBody",
+      "eMapBody",
+      "eMethodBody",
+      "eMatchesBody",
+      "ePercentPercentBody",
+      "ePlusPlusBody",
+      "eMinusMinusBody",
+      "eModBody"
+    ]
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EList",
+    "fields": {
+      "psList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 1
+      },
+      "locallyfree": {
+        "type": "bytes",
+        "id": 3,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+        }
+      },
+      "connectiveUsed": {
+        "type": "bool",
+        "id": 4
+      },
+      "remainder": {
+        "type": "Var",
+        "id": 5
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ETuple",
+    "fields": {
+      "psList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 1
+      },
+      "locallyfree": {
+        "type": "bytes",
+        "id": 3,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+        }
+      },
+      "connectiveUsed": {
+        "type": "bool",
+        "id": 4
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ESet",
+    "fields": {
+      "psList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 1
+      },
+      "locallyfree": {
+        "type": "bytes",
+        "id": 3,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+        }
+      },
+      "connectiveUsed": {
+        "type": "bool",
+        "id": 4
+      },
+      "remainder": {
+        "type": "Var",
+        "id": 5
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EMap",
+    "fields": {
+      "kvsList": {
+        "rule": "repeated",
+        "type": "KeyValuePair",
+        "id": 1
+      },
+      "locallyfree": {
+        "type": "bytes",
+        "id": 3,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+        }
+      },
+      "connectiveUsed": {
+        "type": "bool",
+        "id": 4
+      },
+      "remainder": {
+        "type": "Var",
+        "id": 5
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EMethod",
+    "fields": {
+      "methodname": {
+        "type": "string",
+        "id": 1
+      },
+      "target": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "argumentsList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 3
+      },
+      "locallyfree": {
+        "type": "bytes",
+        "id": 5,
+        "options": {
+          "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+        }
+      },
+      "connectiveUsed": {
+        "type": "bool",
+        "id": 6
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "KeyValuePair",
+    "fields": {
+      "key": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "value": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EVar",
+    "fields": {
+      "v": {
+        "type": "Var",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ENot",
+    "fields": {
+      "p": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ENeg",
+    "fields": {
+      "p": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EMult",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EDiv",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EMod",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EPlus",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EMinus",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ELt",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ELte",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EGt",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EGte",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EEq",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ENeq",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EAnd",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EOr",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EMatches",
+    "fields": {
+      "target": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "pattern": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EPercentPercent",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EPlusPlus",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EMinusMinus",
+    "fields": {
+      "p1": {
+        "type": "Par",
+        "id": 1,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      },
+      "p2": {
+        "type": "Par",
+        "id": 2,
+        "options": {
+          "(scalapb.field).no_box": true
+        }
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "Connective",
+    "fields": {
+      "connAndBody": {
+        "type": "ConnectiveBody",
+        "id": 1
+      },
+      "connOrBody": {
+        "type": "ConnectiveBody",
+        "id": 2
+      },
+      "connNotBody": {
+        "type": "Par",
+        "id": 3
+      },
+      "varRefBody": {
+        "type": "VarRef",
+        "id": 4
+      },
+      "connBool": {
+        "type": "bool",
+        "id": 5
+      },
+      "connInt": {
+        "type": "bool",
+        "id": 6
+      },
+      "connString": {
+        "type": "bool",
+        "id": 7
+      },
+      "connUri": {
+        "type": "bool",
+        "id": 8
+      },
+      "connByteArray": {
+        "type": "bool",
+        "id": 9
+      }
+    },
+    "nullables": [
+      "connAndBody",
+      "connOrBody",
+      "connNotBody",
+      "varRefBody",
+      "connBool",
+      "connInt",
+      "connString",
+      "connUri",
+      "connByteArray"
+    ]
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "VarRef",
+    "fields": {
+      "index": {
+        "type": "sint32",
+        "id": 1
+      },
+      "depth": {
+        "type": "sint32",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "ConnectiveBody",
+    "fields": {
+      "psList": {
+        "rule": "repeated",
+        "type": "Par",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "DeployId",
+    "fields": {
+      "sig": {
+        "type": "bytes",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "DeployerId",
+    "fields": {
+      "publickey": {
+        "type": "bytes",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "GUnforgeable",
+    "fields": {
+      "gPrivateBody": {
+        "type": "GPrivate",
+        "id": 1
+      },
+      "gDeployIdBody": {
+        "type": "GDeployId",
+        "id": 2
+      },
+      "gDeployerIdBody": {
+        "type": "GDeployerId",
+        "id": 3
+      }
+    },
+    "nullables": [
+      "gPrivateBody",
+      "gDeployIdBody",
+      "gDeployerIdBody"
+    ]
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "GPrivate",
+    "fields": {
+      "id": {
+        "type": "bytes",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "GDeployId",
+    "fields": {
+      "sig": {
+        "type": "bytes",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "GDeployerId",
+    "fields": {
+      "publickey": {
+        "type": "bytes",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EitherAny",
+    "fields": {
+      "typeUrl": {
+        "type": "string",
+        "id": 1
+      },
+      "value": {
+        "type": "bytes",
+        "id": 2
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EitherError",
+    "fields": {
+      "messagesList": {
+        "rule": "repeated",
+        "type": "string",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "EitherSuccess",
+    "fields": {
+      "response": {
+        "type": "EitherAny",
+        "id": 1
+      }
+    },
+    "nullables": []
+  },
+  {
+    "namespace": [],
+    "type": "type",
+    "name": "Either",
+    "fields": {
+      "error": {
+        "type": "EitherError",
+        "id": 1
+      },
+      "success": {
+        "type": "EitherSuccess",
+        "id": 2
+      }
+    },
+    "nullables": [
+      "error",
+      "success"
+    ]
+  }
+]

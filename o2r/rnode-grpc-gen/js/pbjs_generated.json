@@ -1,0 +1,3221 @@
+{
+  "options": {
+    "java_package": "coop.rchain.either",
+    "(scalapb.options).import": "coop.rchain.models.ParMapTypeMapper.parMapEMapTypeMapper"
+  },
+  "nested": {
+    "coop": {
+      "nested": {
+        "rchain": {
+          "nested": {
+            "casper": {
+              "nested": {
+                "protocol": {
+                  "options": {
+                    "(scalapb.options).package_name": "coop.rchain.casper.protocol",
+                    "(scalapb.options).flat_package": true,
+                    "(scalapb.options).single_file": true,
+                    "(scalapb.options).preamble": "sealed trait CasperMessage"
+                  },
+                  "nested": {
+                    "HasBlockRequest": {
+                      "options": {
+                        "(scalapb.message).extends": "CasperMessage"
+                      },
+                      "fields": {
+                        "hash": {
+                          "type": "bytes",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "HasBlock": {
+                      "options": {
+                        "(scalapb.message).extends": "CasperMessage"
+                      },
+                      "fields": {
+                        "hash": {
+                          "type": "bytes",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "BlockRequest": {
+                      "options": {
+                        "(scalapb.message).extends": "CasperMessage"
+                      },
+                      "fields": {
+                        "hash": {
+                          "type": "bytes",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "ForkChoiceTipRequest": {
+                      "options": {
+                        "(scalapb.message).extends": "CasperMessage"
+                      },
+                      "fields": {}
+                    },
+                    "ApprovedBlockCandidate": {
+                      "fields": {
+                        "block": {
+                          "type": "BlockMessage",
+                          "id": 1
+                        },
+                        "requiredSigs": {
+                          "type": "int32",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "UnapprovedBlock": {
+                      "options": {
+                        "(scalapb.message).extends": "CasperMessage"
+                      },
+                      "fields": {
+                        "candidate": {
+                          "type": "ApprovedBlockCandidate",
+                          "id": 1
+                        },
+                        "timestamp": {
+                          "type": "int64",
+                          "id": 2
+                        },
+                        "duration": {
+                          "type": "int64",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "Signature": {
+                      "fields": {
+                        "publicKey": {
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "algorithm": {
+                          "type": "string",
+                          "id": 2
+                        },
+                        "sig": {
+                          "type": "bytes",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "BlockApproval": {
+                      "options": {
+                        "(scalapb.message).extends": "CasperMessage"
+                      },
+                      "fields": {
+                        "candidate": {
+                          "type": "ApprovedBlockCandidate",
+                          "id": 1
+                        },
+                        "sig": {
+                          "type": "Signature",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "ApprovedBlock": {
+                      "options": {
+                        "(scalapb.message).extends": "CasperMessage"
+                      },
+                      "fields": {
+                        "candidate": {
+                          "type": "ApprovedBlockCandidate",
+                          "id": 1
+                        },
+                        "sigs": {
+                          "rule": "repeated",
+                          "type": "Signature",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "ApprovedBlockRequest": {
+                      "options": {
+                        "(scalapb.message).extends": "CasperMessage"
+                      },
+                      "fields": {
+                        "identifier": {
+                          "type": "string",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "NoApprovedBlockAvailable": {
+                      "options": {
+                        "(scalapb.message).extends": "CasperMessage"
+                      },
+                      "fields": {
+                        "identifier": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "nodeIdentifer": {
+                          "type": "string",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "BlockMessage": {
+                      "options": {
+                        "(scalapb.message).extends": "CasperMessage"
+                      },
+                      "fields": {
+                        "blockHash": {
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "header": {
+                          "type": "Header",
+                          "id": 2
+                        },
+                        "body": {
+                          "type": "Body",
+                          "id": 3
+                        },
+                        "justifications": {
+                          "rule": "repeated",
+                          "type": "Justification",
+                          "id": 4
+                        },
+                        "sender": {
+                          "type": "bytes",
+                          "id": 5
+                        },
+                        "seqNum": {
+                          "type": "int32",
+                          "id": 6
+                        },
+                        "sig": {
+                          "type": "bytes",
+                          "id": 7
+                        },
+                        "sigAlgorithm": {
+                          "type": "string",
+                          "id": 8
+                        },
+                        "shardId": {
+                          "type": "string",
+                          "id": 9
+                        },
+                        "extraBytes": {
+                          "type": "bytes",
+                          "id": 10
+                        }
+                      }
+                    },
+                    "BlockMetadataInternal": {
+                      "options": {
+                        "(scalapb.message).type": "coop.rchain.models.BlockMetadata"
+                      },
+                      "fields": {
+                        "blockHash": {
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "parents": {
+                          "rule": "repeated",
+                          "type": "bytes",
+                          "id": 2,
+                          "options": {
+                            "(scalapb.field).collection_type": "collection.immutable.List"
+                          }
+                        },
+                        "sender": {
+                          "type": "bytes",
+                          "id": 3
+                        },
+                        "justifications": {
+                          "rule": "repeated",
+                          "type": "Justification",
+                          "id": 4,
+                          "options": {
+                            "(scalapb.field).collection_type": "collection.immutable.List"
+                          }
+                        },
+                        "bonds": {
+                          "rule": "repeated",
+                          "type": "Bond",
+                          "id": 5,
+                          "options": {
+                            "(scalapb.field).collection_type": "collection.immutable.List"
+                          }
+                        },
+                        "blockNum": {
+                          "type": "int64",
+                          "id": 6
+                        },
+                        "seqNum": {
+                          "type": "int32",
+                          "id": 7
+                        },
+                        "invalid": {
+                          "type": "bool",
+                          "id": 8
+                        }
+                      }
+                    },
+                    "Header": {
+                      "fields": {
+                        "parentsHashList": {
+                          "rule": "repeated",
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "postStateHash": {
+                          "type": "bytes",
+                          "id": 2
+                        },
+                        "deploysHash": {
+                          "type": "bytes",
+                          "id": 3
+                        },
+                        "timestamp": {
+                          "type": "int64",
+                          "id": 5
+                        },
+                        "version": {
+                          "type": "int64",
+                          "id": 6
+                        },
+                        "deployCount": {
+                          "type": "int32",
+                          "id": 7
+                        },
+                        "extraBytes": {
+                          "type": "bytes",
+                          "id": 8
+                        }
+                      }
+                    },
+                    "DeployData": {
+                      "fields": {
+                        "deployer": {
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "term": {
+                          "type": "string",
+                          "id": 2
+                        },
+                        "timestamp": {
+                          "type": "int64",
+                          "id": 3
+                        },
+                        "sig": {
+                          "type": "bytes",
+                          "id": 4
+                        },
+                        "sigAlgorithm": {
+                          "type": "string",
+                          "id": 5
+                        },
+                        "phloPrice": {
+                          "type": "int64",
+                          "id": 7
+                        },
+                        "phloLimit": {
+                          "type": "int64",
+                          "id": 8
+                        },
+                        "validAfterBlockNumber": {
+                          "type": "int64",
+                          "id": 10
+                        }
+                      }
+                    },
+                    "ProcessedDeploy": {
+                      "fields": {
+                        "deploy": {
+                          "type": "DeployData",
+                          "id": 1
+                        },
+                        "cost": {
+                          "type": "PCost",
+                          "id": 2
+                        },
+                        "deployLog": {
+                          "rule": "repeated",
+                          "type": "Event",
+                          "id": 3
+                        },
+                        "paymentLog": {
+                          "rule": "repeated",
+                          "type": "Event",
+                          "id": 4
+                        },
+                        "errored": {
+                          "type": "bool",
+                          "id": 5
+                        }
+                      }
+                    },
+                    "Body": {
+                      "fields": {
+                        "state": {
+                          "type": "RChainState",
+                          "id": 1
+                        },
+                        "deploys": {
+                          "rule": "repeated",
+                          "type": "ProcessedDeploy",
+                          "id": 2
+                        },
+                        "extraBytes": {
+                          "type": "bytes",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "Justification": {
+                      "fields": {
+                        "validator": {
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "latestBlockHash": {
+                          "type": "bytes",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "RChainState": {
+                      "fields": {
+                        "preStateHash": {
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "postStateHash": {
+                          "type": "bytes",
+                          "id": 2
+                        },
+                        "bonds": {
+                          "rule": "repeated",
+                          "type": "Bond",
+                          "id": 3
+                        },
+                        "blockNumber": {
+                          "type": "int64",
+                          "id": 4
+                        }
+                      }
+                    },
+                    "Event": {
+                      "oneofs": {
+                        "event_instance": {
+                          "oneof": [
+                            "produce",
+                            "consume",
+                            "comm"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "produce": {
+                          "type": "ProduceEvent",
+                          "id": 1
+                        },
+                        "consume": {
+                          "type": "ConsumeEvent",
+                          "id": 2
+                        },
+                        "comm": {
+                          "type": "CommEvent",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "ProduceEvent": {
+                      "fields": {
+                        "channelsHash": {
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "hash": {
+                          "type": "bytes",
+                          "id": 2
+                        },
+                        "persistent": {
+                          "type": "bool",
+                          "id": 3
+                        },
+                        "sequenceNumber": {
+                          "type": "int32",
+                          "id": 4
+                        }
+                      }
+                    },
+                    "ConsumeEvent": {
+                      "fields": {
+                        "channelsHashes": {
+                          "rule": "repeated",
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "hash": {
+                          "type": "bytes",
+                          "id": 2
+                        },
+                        "persistent": {
+                          "type": "bool",
+                          "id": 3
+                        },
+                        "sequenceNumber": {
+                          "type": "int32",
+                          "id": 4
+                        }
+                      }
+                    },
+                    "CommEvent": {
+                      "fields": {
+                        "consume": {
+                          "type": "ConsumeEvent",
+                          "id": 1
+                        },
+                        "produces": {
+                          "rule": "repeated",
+                          "type": "ProduceEvent",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Bond": {
+                      "fields": {
+                        "validator": {
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "stake": {
+                          "type": "int64",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "DeployService": {
+                      "methods": {
+                        "DoDeploy": {
+                          "requestType": "DeployData",
+                          "responseType": "Either"
+                        },
+                        "getBlock": {
+                          "requestType": "BlockQuery",
+                          "responseType": "Either"
+                        },
+                        "visualizeDag": {
+                          "requestType": "VisualizeDagQuery",
+                          "responseType": "Either",
+                          "responseStream": true
+                        },
+                        "machineVerifiableDag": {
+                          "requestType": "MachineVerifyQuery",
+                          "responseType": "Either"
+                        },
+                        "showMainChain": {
+                          "requestType": "BlocksQuery",
+                          "responseType": "Either",
+                          "responseStream": true
+                        },
+                        "getBlocks": {
+                          "requestType": "BlocksQuery",
+                          "responseType": "Either",
+                          "responseStream": true
+                        },
+                        "listenForDataAtName": {
+                          "requestType": "DataAtNameQuery",
+                          "responseType": "Either"
+                        },
+                        "listenForContinuationAtName": {
+                          "requestType": "ContinuationAtNameQuery",
+                          "responseType": "Either"
+                        },
+                        "findBlockWithDeploy": {
+                          "requestType": "FindDeployInBlockQuery",
+                          "responseType": "Either"
+                        },
+                        "findDeploy": {
+                          "requestType": "FindDeployQuery",
+                          "responseType": "Either"
+                        },
+                        "previewPrivateNames": {
+                          "requestType": "PrivateNamePreviewQuery",
+                          "responseType": "Either"
+                        },
+                        "lastFinalizedBlock": {
+                          "requestType": "LastFinalizedBlockQuery",
+                          "responseType": "Either"
+                        }
+                      }
+                    },
+                    "FindDeployQuery": {
+                      "fields": {
+                        "deployId": {
+                          "type": "bytes",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "FindDeployInBlockQuery": {
+                      "fields": {
+                        "user": {
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "timestamp": {
+                          "type": "int64",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "BlockQuery": {
+                      "fields": {
+                        "hash": {
+                          "type": "string",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "BlocksQuery": {
+                      "fields": {
+                        "depth": {
+                          "type": "int32",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "DataAtNameQuery": {
+                      "fields": {
+                        "depth": {
+                          "type": "int32",
+                          "id": 1
+                        },
+                        "name": {
+                          "type": "Par",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "ContinuationAtNameQuery": {
+                      "fields": {
+                        "depth": {
+                          "type": "int32",
+                          "id": 1
+                        },
+                        "names": {
+                          "rule": "repeated",
+                          "type": "Par",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "DeployServiceResponse": {
+                      "fields": {
+                        "message": {
+                          "type": "string",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "BlockQueryResponse": {
+                      "fields": {
+                        "blockInfo": {
+                          "type": "BlockInfo",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "LightBlockQueryResponse": {
+                      "fields": {
+                        "blockInfo": {
+                          "type": "LightBlockInfo",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "VisualizeDagQuery": {
+                      "fields": {
+                        "depth": {
+                          "type": "int32",
+                          "id": 1
+                        },
+                        "showJustificationLines": {
+                          "type": "bool",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "VisualizeBlocksResponse": {
+                      "fields": {
+                        "content": {
+                          "type": "string",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "MachineVerifyQuery": {
+                      "fields": {}
+                    },
+                    "MachineVerifyResponse": {
+                      "fields": {
+                        "content": {
+                          "type": "string",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "ListeningNameDataResponse": {
+                      "fields": {
+                        "blockResults": {
+                          "rule": "repeated",
+                          "type": "DataWithBlockInfo",
+                          "id": 1
+                        },
+                        "length": {
+                          "type": "int32",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "ListeningNameContinuationResponse": {
+                      "fields": {
+                        "blockResults": {
+                          "rule": "repeated",
+                          "type": "ContinuationsWithBlockInfo",
+                          "id": 1
+                        },
+                        "length": {
+                          "type": "int32",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "PrivateNamePreviewQuery": {
+                      "fields": {
+                        "user": {
+                          "type": "bytes",
+                          "id": 1
+                        },
+                        "timestamp": {
+                          "type": "int64",
+                          "id": 2
+                        },
+                        "nameQty": {
+                          "type": "int32",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "PrivateNamePreviewResponse": {
+                      "fields": {
+                        "ids": {
+                          "rule": "repeated",
+                          "type": "bytes",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "LastFinalizedBlockQuery": {
+                      "fields": {}
+                    },
+                    "LastFinalizedBlockResponse": {
+                      "fields": {
+                        "blockInfo": {
+                          "type": "BlockInfo",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "LightBlockInfo": {
+                      "fields": {
+                        "blockHash": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "blockSize": {
+                          "type": "string",
+                          "id": 2
+                        },
+                        "blockNumber": {
+                          "type": "int64",
+                          "id": 3
+                        },
+                        "version": {
+                          "type": "int64",
+                          "id": 4
+                        },
+                        "deployCount": {
+                          "type": "int32",
+                          "id": 5
+                        },
+                        "tupleSpaceHash": {
+                          "type": "string",
+                          "id": 6
+                        },
+                        "timestamp": {
+                          "type": "int64",
+                          "id": 7
+                        },
+                        "faultTolerance": {
+                          "type": "float",
+                          "id": 8
+                        },
+                        "mainParentHash": {
+                          "type": "string",
+                          "id": 9
+                        },
+                        "parentsHashList": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 10
+                        },
+                        "sender": {
+                          "type": "string",
+                          "id": 11
+                        }
+                      }
+                    },
+                    "BlockInfo": {
+                      "fields": {
+                        "blockHash": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "blockSize": {
+                          "type": "string",
+                          "id": 2
+                        },
+                        "blockNumber": {
+                          "type": "int64",
+                          "id": 3
+                        },
+                        "version": {
+                          "type": "int64",
+                          "id": 4
+                        },
+                        "deployCount": {
+                          "type": "int32",
+                          "id": 5
+                        },
+                        "tupleSpaceHash": {
+                          "type": "string",
+                          "id": 6
+                        },
+                        "timestamp": {
+                          "type": "int64",
+                          "id": 7
+                        },
+                        "faultTolerance": {
+                          "type": "float",
+                          "id": 8
+                        },
+                        "mainParentHash": {
+                          "type": "string",
+                          "id": 9
+                        },
+                        "parentsHashList": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 10
+                        },
+                        "sender": {
+                          "type": "string",
+                          "id": 11
+                        },
+                        "shardId": {
+                          "type": "string",
+                          "id": 12
+                        },
+                        "bondsValidatorList": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 13
+                        },
+                        "deployCost": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 14
+                        }
+                      }
+                    },
+                    "DataWithBlockInfo": {
+                      "fields": {
+                        "postBlockData": {
+                          "rule": "repeated",
+                          "type": "Par",
+                          "id": 1
+                        },
+                        "block": {
+                          "type": "LightBlockInfo",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "ContinuationsWithBlockInfo": {
+                      "fields": {
+                        "postBlockContinuations": {
+                          "rule": "repeated",
+                          "type": "WaitingContinuationInfo",
+                          "id": 1
+                        },
+                        "block": {
+                          "type": "LightBlockInfo",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "WaitingContinuationInfo": {
+                      "fields": {
+                        "postBlockPatterns": {
+                          "rule": "repeated",
+                          "type": "BindPattern",
+                          "id": 1
+                        },
+                        "postBlockContinuation": {
+                          "type": "Par",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "ProposeService": {
+                      "methods": {
+                        "propose": {
+                          "requestType": "PrintUnmatchedSendsQuery",
+                          "responseType": "Either"
+                        }
+                      }
+                    },
+                    "PrintUnmatchedSendsQuery": {
+                      "fields": {
+                        "printUnmatchedSends": {
+                          "type": "bool",
+                          "id": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "node": {
+              "nested": {
+                "model": {
+                  "nested": {
+                    "Repl": {
+                      "methods": {
+                        "Run": {
+                          "requestType": "CmdRequest",
+                          "responseType": "ReplResponse"
+                        },
+                        "Eval": {
+                          "requestType": "EvalRequest",
+                          "responseType": "ReplResponse"
+                        }
+                      }
+                    },
+                    "CmdRequest": {
+                      "fields": {
+                        "line": {
+                          "type": "string",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "EvalRequest": {
+                      "fields": {
+                        "program": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "printUnmatchedSendsOnly": {
+                          "type": "bool",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "ReplResponse": {
+                      "fields": {
+                        "output": {
+                          "type": "string",
+                          "id": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "scalapb": {
+      "options": {
+        "java_package": "scalapb.options",
+        "(options).package_name": "scalapb.options",
+        "(options).flat_package": true
+      },
+      "nested": {
+        "ScalaPbOptions": {
+          "fields": {
+            "package_name": {
+              "type": "string",
+              "id": 1
+            },
+            "flat_package": {
+              "type": "bool",
+              "id": 2
+            },
+            "import": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 3
+            },
+            "preamble": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 4
+            },
+            "single_file": {
+              "type": "bool",
+              "id": 5
+            },
+            "no_primitive_wrappers": {
+              "type": "bool",
+              "id": 7
+            },
+            "primitive_wrappers": {
+              "type": "bool",
+              "id": 6
+            },
+            "collection_type": {
+              "type": "string",
+              "id": 8
+            },
+            "preserve_unknown_fields": {
+              "type": "bool",
+              "id": 9,
+              "options": {
+                "default": true
+              }
+            },
+            "object_name": {
+              "type": "string",
+              "id": 10
+            },
+            "scope": {
+              "type": "OptionsScope",
+              "id": 11
+            },
+            "lenses": {
+              "type": "bool",
+              "id": 12,
+              "options": {
+                "default": true
+              }
+            },
+            "retain_source_code_info": {
+              "type": "bool",
+              "id": 13
+            },
+            "map_type": {
+              "type": "string",
+              "id": 14
+            },
+            "no_default_values_in_constructor": {
+              "type": "bool",
+              "id": 15
+            },
+            "enum_value_naming": {
+              "type": "EnumValueNaming",
+              "id": 16
+            },
+            "enum_strip_prefix": {
+              "type": "bool",
+              "id": 17,
+              "options": {
+                "default": false
+              }
+            },
+            "aux_message_options": {
+              "rule": "repeated",
+              "type": "AuxMessageOptions",
+              "id": 18
+            },
+            "aux_field_options": {
+              "rule": "repeated",
+              "type": "AuxFieldOptions",
+              "id": 19
+            },
+            "aux_enum_options": {
+              "rule": "repeated",
+              "type": "AuxEnumOptions",
+              "id": 20
+            },
+            "bytes_type": {
+              "type": "string",
+              "id": 21
+            },
+            "test_only_no_java_conversions": {
+              "type": "bool",
+              "id": 100001
+            }
+          },
+          "nested": {
+            "OptionsScope": {
+              "values": {
+                "FILE": 0,
+                "PACKAGE": 1
+              }
+            },
+            "EnumValueNaming": {
+              "values": {
+                "AS_IN_PROTO": 0,
+                "CAMEL_CASE": 1
+              }
+            },
+            "AuxMessageOptions": {
+              "fields": {
+                "target": {
+                  "type": "string",
+                  "id": 1
+                },
+                "options": {
+                  "type": "MessageOptions",
+                  "id": 2
+                }
+              }
+            },
+            "AuxFieldOptions": {
+              "fields": {
+                "target": {
+                  "type": "string",
+                  "id": 1
+                },
+                "options": {
+                  "type": "FieldOptions",
+                  "id": 2
+                }
+              }
+            },
+            "AuxEnumOptions": {
+              "fields": {
+                "target": {
+                  "type": "string",
+                  "id": 1
+                },
+                "options": {
+                  "type": "EnumOptions",
+                  "id": 2
+                }
+              }
+            }
+          }
+        },
+        "options": {
+          "type": "ScalaPbOptions",
+          "id": 1020,
+          "extend": "google.protobuf.FileOptions"
+        },
+        "MessageOptions": {
+          "fields": {
+            "extends": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 1
+            },
+            "companion_extends": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 2
+            },
+            "annotations": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 3
+            },
+            "type": {
+              "type": "string",
+              "id": 4
+            },
+            "companion_annotations": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 5
+            },
+            "sealed_oneof_extends": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 6
+            },
+            "no_box": {
+              "type": "bool",
+              "id": 7
+            }
+          }
+        },
+        "message": {
+          "type": "MessageOptions",
+          "id": 1020,
+          "extend": "google.protobuf.MessageOptions"
+        },
+        "FieldOptions": {
+          "fields": {
+            "type": {
+              "type": "string",
+              "id": 1
+            },
+            "scala_name": {
+              "type": "string",
+              "id": 2
+            },
+            "collection_type": {
+              "type": "string",
+              "id": 3
+            },
+            "key_type": {
+              "type": "string",
+              "id": 4
+            },
+            "value_type": {
+              "type": "string",
+              "id": 5
+            },
+            "annotations": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 6
+            },
+            "map_type": {
+              "type": "string",
+              "id": 7
+            },
+            "no_box": {
+              "type": "bool",
+              "id": 30
+            }
+          }
+        },
+        "field": {
+          "type": "FieldOptions",
+          "id": 1020,
+          "extend": "google.protobuf.FieldOptions"
+        },
+        "EnumOptions": {
+          "fields": {
+            "extends": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 1
+            },
+            "companion_extends": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 2
+            },
+            "type": {
+              "type": "string",
+              "id": 3
+            }
+          }
+        },
+        "enum_options": {
+          "type": "EnumOptions",
+          "id": 1020,
+          "extend": "google.protobuf.EnumOptions"
+        },
+        "EnumValueOptions": {
+          "fields": {
+            "extends": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 1
+            },
+            "scala_name": {
+              "type": "string",
+              "id": 2
+            }
+          }
+        },
+        "enum_value": {
+          "type": "EnumValueOptions",
+          "id": 1020,
+          "extend": "google.protobuf.EnumValueOptions"
+        },
+        "OneofOptions": {
+          "fields": {
+            "extends": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 1
+            }
+          }
+        },
+        "oneof": {
+          "type": "OneofOptions",
+          "id": 1020,
+          "extend": "google.protobuf.OneofOptions"
+        }
+      }
+    },
+    "Par": {
+      "fields": {
+        "sends": {
+          "rule": "repeated",
+          "type": "Send",
+          "id": 1
+        },
+        "receives": {
+          "rule": "repeated",
+          "type": "Receive",
+          "id": 2
+        },
+        "news": {
+          "rule": "repeated",
+          "type": "New",
+          "id": 4
+        },
+        "exprs": {
+          "rule": "repeated",
+          "type": "Expr",
+          "id": 5
+        },
+        "matches": {
+          "rule": "repeated",
+          "type": "Match",
+          "id": 6
+        },
+        "unforgeables": {
+          "rule": "repeated",
+          "type": "GUnforgeable",
+          "id": 7
+        },
+        "bundles": {
+          "rule": "repeated",
+          "type": "Bundle",
+          "id": 11
+        },
+        "connectives": {
+          "rule": "repeated",
+          "type": "Connective",
+          "id": 8
+        },
+        "locallyFree": {
+          "type": "bytes",
+          "id": 9,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+          }
+        },
+        "connective_used": {
+          "type": "bool",
+          "id": 10
+        }
+      }
+    },
+    "TaggedContinuation": {
+      "oneofs": {
+        "tagged_cont": {
+          "oneof": [
+            "par_body",
+            "scala_body_ref"
+          ]
+        }
+      },
+      "fields": {
+        "par_body": {
+          "type": "ParWithRandom",
+          "id": 1
+        },
+        "scala_body_ref": {
+          "type": "int64",
+          "id": 2
+        }
+      }
+    },
+    "ParWithRandom": {
+      "fields": {
+        "body": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "randomState": {
+          "type": "bytes",
+          "id": 2,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.crypto.hash.Blake2b512Random"
+          }
+        }
+      }
+    },
+    "PCost": {
+      "fields": {
+        "cost": {
+          "type": "uint64",
+          "id": 1
+        }
+      }
+    },
+    "ListParWithRandom": {
+      "fields": {
+        "pars": {
+          "rule": "repeated",
+          "type": "Par",
+          "id": 1
+        },
+        "randomState": {
+          "type": "bytes",
+          "id": 2,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.crypto.hash.Blake2b512Random"
+          }
+        }
+      }
+    },
+    "Var": {
+      "oneofs": {
+        "var_instance": {
+          "oneof": [
+            "bound_var",
+            "free_var",
+            "wildcard"
+          ]
+        }
+      },
+      "fields": {
+        "bound_var": {
+          "type": "sint32",
+          "id": 1
+        },
+        "free_var": {
+          "type": "sint32",
+          "id": 2
+        },
+        "wildcard": {
+          "type": "WildcardMsg",
+          "id": 3
+        }
+      },
+      "nested": {
+        "WildcardMsg": {
+          "fields": {}
+        }
+      }
+    },
+    "Bundle": {
+      "fields": {
+        "body": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "writeFlag": {
+          "type": "bool",
+          "id": 2
+        },
+        "readFlag": {
+          "type": "bool",
+          "id": 3
+        }
+      }
+    },
+    "Send": {
+      "fields": {
+        "chan": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "data": {
+          "rule": "repeated",
+          "type": "Par",
+          "id": 2
+        },
+        "persistent": {
+          "type": "bool",
+          "id": 3
+        },
+        "locallyFree": {
+          "type": "bytes",
+          "id": 5,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+          }
+        },
+        "connective_used": {
+          "type": "bool",
+          "id": 6
+        }
+      }
+    },
+    "ReceiveBind": {
+      "fields": {
+        "patterns": {
+          "rule": "repeated",
+          "type": "Par",
+          "id": 1
+        },
+        "source": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "remainder": {
+          "type": "Var",
+          "id": 3
+        },
+        "freeCount": {
+          "type": "int32",
+          "id": 4
+        }
+      }
+    },
+    "BindPattern": {
+      "fields": {
+        "patterns": {
+          "rule": "repeated",
+          "type": "Par",
+          "id": 1
+        },
+        "remainder": {
+          "type": "Var",
+          "id": 2
+        },
+        "freeCount": {
+          "type": "int32",
+          "id": 3
+        }
+      }
+    },
+    "ListBindPatterns": {
+      "fields": {
+        "patterns": {
+          "rule": "repeated",
+          "type": "BindPattern",
+          "id": 1
+        }
+      }
+    },
+    "Receive": {
+      "fields": {
+        "binds": {
+          "rule": "repeated",
+          "type": "ReceiveBind",
+          "id": 1
+        },
+        "body": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "persistent": {
+          "type": "bool",
+          "id": 3
+        },
+        "peek": {
+          "type": "bool",
+          "id": 4
+        },
+        "bindCount": {
+          "type": "int32",
+          "id": 5
+        },
+        "locallyFree": {
+          "type": "bytes",
+          "id": 6,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+          }
+        },
+        "connective_used": {
+          "type": "bool",
+          "id": 7
+        }
+      }
+    },
+    "New": {
+      "fields": {
+        "bindCount": {
+          "type": "sint32",
+          "id": 1
+        },
+        "p": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "uri": {
+          "rule": "repeated",
+          "type": "string",
+          "id": 3
+        },
+        "deployId": {
+          "type": "DeployId",
+          "id": 4
+        },
+        "deployerId": {
+          "type": "DeployerId",
+          "id": 5
+        },
+        "locallyFree": {
+          "type": "bytes",
+          "id": 6,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+          }
+        }
+      }
+    },
+    "MatchCase": {
+      "fields": {
+        "pattern": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "source": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "freeCount": {
+          "type": "int32",
+          "id": 3
+        }
+      }
+    },
+    "Match": {
+      "fields": {
+        "target": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "cases": {
+          "rule": "repeated",
+          "type": "MatchCase",
+          "id": 2
+        },
+        "locallyFree": {
+          "type": "bytes",
+          "id": 4,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+          }
+        },
+        "connective_used": {
+          "type": "bool",
+          "id": 5
+        }
+      }
+    },
+    "Expr": {
+      "oneofs": {
+        "expr_instance": {
+          "oneof": [
+            "g_bool",
+            "g_int",
+            "g_string",
+            "g_uri",
+            "g_byte_array",
+            "e_not_body",
+            "e_neg_body",
+            "e_mult_body",
+            "e_div_body",
+            "e_plus_body",
+            "e_minus_body",
+            "e_lt_body",
+            "e_lte_body",
+            "e_gt_body",
+            "e_gte_body",
+            "e_eq_body",
+            "e_neq_body",
+            "e_and_body",
+            "e_or_body",
+            "e_var_body",
+            "e_list_body",
+            "e_tuple_body",
+            "e_set_body",
+            "e_map_body",
+            "e_method_body",
+            "e_matches_body",
+            "e_percent_percent_body",
+            "e_plus_plus_body",
+            "e_minus_minus_body",
+            "e_mod_body"
+          ]
+        }
+      },
+      "fields": {
+        "g_bool": {
+          "type": "bool",
+          "id": 1
+        },
+        "g_int": {
+          "type": "sint64",
+          "id": 2
+        },
+        "g_string": {
+          "type": "string",
+          "id": 3
+        },
+        "g_uri": {
+          "type": "string",
+          "id": 4
+        },
+        "g_byte_array": {
+          "type": "bytes",
+          "id": 25
+        },
+        "e_not_body": {
+          "type": "ENot",
+          "id": 5
+        },
+        "e_neg_body": {
+          "type": "ENeg",
+          "id": 6
+        },
+        "e_mult_body": {
+          "type": "EMult",
+          "id": 7
+        },
+        "e_div_body": {
+          "type": "EDiv",
+          "id": 8
+        },
+        "e_plus_body": {
+          "type": "EPlus",
+          "id": 9
+        },
+        "e_minus_body": {
+          "type": "EMinus",
+          "id": 10
+        },
+        "e_lt_body": {
+          "type": "ELt",
+          "id": 11
+        },
+        "e_lte_body": {
+          "type": "ELte",
+          "id": 12
+        },
+        "e_gt_body": {
+          "type": "EGt",
+          "id": 13
+        },
+        "e_gte_body": {
+          "type": "EGte",
+          "id": 14
+        },
+        "e_eq_body": {
+          "type": "EEq",
+          "id": 15
+        },
+        "e_neq_body": {
+          "type": "ENeq",
+          "id": 16
+        },
+        "e_and_body": {
+          "type": "EAnd",
+          "id": 17
+        },
+        "e_or_body": {
+          "type": "EOr",
+          "id": 18
+        },
+        "e_var_body": {
+          "type": "EVar",
+          "id": 19
+        },
+        "e_list_body": {
+          "type": "EList",
+          "id": 20
+        },
+        "e_tuple_body": {
+          "type": "ETuple",
+          "id": 21
+        },
+        "e_set_body": {
+          "type": "ESet",
+          "id": 22,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.ParSet"
+          }
+        },
+        "e_map_body": {
+          "type": "EMap",
+          "id": 23,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.ParMap"
+          }
+        },
+        "e_method_body": {
+          "type": "EMethod",
+          "id": 24
+        },
+        "e_matches_body": {
+          "type": "EMatches",
+          "id": 27
+        },
+        "e_percent_percent_body": {
+          "type": "EPercentPercent",
+          "id": 28
+        },
+        "e_plus_plus_body": {
+          "type": "EPlusPlus",
+          "id": 29
+        },
+        "e_minus_minus_body": {
+          "type": "EMinusMinus",
+          "id": 30
+        },
+        "e_mod_body": {
+          "type": "EMod",
+          "id": 31
+        }
+      }
+    },
+    "EList": {
+      "fields": {
+        "ps": {
+          "rule": "repeated",
+          "type": "Par",
+          "id": 1
+        },
+        "locallyFree": {
+          "type": "bytes",
+          "id": 3,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+          }
+        },
+        "connective_used": {
+          "type": "bool",
+          "id": 4
+        },
+        "remainder": {
+          "type": "Var",
+          "id": 5
+        }
+      }
+    },
+    "ETuple": {
+      "fields": {
+        "ps": {
+          "rule": "repeated",
+          "type": "Par",
+          "id": 1
+        },
+        "locallyFree": {
+          "type": "bytes",
+          "id": 3,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+          }
+        },
+        "connective_used": {
+          "type": "bool",
+          "id": 4
+        }
+      }
+    },
+    "ESet": {
+      "fields": {
+        "ps": {
+          "rule": "repeated",
+          "type": "Par",
+          "id": 1
+        },
+        "locallyFree": {
+          "type": "bytes",
+          "id": 3,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+          }
+        },
+        "connective_used": {
+          "type": "bool",
+          "id": 4
+        },
+        "remainder": {
+          "type": "Var",
+          "id": 5
+        }
+      }
+    },
+    "EMap": {
+      "fields": {
+        "kvs": {
+          "rule": "repeated",
+          "type": "KeyValuePair",
+          "id": 1
+        },
+        "locallyFree": {
+          "type": "bytes",
+          "id": 3,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+          }
+        },
+        "connective_used": {
+          "type": "bool",
+          "id": 4
+        },
+        "remainder": {
+          "type": "Var",
+          "id": 5
+        }
+      }
+    },
+    "EMethod": {
+      "fields": {
+        "methodName": {
+          "type": "string",
+          "id": 1
+        },
+        "target": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "arguments": {
+          "rule": "repeated",
+          "type": "Par",
+          "id": 3
+        },
+        "locallyFree": {
+          "type": "bytes",
+          "id": 5,
+          "options": {
+            "(scalapb.field).type": "coop.rchain.models.AlwaysEqual[scala.collection.immutable.BitSet]"
+          }
+        },
+        "connective_used": {
+          "type": "bool",
+          "id": 6
+        }
+      }
+    },
+    "KeyValuePair": {
+      "fields": {
+        "key": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "value": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EVar": {
+      "fields": {
+        "v": {
+          "type": "Var",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "ENot": {
+      "fields": {
+        "p": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "ENeg": {
+      "fields": {
+        "p": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EMult": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EDiv": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EMod": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EPlus": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EMinus": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "ELt": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "ELte": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EGt": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EGte": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EEq": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "ENeq": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EAnd": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EOr": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EMatches": {
+      "fields": {
+        "target": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "pattern": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EPercentPercent": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EPlusPlus": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "EMinusMinus": {
+      "fields": {
+        "p1": {
+          "type": "Par",
+          "id": 1,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        },
+        "p2": {
+          "type": "Par",
+          "id": 2,
+          "options": {
+            "(scalapb.field).no_box": true
+          }
+        }
+      }
+    },
+    "Connective": {
+      "oneofs": {
+        "connective_instance": {
+          "oneof": [
+            "conn_and_body",
+            "conn_or_body",
+            "conn_not_body",
+            "var_ref_body",
+            "conn_bool",
+            "conn_int",
+            "conn_string",
+            "conn_uri",
+            "conn_byte_array"
+          ]
+        }
+      },
+      "fields": {
+        "conn_and_body": {
+          "type": "ConnectiveBody",
+          "id": 1
+        },
+        "conn_or_body": {
+          "type": "ConnectiveBody",
+          "id": 2
+        },
+        "conn_not_body": {
+          "type": "Par",
+          "id": 3
+        },
+        "var_ref_body": {
+          "type": "VarRef",
+          "id": 4
+        },
+        "conn_bool": {
+          "type": "bool",
+          "id": 5
+        },
+        "conn_int": {
+          "type": "bool",
+          "id": 6
+        },
+        "conn_string": {
+          "type": "bool",
+          "id": 7
+        },
+        "conn_uri": {
+          "type": "bool",
+          "id": 8
+        },
+        "conn_byte_array": {
+          "type": "bool",
+          "id": 9
+        }
+      }
+    },
+    "VarRef": {
+      "fields": {
+        "index": {
+          "type": "sint32",
+          "id": 1
+        },
+        "depth": {
+          "type": "sint32",
+          "id": 2
+        }
+      }
+    },
+    "ConnectiveBody": {
+      "fields": {
+        "ps": {
+          "rule": "repeated",
+          "type": "Par",
+          "id": 1
+        }
+      }
+    },
+    "DeployId": {
+      "fields": {
+        "sig": {
+          "type": "bytes",
+          "id": 1
+        }
+      }
+    },
+    "DeployerId": {
+      "fields": {
+        "publicKey": {
+          "type": "bytes",
+          "id": 1
+        }
+      }
+    },
+    "GUnforgeable": {
+      "oneofs": {
+        "unf_instance": {
+          "oneof": [
+            "g_private_body",
+            "g_deploy_id_body",
+            "g_deployer_id_body"
+          ]
+        }
+      },
+      "fields": {
+        "g_private_body": {
+          "type": "GPrivate",
+          "id": 1
+        },
+        "g_deploy_id_body": {
+          "type": "GDeployId",
+          "id": 2
+        },
+        "g_deployer_id_body": {
+          "type": "GDeployerId",
+          "id": 3
+        }
+      }
+    },
+    "GPrivate": {
+      "fields": {
+        "id": {
+          "type": "bytes",
+          "id": 1
+        }
+      }
+    },
+    "GDeployId": {
+      "fields": {
+        "sig": {
+          "type": "bytes",
+          "id": 1
+        }
+      }
+    },
+    "GDeployerId": {
+      "fields": {
+        "publicKey": {
+          "type": "bytes",
+          "id": 1
+        }
+      }
+    },
+    "EitherAny": {
+      "fields": {
+        "type_url": {
+          "type": "string",
+          "id": 1
+        },
+        "value": {
+          "type": "bytes",
+          "id": 2
+        }
+      }
+    },
+    "EitherError": {
+      "fields": {
+        "messages": {
+          "rule": "repeated",
+          "type": "string",
+          "id": 1
+        }
+      }
+    },
+    "EitherSuccess": {
+      "fields": {
+        "response": {
+          "type": "EitherAny",
+          "id": 1
+        }
+      }
+    },
+    "Either": {
+      "oneofs": {
+        "content": {
+          "oneof": [
+            "error",
+            "success"
+          ]
+        }
+      },
+      "fields": {
+        "error": {
+          "type": "EitherError",
+          "id": 1
+        },
+        "success": {
+          "type": "EitherSuccess",
+          "id": 2
+        }
+      }
+    },
+    "google": {
+      "nested": {
+        "protobuf": {
+          "nested": {
+            "Empty": {
+              "fields": {}
+            },
+            "FileDescriptorSet": {
+              "fields": {
+                "file": {
+                  "rule": "repeated",
+                  "type": "FileDescriptorProto",
+                  "id": 1
+                }
+              }
+            },
+            "FileDescriptorProto": {
+              "fields": {
+                "name": {
+                  "type": "string",
+                  "id": 1
+                },
+                "package": {
+                  "type": "string",
+                  "id": 2
+                },
+                "dependency": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 3
+                },
+                "public_dependency": {
+                  "rule": "repeated",
+                  "type": "int32",
+                  "id": 10,
+                  "options": {
+                    "packed": false
+                  }
+                },
+                "weak_dependency": {
+                  "rule": "repeated",
+                  "type": "int32",
+                  "id": 11,
+                  "options": {
+                    "packed": false
+                  }
+                },
+                "message_type": {
+                  "rule": "repeated",
+                  "type": "DescriptorProto",
+                  "id": 4
+                },
+                "enum_type": {
+                  "rule": "repeated",
+                  "type": "EnumDescriptorProto",
+                  "id": 5
+                },
+                "service": {
+                  "rule": "repeated",
+                  "type": "ServiceDescriptorProto",
+                  "id": 6
+                },
+                "extension": {
+                  "rule": "repeated",
+                  "type": "FieldDescriptorProto",
+                  "id": 7
+                },
+                "options": {
+                  "type": "FileOptions",
+                  "id": 8
+                },
+                "source_code_info": {
+                  "type": "SourceCodeInfo",
+                  "id": 9
+                },
+                "syntax": {
+                  "type": "string",
+                  "id": 12
+                }
+              }
+            },
+            "DescriptorProto": {
+              "fields": {
+                "name": {
+                  "type": "string",
+                  "id": 1
+                },
+                "field": {
+                  "rule": "repeated",
+                  "type": "FieldDescriptorProto",
+                  "id": 2
+                },
+                "extension": {
+                  "rule": "repeated",
+                  "type": "FieldDescriptorProto",
+                  "id": 6
+                },
+                "nested_type": {
+                  "rule": "repeated",
+                  "type": "DescriptorProto",
+                  "id": 3
+                },
+                "enum_type": {
+                  "rule": "repeated",
+                  "type": "EnumDescriptorProto",
+                  "id": 4
+                },
+                "extension_range": {
+                  "rule": "repeated",
+                  "type": "ExtensionRange",
+                  "id": 5
+                },
+                "oneof_decl": {
+                  "rule": "repeated",
+                  "type": "OneofDescriptorProto",
+                  "id": 8
+                },
+                "options": {
+                  "type": "MessageOptions",
+                  "id": 7
+                },
+                "reserved_range": {
+                  "rule": "repeated",
+                  "type": "ReservedRange",
+                  "id": 9
+                },
+                "reserved_name": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 10
+                }
+              },
+              "nested": {
+                "ExtensionRange": {
+                  "fields": {
+                    "start": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "end": {
+                      "type": "int32",
+                      "id": 2
+                    }
+                  }
+                },
+                "ReservedRange": {
+                  "fields": {
+                    "start": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "end": {
+                      "type": "int32",
+                      "id": 2
+                    }
+                  }
+                }
+              }
+            },
+            "FieldDescriptorProto": {
+              "fields": {
+                "name": {
+                  "type": "string",
+                  "id": 1
+                },
+                "number": {
+                  "type": "int32",
+                  "id": 3
+                },
+                "label": {
+                  "type": "Label",
+                  "id": 4
+                },
+                "type": {
+                  "type": "Type",
+                  "id": 5
+                },
+                "type_name": {
+                  "type": "string",
+                  "id": 6
+                },
+                "extendee": {
+                  "type": "string",
+                  "id": 2
+                },
+                "default_value": {
+                  "type": "string",
+                  "id": 7
+                },
+                "oneof_index": {
+                  "type": "int32",
+                  "id": 9
+                },
+                "json_name": {
+                  "type": "string",
+                  "id": 10
+                },
+                "options": {
+                  "type": "FieldOptions",
+                  "id": 8
+                }
+              },
+              "nested": {
+                "Type": {
+                  "values": {
+                    "TYPE_DOUBLE": 1,
+                    "TYPE_FLOAT": 2,
+                    "TYPE_INT64": 3,
+                    "TYPE_UINT64": 4,
+                    "TYPE_INT32": 5,
+                    "TYPE_FIXED64": 6,
+                    "TYPE_FIXED32": 7,
+                    "TYPE_BOOL": 8,
+                    "TYPE_STRING": 9,
+                    "TYPE_GROUP": 10,
+                    "TYPE_MESSAGE": 11,
+                    "TYPE_BYTES": 12,
+                    "TYPE_UINT32": 13,
+                    "TYPE_ENUM": 14,
+                    "TYPE_SFIXED32": 15,
+                    "TYPE_SFIXED64": 16,
+                    "TYPE_SINT32": 17,
+                    "TYPE_SINT64": 18
+                  }
+                },
+                "Label": {
+                  "values": {
+                    "LABEL_OPTIONAL": 1,
+                    "LABEL_REQUIRED": 2,
+                    "LABEL_REPEATED": 3
+                  }
+                }
+              }
+            },
+            "OneofDescriptorProto": {
+              "fields": {
+                "name": {
+                  "type": "string",
+                  "id": 1
+                },
+                "options": {
+                  "type": "OneofOptions",
+                  "id": 2
+                }
+              }
+            },
+            "EnumDescriptorProto": {
+              "fields": {
+                "name": {
+                  "type": "string",
+                  "id": 1
+                },
+                "value": {
+                  "rule": "repeated",
+                  "type": "EnumValueDescriptorProto",
+                  "id": 2
+                },
+                "options": {
+                  "type": "EnumOptions",
+                  "id": 3
+                }
+              }
+            },
+            "EnumValueDescriptorProto": {
+              "fields": {
+                "name": {
+                  "type": "string",
+                  "id": 1
+                },
+                "number": {
+                  "type": "int32",
+                  "id": 2
+                },
+                "options": {
+                  "type": "EnumValueOptions",
+                  "id": 3
+                }
+              }
+            },
+            "ServiceDescriptorProto": {
+              "fields": {
+                "name": {
+                  "type": "string",
+                  "id": 1
+                },
+                "method": {
+                  "rule": "repeated",
+                  "type": "MethodDescriptorProto",
+                  "id": 2
+                },
+                "options": {
+                  "type": "ServiceOptions",
+                  "id": 3
+                }
+              }
+            },
+            "MethodDescriptorProto": {
+              "fields": {
+                "name": {
+                  "type": "string",
+                  "id": 1
+                },
+                "input_type": {
+                  "type": "string",
+                  "id": 2
+                },
+                "output_type": {
+                  "type": "string",
+                  "id": 3
+                },
+                "options": {
+                  "type": "MethodOptions",
+                  "id": 4
+                },
+                "client_streaming": {
+                  "type": "bool",
+                  "id": 5
+                },
+                "server_streaming": {
+                  "type": "bool",
+                  "id": 6
+                }
+              }
+            },
+            "FileOptions": {
+              "fields": {
+                "java_package": {
+                  "type": "string",
+                  "id": 1
+                },
+                "java_outer_classname": {
+                  "type": "string",
+                  "id": 8
+                },
+                "java_multiple_files": {
+                  "type": "bool",
+                  "id": 10
+                },
+                "java_generate_equals_and_hash": {
+                  "type": "bool",
+                  "id": 20,
+                  "options": {
+                    "deprecated": true
+                  }
+                },
+                "java_string_check_utf8": {
+                  "type": "bool",
+                  "id": 27
+                },
+                "optimize_for": {
+                  "type": "OptimizeMode",
+                  "id": 9,
+                  "options": {
+                    "default": "SPEED"
+                  }
+                },
+                "go_package": {
+                  "type": "string",
+                  "id": 11
+                },
+                "cc_generic_services": {
+                  "type": "bool",
+                  "id": 16
+                },
+                "java_generic_services": {
+                  "type": "bool",
+                  "id": 17
+                },
+                "py_generic_services": {
+                  "type": "bool",
+                  "id": 18
+                },
+                "deprecated": {
+                  "type": "bool",
+                  "id": 23
+                },
+                "cc_enable_arenas": {
+                  "type": "bool",
+                  "id": 31
+                },
+                "objc_class_prefix": {
+                  "type": "string",
+                  "id": 36
+                },
+                "csharp_namespace": {
+                  "type": "string",
+                  "id": 37
+                },
+                "uninterpreted_option": {
+                  "rule": "repeated",
+                  "type": "UninterpretedOption",
+                  "id": 999
+                }
+              },
+              "extensions": [
+                [
+                  1000,
+                  536870911
+                ]
+              ],
+              "reserved": [
+                [
+                  38,
+                  38
+                ]
+              ],
+              "nested": {
+                "OptimizeMode": {
+                  "values": {
+                    "SPEED": 1,
+                    "CODE_SIZE": 2,
+                    "LITE_RUNTIME": 3
+                  }
+                }
+              }
+            },
+            "MessageOptions": {
+              "fields": {
+                "message_set_wire_format": {
+                  "type": "bool",
+                  "id": 1
+                },
+                "no_standard_descriptor_accessor": {
+                  "type": "bool",
+                  "id": 2
+                },
+                "deprecated": {
+                  "type": "bool",
+                  "id": 3
+                },
+                "map_entry": {
+                  "type": "bool",
+                  "id": 7
+                },
+                "uninterpreted_option": {
+                  "rule": "repeated",
+                  "type": "UninterpretedOption",
+                  "id": 999
+                }
+              },
+              "extensions": [
+                [
+                  1000,
+                  536870911
+                ]
+              ],
+              "reserved": [
+                [
+                  8,
+                  8
+                ]
+              ]
+            },
+            "FieldOptions": {
+              "fields": {
+                "ctype": {
+                  "type": "CType",
+                  "id": 1,
+                  "options": {
+                    "default": "STRING"
+                  }
+                },
+                "packed": {
+                  "type": "bool",
+                  "id": 2
+                },
+                "jstype": {
+                  "type": "JSType",
+                  "id": 6,
+                  "options": {
+                    "default": "JS_NORMAL"
+                  }
+                },
+                "lazy": {
+                  "type": "bool",
+                  "id": 5
+                },
+                "deprecated": {
+                  "type": "bool",
+                  "id": 3
+                },
+                "weak": {
+                  "type": "bool",
+                  "id": 10
+                },
+                "uninterpreted_option": {
+                  "rule": "repeated",
+                  "type": "UninterpretedOption",
+                  "id": 999
+                }
+              },
+              "extensions": [
+                [
+                  1000,
+                  536870911
+                ]
+              ],
+              "reserved": [
+                [
+                  4,
+                  4
+                ]
+              ],
+              "nested": {
+                "CType": {
+                  "values": {
+                    "STRING": 0,
+                    "CORD": 1,
+                    "STRING_PIECE": 2
+                  }
+                },
+                "JSType": {
+                  "values": {
+                    "JS_NORMAL": 0,
+                    "JS_STRING": 1,
+                    "JS_NUMBER": 2
+                  }
+                }
+              }
+            },
+            "OneofOptions": {
+              "fields": {
+                "uninterpreted_option": {
+                  "rule": "repeated",
+                  "type": "UninterpretedOption",
+                  "id": 999
+                }
+              },
+              "extensions": [
+                [
+                  1000,
+                  536870911
+                ]
+              ]
+            },
+            "EnumOptions": {
+              "fields": {
+                "allow_alias": {
+                  "type": "bool",
+                  "id": 2
+                },
+                "deprecated": {
+                  "type": "bool",
+                  "id": 3
+                },
+                "uninterpreted_option": {
+                  "rule": "repeated",
+                  "type": "UninterpretedOption",
+                  "id": 999
+                }
+              },
+              "extensions": [
+                [
+                  1000,
+                  536870911
+                ]
+              ]
+            },
+            "EnumValueOptions": {
+              "fields": {
+                "deprecated": {
+                  "type": "bool",
+                  "id": 1
+                },
+                "uninterpreted_option": {
+                  "rule": "repeated",
+                  "type": "UninterpretedOption",
+                  "id": 999
+                }
+              },
+              "extensions": [
+                [
+                  1000,
+                  536870911
+                ]
+              ]
+            },
+            "ServiceOptions": {
+              "fields": {
+                "deprecated": {
+                  "type": "bool",
+                  "id": 33
+                },
+                "uninterpreted_option": {
+                  "rule": "repeated",
+                  "type": "UninterpretedOption",
+                  "id": 999
+                }
+              },
+              "extensions": [
+                [
+                  1000,
+                  536870911
+                ]
+              ]
+            },
+            "MethodOptions": {
+              "fields": {
+                "deprecated": {
+                  "type": "bool",
+                  "id": 33
+                },
+                "uninterpreted_option": {
+                  "rule": "repeated",
+                  "type": "UninterpretedOption",
+                  "id": 999
+                }
+              },
+              "extensions": [
+                [
+                  1000,
+                  536870911
+                ]
+              ]
+            },
+            "UninterpretedOption": {
+              "fields": {
+                "name": {
+                  "rule": "repeated",
+                  "type": "NamePart",
+                  "id": 2
+                },
+                "identifier_value": {
+                  "type": "string",
+                  "id": 3
+                },
+                "positive_int_value": {
+                  "type": "uint64",
+                  "id": 4
+                },
+                "negative_int_value": {
+                  "type": "int64",
+                  "id": 5
+                },
+                "double_value": {
+                  "type": "double",
+                  "id": 6
+                },
+                "string_value": {
+                  "type": "bytes",
+                  "id": 7
+                },
+                "aggregate_value": {
+                  "type": "string",
+                  "id": 8
+                }
+              },
+              "nested": {
+                "NamePart": {
+                  "fields": {
+                    "name_part": {
+                      "rule": "required",
+                      "type": "string",
+                      "id": 1
+                    },
+                    "is_extension": {
+                      "rule": "required",
+                      "type": "bool",
+                      "id": 2
+                    }
+                  }
+                }
+              }
+            },
+            "SourceCodeInfo": {
+              "fields": {
+                "location": {
+                  "rule": "repeated",
+                  "type": "Location",
+                  "id": 1
+                }
+              },
+              "nested": {
+                "Location": {
+                  "fields": {
+                    "path": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "span": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 2
+                    },
+                    "leading_comments": {
+                      "type": "string",
+                      "id": 3
+                    },
+                    "trailing_comments": {
+                      "type": "string",
+                      "id": 4
+                    },
+                    "leading_detached_comments": {
+                      "rule": "repeated",
+                      "type": "string",
+                      "id": 6
+                    }
+                  }
+                }
+              }
+            },
+            "GeneratedCodeInfo": {
+              "fields": {
+                "annotation": {
+                  "rule": "repeated",
+                  "type": "Annotation",
+                  "id": 1
+                }
+              },
+              "nested": {
+                "Annotation": {
+                  "fields": {
+                    "path": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "source_file": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "begin": {
+                      "type": "int32",
+                      "id": 3
+                    },
+                    "end": {
+                      "type": "int32",
+                      "id": 4
+                    }
+                  }
+                }
+              }
+            },
+            "Any": {
+              "fields": {
+                "type_url": {
+                  "type": "string",
+                  "id": 1
+                },
+                "value": {
+                  "type": "bytes",
+                  "id": 2
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
