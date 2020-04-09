@@ -64,10 +64,11 @@ function main(argv, { fs, join, clock, randomBytes, http, https, express, passpo
 
   const dbfile = Capper.fsSyncAccess(fs, join, cli['--db']);
   const rd = arg => Capper.fsReadAccess(fs, join, cli[arg]);
-  const rchain = rnodeAPI.RNode(grpc, {
-    host: cli['--grpc-host'],
-    port: parseInt(cli['--grpc-port'], 10),
-  });
+  const rchain = typeof rnodeAPI === 'undefined' ? null :
+        rnodeAPI.RNode(grpc, {
+          host: cli['--grpc-host'],
+          port: parseInt(cli['--grpc-port'], 10),
+        });
 
   Capper.makeConfig(rd('--conf')).then((config) => {
     let signIn; // ISSUE: how to link to the oauthClient at start-up?
