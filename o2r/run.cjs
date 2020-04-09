@@ -12,4 +12,4 @@ async function main(require, process) {
   run(require, process);
 }
 
-main(require, process).catch((err) => console.log(err.message));
+main(require, process).catch((err) => console.log(err));
