@@ -1,9 +1,10 @@
-/** keyPair -- ed25519 signing keys as Capper persistent objects
+/** keyPair -- RChain deploy signing keys as Capper persistent objects
 
-    key parts (publicKey, seed) are persisted in hex, which
-    should integrate nicely with rho:pubkey:ed25519:xxxxx.
-
+    key parts (publicKey, seed) are persisted in hex
+    curve is secp256k1, following RChain rnode v0.9.24 9f3a002
 */
+/* global Buffer */
+// ISSUE: flow typing hasn't been kept up-to-date. TODO: migrate to typescript / JSDoc
 // @flow strict
 
 // for customizing the way objects appear in logs
@@ -11,7 +12,12 @@
 // ack: https://stackoverflow.com/a/46870568
 import { inspect } from 'util';
 
-//@@ const rchain = require('../../lib/rchain-api/rnodeAPI');
+import elliptic from 'elliptic';
+import rchain from '@tgrospic/rnode-grpc-js';
+// Import generated protobuf types (in global scope)
+import '../../rnode-grpc-gen/js/DeployService_pb.js';
+import '../../rnode-grpc-gen/js/ProposeService_pb.js';
+
 import { once } from '../../capper_start.js';
 
 /*::  // ISSUE: belongs in rchain-api?
@@ -48,13 +54,13 @@ type KeyGenPowers = {
 }
 */
 
-//@@ const { RHOCore, b2h, h2b, verify } = rchain;
-//@@ const { fromJSData, toByteArray } = RHOCore;
 const def = Object.freeze; // cf. ocap design note
+const { utils: { toHex } } = elliptic;
 
 
 export
 function appFactory({ randomBytes } /*: KeyGenPowers */) {
+  const ec = new elliptic.ec('secp256k1');
   return def({ keyPair });
 
   function keyPair(context /*: Context<*> */) {
@@ -63,11 +69,11 @@ function appFactory({ randomBytes } /*: KeyGenPowers */) {
     function init(label /*: string*/) {
       once(state);
       const seed = randomBytes(32);
-      const key = rchain.keyPair(seed);
+      const key = ec.keyPair({ priv: seed });
 
       state.label = label;
-      state.publicKey = key.publicKey();
-      state.seed = b2h(seed);
+      state.publicKey = key.getPublic('hex');
+      state.seed = toHex(seed);
     }
 
     const toString = () => `<keyPair ${state.label}: ${state.publicKey.substring(0, 12)}...>`;
@@ -75,18 +81,14 @@ function appFactory({ randomBytes } /*: KeyGenPowers */) {
     return def({
       init,
       toString,
-      signBytes: bytes => getKey().signBytes(bytes),
-      signBytesHex: bytes => getKey().signBytesHex(bytes),
-      signText: text => getKey().signText(text),
-      signTextHex: text => getKey().signTextHex(text),
-      signDataHex: item => getKey().signBytesHex(toByteArray(fromJSData(item))),
+      signDeploy: deployObj => rchain.signDeploy(getKey(), deployObj),
       publicKey: () => state.publicKey,
       label: () => state.label,
       [inspect.custom]: toString,
     });
 
     function getKey() {
-      return rchain.keyPair(h2b(state.seed));
+      return ec.keyPair({ priv: state.seed });
     }
   }
 }
@@ -103,6 +105,14 @@ function verifyDataSigHex(data /*: Json */, sigHex /*: string */, pubKeyHex /*: 
 function integrationTest({ randomBytes }) {
   const kpApp = appFactory({ randomBytes });
 
+  const deploy1 = {
+    term: 'new x in { Nil }',
+    timestamp: 1586400683530,
+    phloprice: 1,
+    phlolimit: 1000000,
+    validafterblocknumber: 101,
+  };
+
   // $FlowFixMe: too lazy to stub drop, make
   const context1 /*: Context<*> */ = { state: {} };
   const pair1 = kpApp.keyPair(context1);
@@ -110,7 +120,25 @@ function integrationTest({ randomBytes }) {
   console.log('inspect keyPair:', pair1);
   console.log('keyPair.toString():', pair1.toString());
   console.log('public key:', pair1.publicKey());
-  console.log('signature:', pair1.signTextHex('hello world'));
+  const signed1 = pair1.signDeploy(deploy1);
+  console.log('signed deploy:', signed1);
+
+  // TODO: with a fixed key, this is a unit test; move it to The Right Place.
+  // $FlowFixMe: too lazy to stub drop, make
+  const context2 /*: Context<*> */ = {
+    state: {
+      label: 'fixed',
+      publicKey: '0410296587b197be8c96ca5c16f5725160643eecedf433ab478c121dec6d6dd76c3f81558b4744285d44aac9ea175de70e4d6759d9dc1550797b76b8e8a3474102',
+      seed: '824ebe64a4a301f932e7c7e13431c51ca463b0bb33ba42c077999b3285d8cf2c'
+    }
+  };
+  const pair2 = kpApp.keyPair(context2);
+  // pair1.init('k2');
+  console.log('inspect keyPair:', pair2);
+  console.log('keyPair.toString():', pair2.toString());
+  console.log('public key:', pair2.publicKey());
+  const signed2 = pair1.signDeploy(deploy1);
+  console.log('signed deploy:', signed2);
 }
 
 
