@@ -22,7 +22,7 @@
     "flow-typed": "^3.1.0"
   },
   "scripts": {
-    "start": "node --eval \"(async () => { const { run } = await import('./server.js'); run(require, process)})()\"",
+    "start": "node run.cjs ./server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "flow-check": "flow check --from emacs",
     "flow-status": "flow status --from emacs",
