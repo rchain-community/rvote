@@ -4,11 +4,14 @@
     as well as ocap discipline.
 */
 /* global require, module */
-// @flow strict
+// @ts-check
 
-// $FlowFixMe ISSUE: flow strict in capper
+import rnode from '@tgrospic/rnode-grpc-js';
+import grpc from '@grpc/grpc-js';
 import Capper from 'Capper';
 import $docopt from 'docopt';
+
+import * as protoSchema from './rnode-grpc-gen/js/pbjs_generated.json';
 
 import * as capperStart from './capper_start.js';
 import * as gateway from './gateway/server/main.js';
@@ -64,11 +67,11 @@ function main(argv, { fs, join, clock, randomBytes, http, https, express, passpo
 
   const dbfile = Capper.fsSyncAccess(fs, join, cli['--db']);
   const rd = arg => Capper.fsReadAccess(fs, join, cli[arg]);
-  const rchain = typeof rnodeAPI === 'undefined' ? null :
-        rnodeAPI.RNode(grpc, {
-          host: cli['--grpc-host'],
-          port: parseInt(cli['--grpc-port'], 10),
-        });
+  const rchain = rnode.rnodeDeploy({
+    grpcLib: grpc,
+    host: `${cli['--grpc-host']}:${cli['--grpc-port']}`,
+    protoSchema
+  });
 
   Capper.makeConfig(rd('--conf')).then((config) => {
     let signIn; // ISSUE: how to link to the oauthClient at start-up?
@@ -155,14 +158,14 @@ function main(argv, { fs, join, clock, randomBytes, http, https, express, passpo
 }
 
 
+/**
+ * @param {any} require - access to ("resource" aka non-pure) modules
+ * @param {{ argv: string[] }} process - access to CLI arguments
+ */
 export
 function run(require, process) {
-  // Import primitive effects only when invoked as main module.
-  //
   // See Object capability discipline design note in
   // CONTRIBUTING.md.
-  /* eslint-disable global-require */
-  /* global process */
   main(process.argv,
        {
          // Opening a file based on filename is a primitive effect.
