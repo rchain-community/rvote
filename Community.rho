@@ -1,0 +1,97 @@
+new Community, commMap, stdout(`rho:io:stdout`), lookup(`rho:registry:lookup`),
+insertArbitrary(`rho:registry:insertArbitrary`), uriCh, ret, ack in {
+    insertArbitrary!(*Community,*uriCh) |
+    for ( uri <- uriCh ) {
+       stdout!(["#define $Community",*uri])
+    } |
+    commMap!({}) |
+    contract Community (@"new", @name, inbox, return) = {
+        new admin, methods, userlist, infoCh, ret in {
+            userlist!([]) | methods!({}) |
+                  infoCh!({}) |
+            stdout!("creating community.") |
+            for (@comms <- commMap ) {
+                if ( comms.get(name) != Nil ) {
+                    stdout!("error: community with that name already exists") |
+                    commMap!(comms) |
+                    return!(Nil)
+                } else {
+                  lookup!($Directory,*ret) |
+                  for ( Directory <- ret ) {
+                    stdout!(["got directory", *Directory]) |
+                    Directory!(*ret) |
+                    for ( @{"read": *read, "write": *write, "grant": *grant, ..._ } <- ret ) {
+                      commMap!(comms.union({name: *infoCh})) |
+                      infoCh!({"name": name, "request": *inbox}) |
+                      return!({"admin": *admin, "read": *read, "write": *write, "grant": *grant}) |
+                      contract admin(@"add info", @key, @value, return) = {
+                        for (info <- infoCh) {
+                          infoCh!(*info.set(key, value))
+                        }
+                      } |
+                      contract admin(@"add user", @username, @inbox, return) = {
+                        //TODO see if already a member
+                        for ( @list <- userlist) {
+                          if ( list.length() == 0 ) { userlist!([username]) |
+                            write!(username, {"inbox": inbox, "delegate": Nil}, *stdout) |
+                            stdout!("first user being added")
+                          } else {
+                            userlist!(list.slice(1,list.length()) ++ [ username, list.nth(0)]) |
+                            write!(username, {"inbox": inbox, "delegate": list.nth(0)}, *stdout) |
+                            stdout!(list.slice(1,list.length()) ++ [username, list.nth(0)])
+                          }
+                        } |
+                        grant!(username, *ret) |
+                        for ( updateself <- ret ) {
+                          return!({"selfupdate": *updateself})
+                        }
+                       }
+                     }
+                   }
+                 }
+              }
+            }
+          } |
+    contract Community (@"request", @name, @userid, return) = {
+        for ( @{map /\  {=name: *infoCh, ..._}} <- commMap ) {
+          commMap!(map) |
+          for ( @{info /\ {"request": *inbox, ..._ }}  <- infoCh ) {
+            //stdout!(*info) |
+            inbox!(["Community", "request", name, userid])|
+            infoCh!(info) |
+            return!(info)
+          }
+        }
+      } |
+    contract Community (@"lookup", @name, return) = {
+        for ( @{map /\  {=name: *infoCh, ..._}} <- commMap ) {
+          commMap!(map) |
+          for ( info <- infoCh ) {
+            //stdout!(*info) |
+            infoCh!(*info) |
+            return!(*info)
+          }
+        }
+      } |
+    contract Community (@"lookup", return) = {
+        for ( @map <- commMap ) {
+          //stdout!(map) |
+          commMap!(map) |
+          return!(map)
+        }
+    } |
+    Community!("new","test", Nil, *ret) |
+    Community!("new","test2", Nil, *ret) |
+    for ( @{"admin": admin, "read": read, "write": write, "grant": grant} <- ret; _ <- ret ) {
+      stdout!("got em") |
+      Community!("lookup","test",*stdout) |
+      Community!("lookup","test2",*stdout) |
+      Community!("lookup",*stdout) |
+      //Community!("new","test", Nil, *stdout) |
+      admin|("add user","jim","xxxxx", *ret) |
+      for ( _ <- ret ) {
+       Community!("lookup","test",*stdout) |
+       Community!("lookup","test2",*stdout)
+      }
+    }
+}
