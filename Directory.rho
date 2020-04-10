@@ -1,0 +1,66 @@
+new directory in {
+  contract directory(capabilities) = {
+    new mapCh, read, write, grant in {
+     mapCh!({}) |
+     capabilities!({"read": bundle+{*read},
+       "write": bundle+{*write},
+       "grant": bundle+{*grant}}
+     ) |       
+     contract grant(@key, ret) = { // return a capability to modify only one key (self) in the directory
+      new writekey in {
+        contract writekey(@value, result) = {
+          write!(key, value, *result)
+        } |
+        ret!(*writekey)
+      }
+     } |
+     contract read(return) = {
+       for ( map <<- mapCh ) {
+         return!(*map)
+       }
+      } |
+     contract read(@key, return) = {
+       for ( map <<- mapCh ) {
+         return!(*map.get(key))
+       }
+      } |
+      contract write(@key,@value, ret) = {
+        for ( map <- mapCh ) {
+          if ( value == Nil ) {
+            mapCh!(*map.delete(key)) |
+            ret!([key,"deleted"])
+          } else {
+            mapCh!(*map.set(key,value)) |
+            ret!([key,value,"added"])
+          }
+        }
+     }
+   }
+  } |
+  new $stdout, $lookup, $insertArbitrary, uriCh, read, write, ret, ack in {
+    insertArbitrary!(bundle+{*directory},*uriCh) |
+    for (uri <- uriCh ) {
+      stdout!(["#define $Directory",*uri])
+    } |
+    directory!(*ret) |
+    for ( @{"read": read, "write": write, "grant": grant, ..._ } <- ret ) {
+      stdout!("got capabilities.") |
+      @write!("hello","world", *ack) |
+      @write!("this","that", *ack) |
+      @grant!("hello", *ret) |
+      for( hello <- ret; _ <- ack; _ <- ack ) {
+        stdout!("got grant.") |
+        @read!(*ret) |
+        for ( amap <- ret ) {
+          stdout!(*amap) |
+          @write!("this",Nil, *ack) | /* delete a key */
+          hello!("galaxy", *ret) |
+          for ( _ <- ack; _ <- ret ) {
+            @read!("hello",*stdout) |
+            @read!(*stdout)
+          }
+        }
+      }
+    }
+  }
+}
