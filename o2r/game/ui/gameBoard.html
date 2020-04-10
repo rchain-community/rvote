@@ -17,6 +17,11 @@ fieldset.tidy input {
     float: left;
     margin-bottom: 4px;
 }
+fieldset.tidy small {
+    color: red;
+    float: left;
+    margin-left: 8px;
+}
 
 fieldset.tidy div label:last-child input {
     margin-bottom: 12px;
@@ -31,25 +36,37 @@ fieldset.tidy div label:last-child input {
     <div>
     <label><b>Provider:</b>
       <select id="provider">
-	<option>github</option>
 	<option>discord</option>
       </select>
     </label>
     <hr />
+  </div>
+  <div>
+      <label><b>Server:</b> <input id="locus" />
+        <small>discord server / guild ID</small>
+      </label>
+      <label><b>Role:</b> <input id="role" />
+        <small>id of role that this service will require users to have</small>
+      </label>
+      <label><b>Client Id:</b> <input id="clientID" />
+        <small>issued by OAuth provider</small>
+      </label>
+      <label><b>Client Secret:</b> <input id="clientSecret" type="password" />
+        <small>issued by OAuth provider</small>
+      </label>
+        <label><b>Token:</b> <input id="token" type="password" />
+        <small><a href="https://discordapp.com/developers/docs/topics/oauth2#bots">discord bot token</a></small>
+      </label>
     </div>
     <div>
-    <label><b>Route Path:</b> <input id="path" /></label>
-    </div>
-    <div>
-    <label><b>Callback Path:</b> <input id="callbackPath" /></label>
-    <label><b>Client Id:</b> <input id="clientID" /></label>
-    <label><b>Client Secret:</b> <input id="clientSecret" type="password" /></label>
-    </div>
-    <div>
-    <label><b>Repo / Server:</b> <input id="locus" /></label>
-    <label><b>Token:</b> <input id="token" type="password" /></label>
-    <label><b>Role:</b> <input id="role" /></label>
-    </div>
+    <label><b>Callback Path:</b> <input id="callbackPath" />
+      <small>callback URL relative to base of this server</small>
+    </label>
+    <label><b>Route Path:</b>
+      <input id="path" />
+      <small>What route (url path) on this server are we configuring?</small>
+     </label>
+   </div>
     <br clear="all" />
     <div><label><b><button id="makeSignIn">Create</button></b></label></div>
   </fieldset>
