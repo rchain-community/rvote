@@ -1,4 +1,4 @@
-new BallotFactory, LockoutFactory, MailBoxFactory, DepositoryFactory, MintFactory, r(`rho:registry`) in {
+new BallotFactory, LockoutFactory, MailBoxFactory, DepositoryFactory, MintFactory, r(`rho:registry:lookup`) in {
   // create: create a ballot
   //
   //  string algorithm: name of public key algorithm to use 
