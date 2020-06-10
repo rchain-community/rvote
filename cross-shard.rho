@@ -1,3 +1,5 @@
+// This is an example voting app taken from:
+//  https://github.com/rchain/rchain/blob/f55361e50fcd539e2eacbe82486e878765719ed7/rholang/src/main/rholang/cross-shard.rho
 new BallotFactory, LockoutFactory, MailBoxFactory, DepositoryFactory, MintFactory, r(`rho:registry:lookup`) in {
   // create: create a ballot
   //
