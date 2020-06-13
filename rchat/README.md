@@ -8,6 +8,8 @@ user-level message: "tracing traffic".
 Then we expose the database port (see below) and use an SQL IDE such
 as dbeaver to find the `zerver_messge` table.
 
+<a target="_blank" rel="noopener noreferrer" href="https://user-images.githubusercontent.com/150986/84575875-1ba89280-ad76-11ea-9b6e-526c35492277.png"><img src="https://user-images.githubusercontent.com/150986/84575875-1ba89280-ad76-11ea-9b6e-526c35492277.png" alt="message_table_screenshot" style="max-width:100%;"></a>
+
 With a goal of using postgres LISTEN, we establish that we can
 access the zulib database. `npm start` produces the following:
 
