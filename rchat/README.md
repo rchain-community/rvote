@@ -1,47 +1,41 @@
 # rchat: RChain replica of Zulip messages
 
-Install [docker-zulip][dz] (35d2313 2020-06-12), and enter one
-user-level message: "tracing traffic".
+Install [docker-zulip][dz] (35d2313 2020-06-12) modified to expose the
+database port (see below).
 
 [dz]: https://github.com/zulip/docker-zulip
 
-Then we expose the database port (see below) and use an SQL IDE such
-as dbeaver to find the `zerver_messge` table.
+Using an SQL IDE such as dbeaver, we find the `zerver_messge` table.
 
 <a target="_blank" rel="noopener noreferrer" href="https://user-images.githubusercontent.com/150986/84575875-1ba89280-ad76-11ea-9b6e-526c35492277.png"><img src="https://user-images.githubusercontent.com/150986/84575875-1ba89280-ad76-11ea-9b6e-526c35492277.png" alt="message_table_screenshot" style="max-width:100%;"></a>
 
-With a goal of using postgres LISTEN, we establish that we can
-access the zulip database. `npm start` produces the following:
+Using [postgres LISTEN][pgl], we can see messages as they arrive.
+`npm start` produces the following:
+
+[pgl]: https://www.postgresql.org/docs/9.0/sql-listen.html
 
 ```
-[
-  {
-    id: 1,
-    subject: '',
-    content: 'Your bot `notification-bot@zulip.com` tried to send a message to stream #**None**. The stream exists but does not have any subscribers.',
-
 ...
-
-  {
-    id: 9,
-    subject: 'topic demonstration',
-    content: 'tracing traffic',
-    rendered_content: '<p>tracing traffic</p>',
-    rendered_content_version: 1,
-    last_edit_time: null,
-    edit_history: null,
-    has_attachment: false,
-    has_image: false,
-    has_link: false,
-    recipient_id: 8,
-    sender_id: 8,
-    sending_client_id: 1,
-    search_tsvector: "'demonstrate':2 'demonstration':2 'topic':1 'trace':3 'tracing':3 'traffic':4",
-    date_sent: 2020-06-13T16:19:10.858Z
-  },
-  count: 9,
-  command: 'SELECT'
-]
+adding trigger on  zulip.zerver_message
+...
+chan1 {
+  id: 15,
+  subject: 'topic demonstration',
+  content: 'listen demo',
+  rendered_content: '<p>listen demo</p>',
+  rendered_content_version: 1,
+  last_edit_time: null,
+  edit_history: null,
+  has_attachment: false,
+  has_image: false,
+  has_link: false,
+  recipient_id: 8,
+  sender_id: 8,
+  sending_client_id: 1,
+  search_tsvector: null,
+  date_sent: '2020-06-13T19:12:57.406022+00:00'
+}
+chan1 { flags: 1, message_id: 15, user_profile_id: 8, id: 14 }
 ```
 
 
