@@ -57,7 +57,14 @@ create or replace function ${ proc } ()
 as $$
 begin
   PERFORM (
-     select pg_notify('${ channel }', row_to_json(NEW)::text)
+     select pg_notify('${ channel }',
+                      '{ "schema": ' || to_json(tg_table_schema) ||
+                      ', "table_name": ' || to_json(tg_table_name) ||
+                      ', "relid": ' || to_json(tg_relid) ||
+                      ', "op": ' || to_json(tg_op) ||
+                      case when tg_op = 'UPDATE' then ', "old": ' || row_to_json(OLD)::text else '' end ||
+                      case when tg_op in ('INSERT', 'UPDATE') then ', "new": ' || row_to_json(NEW)::text else '' end ||
+                      '}')
   );
   RETURN NULL;
   end;
@@ -72,10 +79,10 @@ async function add_notify_trigger(sql, table, proc, channel) {
   await sql.unsafe(`drop trigger if exists ${trigger} on ${ table }`);
   return sql.unsafe(`
 CREATE TRIGGER ${ trigger }
-         AFTER INSERT
+         AFTER INSERT OR UPDATE OR DELETE
             ON ${ table }
       FOR EACH ROW
-       EXECUTE PROCEDURE ${ proc }('${ table }');
+       EXECUTE PROCEDURE ${ proc }();
 `);
 
 }
