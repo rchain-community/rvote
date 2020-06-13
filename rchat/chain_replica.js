@@ -15,9 +15,8 @@ async function main({ postgres }) {
   const proc = 'proc1';
   const channel = 'chan1';
   await create_notify_function(sql, proc, channel);
-  let names = await tables(sql);
+  const names = await tables(sql);
   console.log(names);
-  names = names.filter(n => n.match(/message/)); //@@
   await Promise.all(names.map(async (tab_name) => {
     await add_notify_trigger(sql, tab_name, proc, channel);
   }));
