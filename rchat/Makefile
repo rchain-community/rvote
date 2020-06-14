@@ -7,17 +7,20 @@ FUN1SK=1d9d914e70e431f1f4ed05e0dc64715265fb05168563535d2d91471e92f844da
 PMT=--phlo-limit 1000000000 --phlo-price=1 --private-key=$(FUN1SK)
 
 # https://www.gnu.org/software/make/manual/html_node/Pattern-Examples.html#Pattern-Examples
-%.rho.done: %.rho
+,deployed/%: %.rho
 	# rnode --grpc-host 127.0.0.1 eval $< && touch $@
 	# rnode --grpc-host 127.0.0.1 --grpc-port=30401 --grpc-port-internal=30402 eval $< && touch $@ >>storage-log.txt
 	# un-comment rho:rchain:deployId and such: new x, //(`rho:...`) => new x(`rho:...`)
 	sed 's_, //(`rho:_(`rho:_' <$< >$<.tmp
 	echo xxx | $(RNODE) deploy $(PMT) $<.tmp && \
 		$(RNODE) propose --print-unmatched-sends && \
-		touch $@c
+		touch $@
 		rm $<.tmp
 
 deploy: iddb.rho.done
+,deployed:
+	mkdir -p ,deployed
+
 
 
 validator: ~/.rnode/genesis
