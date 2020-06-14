@@ -17,7 +17,7 @@ PMT=--phlo-limit 1000000000 --phlo-price=1 --private-key=$(FUN1SK)
 		touch $@c
 		rm $<.tmp
 
-deploy: Inbox.rho.done
+deploy: iddb.rho.done
 
 
 validator: ~/.rnode/genesis
