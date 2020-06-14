@@ -1,0 +1,24 @@
+/**
+ * myzulipdb -- IdDB for deployer with zulip tables
+ */
+new
+deployId, //(`rho:rchain:deployId`),
+deployerId, //(`rho:rchain:deployerId`),
+lookup(`rho:registry:lookup`),
+IdDBCh,
+log(`rho:io:stderr`)
+in {
+    lookup!(`rho:id:ka9r5c1ha5fk7y8qwgqjmhcfrm53pz1kxjq4of9qm1mhbt8dsgzp3r`, *IdDBCh) |
+    for (IdDB <- IdDBCh) {
+        log!({"IdDB": *IdDB}) |
+        new dbCh in {
+            IdDB!(*dbCh) |
+            for (db <- dbCh) {
+                log!({"db": *db}) |
+                db!("create_table", "zerver_message", Nil) |
+                db!("create_table", "zerver_usermessage", Nil) |
+                @{[*deployerId, "zulip_iddb3"]}!(*db)
+            }
+        }
+    }
+}

@@ -1,3 +1,4 @@
+import fs from 'fs';  // ISSUE: AMBIENT
 import postgres from 'postgres';  // ISSUE: AMBIENT
 
 const zulip_db_config = {
@@ -15,7 +16,7 @@ const zulip_ephemera = [
 ];
 
 
-async function main({ postgres }) {
+async function main(argv, { setTimeout, exit, fsp, postgres }) {
 
   const sql = postgres(zulip_db_config);
 
@@ -30,19 +31,38 @@ async function main({ postgres }) {
     await add_notify_trigger(sql, tab_name, proc, channel);
   }));
 
+  let first = true;
+
+  const [_node, _script, filename, seconds] = argv;
+  const out = await fsp.open(filename, 'w');
+
+  setTimeout(() => process.exit(0), seconds * 1000);
+
   await sql.listen(channel, (payload) => {
     const notice = JSON.parse(payload);
     console.log({ op: notice.op, table_name: notice.table_name });
+
     const rho = notice_as_rho(notice);
-    console.log(rho);
-    // TODO: deploy rho to chain
+    if (first) {
+      first = false;
+    } else {
+      out.write('|\n');
+    }
+    out.write(rho);
+    out.write('\n');
   });
 }
 
 function notice_as_rho({ op, table_name, OLD = undefined, NEW = undefined}) {
-  const lit = val => val ? JSON.stringify(val) : 'Nil';
-  return `new deployId(\`rho:rchain:deployId\`), deployerId(\`rho:rchain:deployerId\`) in {
-    @{[*deployerId, "iddb_apply"]}!(${lit(op)}, ${lit(table_name)}, ${lit(OLD)}, ${lit(NEW)}, *deployId)
+  // KLUDGE: replacing null with Nil in string form has false positives
+  const lit = val => val ? JSON.stringify(val).replace(/\bnull\b/g, 'Nil') : 'Nil';
+
+  // ISSUE: sync "zulip_iddb3" with myzulipdb.rho
+  return `new deployerId(\`rho:rchain:deployerId\`) in {
+    for(db <<- @{[*deployerId, "zulip_iddb3"]}) {
+        // ISSUE: Nil return channel: no sync
+        db!(${lit(op)}, ${lit(table_name)}, ${lit(OLD)}, ${lit(NEW)}, Nil)
+    }
   }
   `;
 }
@@ -100,5 +120,11 @@ CREATE TRIGGER ${ trigger }
 
 }
 
-main({ postgres })
+/* global process, setTimeout */
+main(process.argv, {
+  setTimeout,
+  exit: process.exit,
+  fsp: fs.promises,
+  postgres,
+})
   .catch(err => console.error(err));

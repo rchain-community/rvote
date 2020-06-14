@@ -17,10 +17,19 @@ PMT=--phlo-limit 1000000000 --phlo-price=1 --private-key=$(FUN1SK)
 		touch $@
 		rm $<.tmp
 
-deploy: iddb.rho.done
 ,deployed:
 	mkdir -p ,deployed
 
+register: ,deployed ,deployed/iddb
+	echo ISSUE: now update URI in myzulipdb.rho
+
+init_mirror: ,deployed ,deployed/iddb ,deployed/myzulipdb
+
+,db_actions.rho: init_mirror chain_replica.js
+	@echo listening to zulip for 15 seconds...
+	node chain_replica.js $@ 15
+
+do_mirror: ,db_actions.rho ,deployed/,db_actions
 
 
 validator: ~/.rnode/genesis

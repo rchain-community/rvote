@@ -25,6 +25,7 @@ in {
             // rows are stored at @{[self, table_name, key]}
             // TODO: consider TreeHashMap, since set of keys could get large
             contract self(@"create_table", @table_name /\ String, return) = {
+                // TODO: fail if table_name already present
                 for (@tables <- tablesCh) {
                     new keysCh in {
                         keysCh!(Set()) |
@@ -49,6 +50,8 @@ in {
                     }
                 }
             } |
+            // TODO: select method to get record from table_name, key
+            // TODO: move keys, select to read-only facet
 
             contract self(@"INSERT", @table_name /\ String, _OLD, @NEW, return) = {
                 for (@tables <<- tablesCh) {
