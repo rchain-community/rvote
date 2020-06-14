@@ -10,9 +10,12 @@ PMT=--phlo-limit 1000000000 --phlo-price=1 --private-key=$(FUN1SK)
 %.rho.done: %.rho
 	# rnode --grpc-host 127.0.0.1 eval $< && touch $@
 	# rnode --grpc-host 127.0.0.1 --grpc-port=30401 --grpc-port-internal=30402 eval $< && touch $@ >>storage-log.txt
-	echo xxx | $(RNODE) deploy $(PMT) $< && \
+	# un-comment rho:rchain:deployId and such: new x, //(`rho:...`) => new x(`rho:...`)
+	sed 's_, //(`rho:_(`rho:_' <$< >$<.tmp
+	echo xxx | $(RNODE) deploy $(PMT) $<.tmp && \
 		$(RNODE) propose --print-unmatched-sends && \
-		touch $@
+		touch $@c
+		rm $<.tmp
 
 deploy: Inbox.rho.done
 
