@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@tgrospic/rnode-grpc-js": "^0.8.5"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.127.0",
+    "grpc-tools": "^1.8.1",
+    "protobufjs": "^6.9.0"
+  },
+  "scripts": {
+    "rnode-generate": "rnode-grpc --rnode-version v0.9.23"
+  },
+  "type": "module"
+}
