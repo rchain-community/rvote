@@ -1,5 +1,17 @@
+/* global Buffer */
+
 import fs from 'fs';  // ISSUE: AMBIENT
+
 import postgres from 'postgres';  // ISSUE: AMBIENT
+import grpcLib from '@grpc/grpc-js'; //@@ AMBIENT
+
+import rnode_grpc_js from '@tgrospic/rnode-grpc-js';
+// requires --experimental-json-modules
+import protoSchema from '../rchain-proto/rnode-grpc-gen/js/pbjs_generated.json';
+import '../rchain-proto/rnode-grpc-gen/js/DeployServiceV1_pb.js'; // proto global
+
+const { signDeploy, rnodeDeploy, getAddrFromPrivateKey } = rnode_grpc_js;
+
 
 const harden = x => Object.freeze(x);  // ISSUE: @agoric/harden for deep-freeze?
 
@@ -18,24 +30,50 @@ const zulip_ephemera = [
 ];
 
 
-async function main(argv, { current_timestamp, setTimeout, clearTimeout, exit, fsp, postgres }) {
-  const [_node, _script, filename, seconds] = argv;
+async function main(argv, env, { timer, fsp, postgres, grpcLib }) {
+  const [_node, _script, filename] = argv;
 
   const sql = postgres(zulip_db_config);
 
   const channel = 'mirror';
   await prepare_to_listen(sql, channel);
 
-  const out = await fsp.open(filename, 'w');
-  const sec = 1000;
-  const queue = batchingQueue({ max_qty: 32, quiesce_time: 4 * sec },
-    { current_timestamp,  setTimeout, clearTimeout }, file_spool(out));
+  let dest;
+  if (env.RNODE && env.SECRET_KEY) {
+    const deployService = rnodeDeploy({ grpcLib, host: env.RNODE || '127.0.0.1:40401', protoSchema });
+    const secretKey = Buffer.from(env.SECRET_KEY, 'hex');
+    const validafterblocknumber = parseInt(env.BLOCKNUM) || -1;  // TODO: warn if missing?
+    const phlolimit = 10e3;
+    dest = chain_dest(secretKey, deployService, { validafterblocknumber, phlolimit });
+  } else {
+    if (!filename) {
+      throw new Error('need file arg or RNODE and SECRET_KEY env variables');
+    }
+    const out = await fsp.open(filename, 'w');
+    dest = file_spool(out);
+  }
+  const queue = batchingQueue({ max_qty: 64, quiesce_time: 4 * 1000 }, timer, dest);
 
-  setTimeout(() => {
-    queue.finish();
-    process.exit(0);
-  }, seconds * 1000);
   mirror_events(sql, channel, queue);
+}
+
+function chain_dest(secretKey, deployService, { validafterblocknumber, phlolimit }) {
+  const keyInfo = getAddrFromPrivateKey(secretKey.toString('hex'));
+  console.log({deployKey: keyInfo.pubKey, eth: keyInfo.ethAddr });
+
+  return async (terms) => {
+    const term = terms.join('\n|\n');
+    const deployData = {
+      term,
+      phloprice: 1,  // TODO: when rchain economics evolve
+      phlolimit,
+      validafterblocknumber,  // ISSUE: should get updated over time
+    };
+    const signed = signDeploy(secretKey, deployData);
+    console.log({ timestamp: signed.timestamp, terms: terms.length });
+    const result = await deployService.doDeploy(signed);
+    console.log({ deployResponse: result });
+  };
 }
 
 function file_spool(out) {
@@ -157,7 +195,7 @@ function batchingQueue(
 
   function flush() {
     if (buf.length > 0) {
-      sink(buf);
+      sink(buf); // ISSUE: async? consume promise?
       buf = [];
     }
     if (quiescing !== undefined) {
@@ -181,9 +219,14 @@ function batchingQueue(
         const last_activity = t;
         quiescing = setTimeout(() => {
           const t = current_timestamp();
-          console.log({ quiesce_time, current: toDate(t), last_activity: toDate(last_activity), delta: (t - last_activity) / 1000 })
+          console.log({
+            quiesce_time,
+            current: toDate(t),
+            last_activity: toDate(last_activity),
+            delta: (t - last_activity) / 1000,
+          });
           flush();
-        }, quiesce_time)
+        }, quiesce_time);
       }
     },
     finish: () => {
@@ -193,14 +236,16 @@ function batchingQueue(
 }
 
 
-/* global process, setTimeout */
-main(process.argv, {
+/* global process, setTimeout, clearTimeout */
+main(process.argv, process.env, {
   setTimeout,
-  exit: process.exit,
   fsp: fs.promises,
-  current_timestamp: () => Date.now(),
-  setTimeout,
-  clearTimeout,
+  timer: {
+    current_timestamp: () => Date.now(),
+    setTimeout,
+    clearTimeout,
+  },
   postgres,
+  grpcLib,
 })
   .catch(err => console.error(err));
