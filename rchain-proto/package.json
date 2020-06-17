@@ -1,0 +1,20 @@
+{
+  "name": "rchain-proto",
+  "version": "0.9.23",
+  "description": "RChain protobuf generated stubs",
+  "main": "index.js",
+  "scripts": {
+    "rnode-generate": "rnode-grpc --rnode-version v0.9.23",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@tgrospic/rnode-grpc-js": "^0.8.5",
+    "grpc-tools": "^1.9.0",
+    "protobufjs": "^6.9.0"
+  },
+  "dependencies": {
+    "google-protobuf": "^3.12.2"
+  }
+}
