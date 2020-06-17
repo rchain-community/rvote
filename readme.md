@@ -1,61 +1,26 @@
-# **rv2020 - RChain Anonymous Voting Dapp**
+# rv2020 - RChain Voting
 
-**[This doc is from Gdoc](https://docs.google.com/document/d/1jfARb33suC_7AkICblTOFTmKN2mvTu9r7cFRPDKZ6hw/edit#)**
+Exploration into an on-chain record of RChain Cooperative business.
 
+## Goal
 
-### **Summary**
-
-The voting dapp will be used by coop members to vote for board of directors (BOD) and Items of Business (IOB) during the annual RChain membership meeting in October 2020.
-
-
-### **Requirements**
+The voting dapp should be used by coop members to vote for board of directors (BOD) and Items of Business (IOB) during the annual RChain membership meeting in October 2020.
 
 
+## Requirements
 
-1. Runs on RChain
-2. Anonymous voting
-3. Employs email address rchain coop identities
-4. Yes/no/abstain questions
-5. Other question types? Text alternatives, rank, estimate
-6. Admin: open, close voting, (multisig/consent, AllPromises)
-7. Voter interface
-8. Tally of results
-9. Open and close voting
-10. Decisions by percentages (majority, ⅔, …), medians
-11. ~~Collect member information!!! Member survey~~
-    1. ~~Rev address (generate one if needed)~~
-    2. ~~Discord user~~
-    3. ~~Priorities? invest/build/coordinate/~~
-    4. ~~keywords~~
+See **[brainstorming document](https://docs.google.com/document/d/1jfARb33suC_7AkICblTOFTmKN2mvTu9r7cFRPDKZ6hw/edit#)** as well as issues.
 
 
-### **Timeline**
+## Timeline
 
 *   October 24th - annual general membership (AGM) meeting
 
 _see also issue #26 etc._
 
 
+## Methods
 
-
-
-### Methods
+Various ways of integrating zulip are being explored as of Jun 17. (demo to appear in [communit debriefs](https://www.youtube.com/watch?v=YW15Fp7q12M&list=PLf2bbiic5ZjCVy9t4vhz4cQTSS6vLQC5R))
 
 _see issues list_
-
-
-### **Github**
-
-[https://github.com/rchain-community/rv2020](https://github.com/rchain-community/rv2020)
-
-[https://github.com/rchain-community/rv2020/tree/master/o2r](https://github.com/rchain-community/rv2020/tree/master/o2r) moved from rchain-dbr
-
-[https://github.com/rchain-community/community](https://github.com/rchain-community/community)
-
-
-### **[Gdoc](https://docs.google.com/document/d/1jfARb33suC_7AkICblTOFTmKN2mvTu9r7cFRPDKZ6hw/edit#)**
-
-
-### **Education**
-
-How to leverage the voting dapp for educational use
