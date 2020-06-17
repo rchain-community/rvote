@@ -1,0 +1,21 @@
+{
+  "name": "rchat",
+  "version": "0.1.0",
+  "main": "chain_replica.js",
+  "type": "module",
+  "engines": {
+    "node": ">=14.4.0"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.0.5",
+    "@tgrospic/rnode-grpc-js": "^0.8.5",
+    "postgres": "^1.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node --version && node ./chain_replica.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache2"
+}

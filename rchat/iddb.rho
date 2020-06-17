@@ -1,0 +1,167 @@
+/**
+ * IdDB - DB with id primary key column in all tables
+ */
+new
+deployId, //(`rho:rchain:deployId`),
+deployerId, //(`rho:rchain:deployerId`),
+insertArbitrary(`rho:registry:insertArbitrary`),
+IdDB,
+log(`rho:io:stderr`)
+in {
+    // register IdDB constructor contract
+    new uriCh in {
+        insertArbitrary!(*IdDB, *uriCh) |
+        for (@uri <- uriCh) {
+            log!({"IdDB URI": uri}) |
+            deployId!(uri)
+        }
+    }
+    |
+    contract IdDB(return) = {
+        new self, tablesCh in {
+            return!(*self) |
+
+            tablesCh!({}) | // table_name -> channel with Set of keys
+            // rows are stored at @{[self, table_name, key]}
+            // TODO: consider TreeHashMap, since set of keys could get large
+            contract self(@"create_table", @table_name /\ String, return) = {
+                // TODO: fail if table_name already present
+                for (@tables <- tablesCh) {
+                    new keysCh in {
+                        keysCh!(Set()) |
+                        tablesCh!(tables.set(table_name, *keysCh)) |
+                        log!({"created": table_name, "with": tables}) |
+                        return!(Nil)
+                    }
+                }
+            } |
+            // TODO: drop table: delete from map @tablesCh; consume keysCh, all rows
+
+            contract self(@"keys", @table_name /\ String, return) = {
+                for (@tables <<- tablesCh) {
+                    match tables.get(table_name) {
+                        Nil => { return!((false, "no such table")) }
+                        {*keysCh} => {
+                            for (@keys <<- keysCh) {
+                                log!({"got keys for": table_name, "qty": keys.size()}) |
+                                return!((true, keys))
+                            }
+                        }
+                    }
+                }
+            } |
+            // TODO: select method to get record from table_name, key
+            // TODO: move keys, select to read-only facet
+
+            contract self(@"INSERT", @table_name /\ String, _OLD, @NEW, return) = {
+                for (@tables <<- tablesCh) {
+                    match (tables.get(table_name), NEW.get("id")) {
+                        (Nil, _) => { return!((false, "no such table")) }
+                        (_, Nil) => { return!((false, "NEW has no id key")) }
+                        (*keysCh, key) => {
+                            for (@keys <- keysCh) {
+                                match keys.contains(key) {
+                                    true => {
+                                        keysCh!(keys) |
+                                        return!((false, "key already present"))
+                                    }
+                                    false => {
+                                        keysCh!(keys.union(Set(key))) |
+                                        @{[*self, table_name, key]}!(NEW) |
+                                        log!({"inserted key": key, "with": keys}) |
+                                        return!((true, key))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            |
+            contract self(@"DELETE", @table_name /\ String, @OLD, _NEW, return) = {
+                for (@tables <<- tablesCh) {
+                    match (tables.get(table_name), OLD.get("id")) {
+                        (Nil, _) => { return!((false, "no such table")) }
+                        (_, Nil) => { return!((false, "OLD has no id key")) }
+                        (*keysCh, key) => {
+                            for (@keys <- keysCh) {
+                                match keys.contains(key) {
+                                    false => {
+                                        keysCh!(keys) |
+                                        return!((false, "key not present"))
+                                    }
+                                    true => {
+                                        for(_ <- @{[*self, table_name, key]}) {
+                                            keysCh!(keys.delete(key)) |
+                                            log!({"deleted key": key, "from": keys}) |
+                                            return!((true, key))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            |
+            contract self(@"UPDATE", @table_name /\ String, @OLD, @NEW, return) = {
+                for (@tables <<- tablesCh) {
+                    match (tables.get(table_name), OLD.get("id")) {
+                        (Nil, _) => { return!((false, "no such table")) }
+                        (_, Nil) => { return!((false, "OLD has no id key")) }
+                        (*keysCh, key) => {
+                            for (@keys <<- keysCh) {
+                                match keys.contains(key) {
+                                    false => {
+                                        return!((false, "key not present"))
+                                    }
+                                    true => {
+                                        for(_ <- @{[*self, table_name, key]}) {
+                                            @{[*self, table_name, key]}!(NEW) |
+                                            log!({"updated key": key}) |
+                                            return!((true, key))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+               }
+            }
+        }
+    } |
+    // testing
+    new ch, logKeys in {
+        IdDB!(*ch) |
+        for (db1 <- ch) {
+            log!({"db1": *db1}) |
+            contract logKeys(@label, @key) = {
+                new keysCh in {
+                    log!({label: key}) |
+                    db1!("keys", "player", *keysCh) |
+                    for (@{(true, keys)} <- keysCh) {
+                        log!({label: key, "keys": keys})
+                    }
+                }
+            }
+            |
+            db1!("create_table", "player", *ch) |
+
+            for (_ <- ch) {
+                log!("create_table player done") |
+                db1!("INSERT", "player", Nil, {"id": 123, "name": "Pete Rose", "average": 400}, *ch) |
+                for (@{(true, key)} <- ch) {
+                    logKeys!("inserted", key) |
+                    db1!("UPDATE", "player", {"id": 123}, {"id": 123, "name": "Pete Rose", "average": 250}, *ch) |
+                    for (@{(true, key)} <- ch) {
+                        logKeys!("updated", key) |
+                        db1!("DELETE", "player", {"id": 123}, Nil, *ch) |
+                        for (@{(true, key)} <- ch) {
+                            logKeys!("delted", key)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
