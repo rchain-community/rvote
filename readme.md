@@ -6,11 +6,14 @@ Exploration into an on-chain record of RChain Cooperative business.
 
 The voting dapp should be used by coop members to vote for board of directors (BOD) and Items of Business (IOB) during the annual RChain membership meeting in October 2020.
 
+## Requirements and Discussion
 
-## Requirements
-
-See **[brainstorming document](https://docs.google.com/document/d/1jfARb33suC_7AkICblTOFTmKN2mvTu9r7cFRPDKZ6hw/edit#)** as well as issues.
-
+See issues as well as
+  - [initial brainstorming document](https://docs.google.com/document/d/1jfARb33suC_7AkICblTOFTmKN2mvTu9r7cFRPDKZ6hw/edit#)
+  - [RChat Requirements and Design Discussion Log](https://docs.google.com/document/d/1PsPSvUBDQw2EV-L-K52Fmiy01_VtyesIKLMp6Mm-XGw/edit)
+  - [RChat Log](https://docs.google.com/document/d/1rDAXC6TcFr4JS7eQti3jjFnf0FJGzwLpq9pnBaLHa30/edit#heading=h.v4jq7ifo127j)
+  - [#rchat discord channel](https://discord.com/channels/375365542359465989/717821191728922684)
+ 
 
 ## Timeline
 
