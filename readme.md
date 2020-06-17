@@ -31,18 +31,9 @@ The voting dapp will be used by coop members to vote for board of directors (BOD
 
 ### **Timeline**
 
-
-
-*   April 7th - requirements gathering
-*   June 1st -  proof of concept (POC)
-*   July 1st  -  prototype
-*   August 1st - complete voting dapp
-*   August  2nd - start dapp testing
-*   September 1st - finish testing
-*   September 1st - call for BODs nominee & IOBs
-*   September 15th - closing for BOD and IOB submissions
-*   September 16th - BOD and IOB vetting
 *   October 24th - annual general membership (AGM) meeting
+
+_see also issue #26 etc._
 
 
 ### Method 1 (jim)
