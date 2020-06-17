@@ -1,6 +1,8 @@
 import fs from 'fs';  // ISSUE: AMBIENT
 import postgres from 'postgres';  // ISSUE: AMBIENT
 
+const harden = x => Object.freeze(x);  // ISSUE: @agoric/harden for deep-freeze?
+
 const zulip_db_config = {
     host: 'localhost',
     port: 5432,
@@ -16,42 +18,51 @@ const zulip_ephemera = [
 ];
 
 
-async function main(argv, { setTimeout, exit, fsp, postgres }) {
+async function main(argv, { current_timestamp, setTimeout, clearTimeout, exit, fsp, postgres }) {
+  const [_node, _script, filename, seconds] = argv;
 
   const sql = postgres(zulip_db_config);
 
-  const proc = 'notify_mirror';
   const channel = 'mirror';
-  await create_notify_function(sql, proc, channel);
-  const tables_of_record = (await pg_tables(sql))
-        .filter(({ table_schema, table_name }) => !zulip_ephemera.includes(table_name))
-        .map(({ table_schema, table_name }) => `${ table_schema }.${table_name}`);
+  await prepare_to_listen(sql, channel);
 
-  await Promise.all(tables_of_record.map(async (tab_name) => {
-    await add_notify_trigger(sql, tab_name, proc, channel);
-  }));
-
-  let first = true;
-
-  const [_node, _script, filename, seconds] = argv;
   const out = await fsp.open(filename, 'w');
+  const sec = 1000;
+  const queue = batchingQueue({ max_qty: 32, quiesce_time: 4 * sec },
+    { current_timestamp,  setTimeout, clearTimeout }, file_spool(out));
 
-  setTimeout(() => process.exit(0), seconds * 1000);
+  setTimeout(() => {
+    queue.finish();
+    process.exit(0);
+  }, seconds * 1000);
+  mirror_events(sql, channel, queue);
+}
 
+function file_spool(out) {
+  let first = true;
+  return (terms) => {
+    console.log('spooling', terms.length);
+    for (const rho of terms) {
+      if (first) {
+        first = false;
+      } else {
+        out.write('|\n');
+      }
+      out.write(rho);
+      out.write('\n');
+    }
+  };
+}
+
+async function mirror_events(sql, channel, queue) {
   await sql.listen(channel, (payload) => {
     const notice = JSON.parse(payload);
     console.log({ op: notice.op, table_name: notice.table_name });
-
     const rho = notice_as_rho(notice);
-    if (first) {
-      first = false;
-    } else {
-      out.write('|\n');
-    }
-    out.write(rho);
-    out.write('\n');
+    queue.push(rho);
   });
 }
+
 
 function notice_as_rho({ op, table_name, OLD = undefined, NEW = undefined}) {
   // KLUDGE: replacing null with Nil in string form has false positives
@@ -67,6 +78,17 @@ function notice_as_rho({ op, table_name, OLD = undefined, NEW = undefined}) {
   `;
 }
 
+async function prepare_to_listen(sql, channel) {
+  const proc = 'notify_mirror';
+  await create_notify_function(sql, proc, channel);
+  const tables_of_record = (await pg_tables(sql))
+        .filter(({ table_schema, table_name }) => !zulip_ephemera.includes(table_name))
+        .map(({ table_schema, table_name }) => `${ table_schema }.${table_name}`);
+
+  return Promise.all(tables_of_record.map(async (tab_name) => {
+    await add_notify_trigger(sql, tab_name, proc, channel);
+  }));
+}
 
 async function pg_tables(sql) {
   return await sql`
@@ -120,11 +142,65 @@ CREATE TRIGGER ${ trigger }
 
 }
 
+/**
+ * Make queue that batches items for efficient delivery.
+ * times are natural numbers (typically milliseconds)
+ */
+function batchingQueue(
+  { max_qty, quiesce_time},
+  { current_timestamp, setTimeout, clearTimeout },
+  sink,
+) {
+  let buf = [];
+  let quiescing;
+  const toDate = ts => new Date(ts);
+
+  function flush() {
+    if (buf.length > 0) {
+      sink(buf);
+      buf = [];
+    }
+    if (quiescing !== undefined) {
+      clearTimeout(quiescing);
+      quiescing = undefined;
+    }
+  }
+
+  return harden({
+    push: (item) => {
+      let due = false;
+      const t = current_timestamp();
+      buf.push(item);
+      if (buf.length >= max_qty) {
+        console.log({ current: toDate(t), qty: buf.length, max_qty });
+        flush();
+      } else {
+        if (quiescing !== undefined) {
+          clearTimeout(quiescing);
+        }
+        const last_activity = t;
+        quiescing = setTimeout(() => {
+          const t = current_timestamp();
+          console.log({ quiesce_time, current: toDate(t), last_activity: toDate(last_activity), delta: (t - last_activity) / 1000 })
+          flush();
+        }, quiesce_time)
+      }
+    },
+    finish: () => {
+      flush();
+    }
+  });
+}
+
+
 /* global process, setTimeout */
 main(process.argv, {
   setTimeout,
   exit: process.exit,
   fsp: fs.promises,
+  current_timestamp: () => Date.now(),
+  setTimeout,
+  clearTimeout,
   postgres,
 })
   .catch(err => console.error(err));
