@@ -16,7 +16,9 @@ See issues as well as
  
 
 ## Timeline
-
+* September 1st - call for BODs nominee & IOBs
+* September 15th - closing for BOD and IOB submissions
+* September 16th - BOD and IOB vetting
 *   October 24th - annual general membership (AGM) meeting
 
 _see also issue #26 etc._
