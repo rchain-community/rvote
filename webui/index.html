@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deploy from Web Integration Test -- RChain</title>
+</head>
+<body>
+    <h1>Deploy Integration Test</h1>
+    <form id="deploy1">
+        <fieldset>
+            <label>
+                Account
+                <!--
+Private key	5ae90fb24e3d49949ca4d0132b0abfc1eb3213d4285683c5524ec68347dbdfd3
+Public key	04e128e43cea6290e500bf2f2e90f1bcc8448a3ce958eca85939ca9896fa5a1bd3fd7923f47a7fb767867790bfc8000e0a35392de42982cdee4e0abfdf3344356b
+ETH	186743b4d70f7e8f78b22e11d7d93635d367fd3c
+REV	1111B9VWWEpX2b1wWpesgwxt5n9EAsqmTdH2GjaUJrmTWKQw57rPk
+                -->
+                <select id="account">
+                    <option value="5ae90fb24e3d49949ca4d0132b0abfc1eb3213d4285683c5524ec68347dbdfd3">1111B9VWWEpX2b1wWpesgwxt5n9EAsqmTdH2GjaUJrmTWKQw57rPk</option>
+                </select>
+            </label>
+            <br />
+            <label>Timestamp: <input type="integer" name="timestamp" /></label>
+            <br />
+            <textarea id="term" cols="80" rows="12">
+new deployId!(`rho:rchain:deployId`),
+log(`rho:io:stdout`)
+in {
+  log!("hello") |
+  deployId!(1 + 1)
+}
+            </textarea>
+            <br />
+            <button id="deploy" type="button">Deploy</button>
+        </fieldset>
+    </form>
+    <hr />
+    <address>
+        <a href="https://www.madmode.com/">Dan Connolly</a>
+    </address>
+    <script src='./node_modules/@tgrospic/rnode-grpc-js/dist/rnode-sign.js'></script>
+    <script type="module" src="rgate.js"></script>
+    <script type="module">
+        import ui from "./rgate.js";
+        ui({
+            getElementById: (id) => document.getElementById(id),
+            inputElement: (id) => document.getElementById(id),
+            clock: () => new Date(),
+            signDeploy,
+        })
+    </script>
+</body>
+</html>
