@@ -1,14 +1,30 @@
 {
   "dependencies": {
-    "@tgrospic/rnode-grpc-js": "^0.8.5"
+    "blakejs": "^1.1.0",
+    "elliptic": "^6.5.3"
   },
   "devDependencies": {
     "flow-bin": "^0.127.0",
     "grpc-tools": "^1.8.1",
-    "protobufjs": "^6.9.0"
+    "prettier": "^2.0.5",
+    "protobufjs": "^6.9.0",
+    "snowpack": "^2.5.3"
   },
   "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build",
+    "format": "prettier --write \"src/**/*.js\"",
+    "lint": "prettier --check \"src/**/*.js\"",
     "rnode-generate": "rnode-grpc --rnode-version v0.9.23"
+  },
+  "snowpack": {
+    "installOptions": {},
+    "scripts": {
+      "mount:public": "mount public --to /",
+      "mount:web_modules": "mount web_modules",
+      "mount:src": "mount src --to /_dist_"
+    },
+    "plugins": []
   },
   "type": "module"
 }

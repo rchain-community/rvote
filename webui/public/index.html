@@ -38,15 +38,13 @@ in {
     <address>
         <a href="https://www.madmode.com/">Dan Connolly</a>
     </address>
-    <script src='./node_modules/@tgrospic/rnode-grpc-js/dist/rnode-sign.js'></script>
-    <script type="module" src="rgate.js"></script>
+    <noscript>Please excuse lack of non-JavaScript support.</noscript>
     <script type="module">
-        import ui from "./rgate.js";
+        import ui from "./_dist_/rgate.js";
         ui({
             getElementById: (id) => document.getElementById(id),
             inputElement: (id) => document.getElementById(id),
-            clock: () => new Date(),
-            signDeploy,
+            clock: () => new Date()
         })
     </script>
 </body>
