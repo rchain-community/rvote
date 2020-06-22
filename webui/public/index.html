@@ -24,12 +24,19 @@ REV	1111B9VWWEpX2b1wWpesgwxt5n9EAsqmTdH2GjaUJrmTWKQw57rPk
             <br />
             <textarea id="term" cols="80" rows="12">
 new deployId!(`rho:rchain:deployId`),
-log(`rho:io:stdout`)
+log(`rho:io:stderr`)
 in {
   log!("hello") |
   deployId!(1 + 1)
 }
             </textarea>
+            <br />
+            <label>
+              Node
+              <select id="apiBase">
+                <option value="https://node1.testnet.rchain-dev.tk:443">testnet node 1</option>
+              </select>
+            </label>
             <br />
             <button id="deploy" type="button">Deploy</button>
         </fieldset>
@@ -42,6 +49,7 @@ in {
     <script type="module">
         import ui from "./_dist_/rgate.js";
         ui({
+            fetch,
             getElementById: (id) => document.getElementById(id),
             inputElement: (id) => document.getElementById(id),
             clock: () => new Date()

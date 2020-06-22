@@ -11,11 +11,12 @@
     "snowpack": "^2.5.3"
   },
   "scripts": {
+    "realclean": "rm -rf dist node_modules build",
+    "postinstall": "npm link ../rchain-proto",
     "start": "snowpack dev",
     "build": "snowpack build",
     "format": "prettier --write \"src/**/*.js\"",
-    "lint": "prettier --check \"src/**/*.js\"",
-    "rnode-generate": "rnode-grpc --rnode-version v0.9.23"
+    "lint": "prettier --check \"src/**/*.js\""
   },
   "snowpack": {
     "installOptions": {},
