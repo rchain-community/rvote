@@ -3,6 +3,9 @@
 import blake from 'blakejs';
 import elliptic from 'elliptic';
 import casper from 'rchain-proto';
+
+import { Base16 } from './hex.js';
+
 console.log({ casper });
 
 const { DeployDataProto } = casper;
@@ -156,10 +159,6 @@ function Node(fetch, apiBase) {
 }
 
 
-const encodeBase16 = bytes =>
-      Array.from(bytes).map(x => (x & 0xff).toString(16).padStart(2, '0')).join('');
-
-
 function sign(keyHex /*: string*/, info /*: DeployInfo */) /*: WebDeploy */ {
   const key = secp256k1.keyFromPrivate(keyHex);
   const {
@@ -190,8 +189,8 @@ function sign(keyHex /*: string*/, info /*: DeployInfo */) /*: WebDeploy */ {
       validAfterBlockNumber,
     },
     sigAlgorithm: 'secp256k1',
-    signature: encodeBase16(sig),
-    deployer: encodeBase16(deployer),
+    signature: Base16.encode(sig),
+    deployer: Base16.encode(deployer),
   };
 }
 
