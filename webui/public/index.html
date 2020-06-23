@@ -14,13 +14,12 @@
       <label>Key2 <input id="key2" /></label>
       <br />
       <img id="qr2" />
+      <div id="jazz2"></div>
     </fieldset>
   </form>
   <script type="module">
-    import QRCode from 'https://cdn.pika.dev/qrcode/^1.4.4';  // ISSUE: subresource-integrity?
     import { ui } from './_dist_/intro.js';
     ui({
-      QRCode,
       getElementById: (id) => document.getElementById(id),
       inputElement: (id) => document.getElementById(id),
     });
