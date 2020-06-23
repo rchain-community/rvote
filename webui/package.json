@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "blakejs": "^1.1.0",
-    "elliptic": "^6.5.3"
+    "elliptic": "^6.5.3",
+    "ethereum-blockies-base64": "^1.0.2"
   },
   "devDependencies": {
     "flow-bin": "^0.127.0",

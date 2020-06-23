@@ -4,6 +4,22 @@
     <title>Deploy from Web Integration Test -- RChain</title>
 </head>
 <body>
+  <h1>Introductions: accounts, icons, names</h1>
+  <form id="intro1">
+    <fieldset>
+      <label>Nickname <input id="nickname" /></label>
+      <br />
+      <img id="blockie1" />
+    </fieldset>
+  </form>
+  <script type="module">
+    import { ui } from './_dist_/intro.js';
+    ui({
+      getElementById: (id) => document.getElementById(id),
+      inputElement: (id) => document.getElementById(id),
+    });
+  </script>
+    <hr />
     <h1>Deploy Integration Test</h1>
     <form id="deploy1">
         <fieldset>
