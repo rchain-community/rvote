@@ -141,17 +141,27 @@ export default function ui({ getElementById, inputElement, clock, fetch } /*: Do
   deployButton.addEventListener("click", handleDeploy);
 }
 
-function Node(fetch, apiBase) {
+export function Node(fetch, apiBase) {
   return harden({
     async blocks(n /*: number */) /*: Promise<BlockInfo[]> */{
       const reply = await fetch(`${apiBase}/api/blocks/${n}`);
       return await reply.json();
     },
     async deploy(data /*: WebDeploy */) /*: Promise<mixed> */ {
-      console.log({ url: `${apiBase}/api/deploy`, data });
-      const reply = await fetch(`${apiBase}/api/deploy`, {
+      const methodUrl = `${apiBase}/api/deploy`;
+      console.log({ methodUrl, data });
+      const reply = await fetch(methodUrl, {
         method: 'POST',
         body: JSON.stringify(data),
+      });
+      return await reply.json();
+    },
+    async exploreDeploy(term /*: string */) /*: Promise<mixed> */ {
+      const methodUrl = `${apiBase}/api/explore-deploy`;
+      console.log({ methodUrl, term });
+      const reply = await fetch(methodUrl, {
+        method: 'POST',
+        body: term,
       });
       return await reply.json();
     },
@@ -199,4 +209,33 @@ function the /*:: <T> */(x /*: ?T */) /*: T */ {
     throw new TypeError();
   }
   return x;
+}
+
+
+const checkBalance_rho = addr => `
+  new return, rl(\`rho:registry:lookup\`), RevVaultCh, vaultCh in {
+    rl!(\`rho:rchain:revVault\`, *RevVaultCh) |
+    for (@(_, RevVault) <- RevVaultCh) {
+      @RevVault!("findOrCreate", "${addr}", *vaultCh) |
+      for (@maybeVault <- vaultCh) {
+        match maybeVault {
+          (true, vault) => @vault!("balance", *return)
+          (false, err)  => return!(err)
+        }
+      }
+    }
+  }
+`;
+
+export async function checkBalance(node, revAddr/*: string*/) /*: number */{
+  console.log({ revAddr });
+  const deloyCode   = checkBalance_rho(revAddr);
+  const result = await node.exploreDeploy(deloyCode);
+  console.log({ result });
+  const {expr: [e]} = result;
+  const dataError   = e && e.ExprString && e.ExprString.data;
+  if (dataError) {
+    throw new Error(dataError);
+  }
+  return e && e.ExprInt && e.ExprInt.data;
 }

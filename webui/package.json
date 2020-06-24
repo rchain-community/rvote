@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@tgrospic/rnode-grpc-js": "^0.8.5",
     "blakejs": "^1.1.0",
     "elliptic": "^6.5.3",
     "ethereum-blockies-base64": "^1.0.2",
@@ -21,7 +22,16 @@
     "lint": "prettier --check \"src/**/*.js\""
   },
   "snowpack": {
-    "installOptions": {},
+    "install": [
+      "blakejs",
+      "elliptic"
+    ],
+    "installOptions": {
+      "namedExports": [
+        "blakejs",
+        "elliptic"
+      ]
+    },
     "scripts": {
       "mount:public": "mount public --to /",
       "mount:web_modules": "mount web_modules",

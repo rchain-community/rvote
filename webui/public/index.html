@@ -7,19 +7,38 @@
   </style>
 </head>
 <body>
-  <h2>RChain Contract Execution Account</h2>
+  <h2>Device REV Account</h2>
   <form id="deployKey3">
+    <p id="noDeviceKeyNotice">
+      <strong>Welcome!</strong> To participate in rv2020, this app
+      maintains an account <strong>on this device</strong> to hold
+      a small amount of REV for contract execution.
+    </p>
     <fieldset>
-      <label>Deploy Key <input id="deployKey" type="hidden"/></label>
+      <div id="devKeyViz"></div>
+      <label>Device REV address: <input id="devAddr" readonly="readonly" /></label>
       <br />
+      <label>
+        Device REV balance:
+        <input id="devBal" readonly="readonly" placeholder='?'/>
+        <button id="checkBalance" type="button">re-check</button>
+      </label>
+      <br />
+      <button type="button" id="devKeyGen">Create Device REV Account</button>
+      <p>
+        <small><strong>Note:</strong> the private key is stored in
+          <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage"
+             >localStorage</a> for this web site. To see it, enter
+          <code>localStorage.get('deviceKey')</code> in a javascript console.
+        </small>
+      </p>
       <img id="qr3" class="privateKeyQR" />
-      <div id="jazz3"></div>
-      <button type="button" id="keygen3">Generate</button>
     </fieldset>
   </form>
   <script type="module">
-    import { keyUI } from './_dist_/intro.js';
-    keyUI({
+    import { acctUI } from './_dist_/intro.js';
+    acctUI({
+      setTimeout, fetch,
       getElementById: (id) => document.getElementById(id),
       getRandomValues: (arr) => window.crypto.getRandomValues(arr),
       inputElement: (id) => document.getElementById(id),
@@ -70,9 +89,16 @@ in {
             </textarea>
             <br />
             <label>
-              Node
+              Validator
               <select id="apiBase">
                 <option value="https://node1.testnet.rchain-dev.tk:443">testnet node 1</option>
+              </select>
+            </label>
+            <br />
+            <label>
+              Observer
+              <select id="observerApiBase">
+                <option value="https://observer.testnet.rchain.coop">testnet observer</option>
               </select>
             </label>
             <br />

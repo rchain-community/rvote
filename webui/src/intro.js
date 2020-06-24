@@ -1,15 +1,24 @@
 /**
  * intro - introductions, keys, registry URIs, avatars, icons, etc.
  */
+/* global Intl */
 // @flow
 
 import makeBlockie from 'ethereum-blockies-base64';
 import jazzicon from 'jazzicon';
-import { Base16 } from './hex.js';
+import rnode from '@tgrospic/rnode-grpc-js';
+
 import './vendor/qrcode/qrcode.js';  // ISSUE: global
+import { Base16 } from './hex.js';
+import { Node, checkBalance } from './rgate.js';
+
 // console.log(QRCode);
 
-export function keyUI({ getElementById, inputElement, localStorage, getRandomValues }) {
+export function acctUI({ setTimeout,
+                         getElementById, inputElement,
+                         localStorage,
+                         getRandomValues,
+                         fetch }) {
   console.log('setting up key ui...');
 
   // don't submit
@@ -17,38 +26,66 @@ export function keyUI({ getElementById, inputElement, localStorage, getRandomVal
     event.preventDefault();
   });
 
-  const storeKey = 'deployKeyHex';
+  const storeKey = 'deviceKey';
 
-  const imgHolder = getElementById('jazz3');
-  const keyGenButton = getElementById('keygen3');
+  const imgHolder = getElementById('devKeyViz');
+  const addrField = getElementById('devAddr');
+  const balanceField = getElementById('devBal');
+  const balanceButton = getElementById("checkBalance");
+  const keyGenButton = getElementById('devKeyGen');
 
-  // BUG: jazzicon should be based on eth addr
-  // TODO: display REV addr with option to copy to clipboard
-  let deployKeyHex = localStorage.getItem(storeKey);
+  let deviceKeyHex = localStorage.getItem(storeKey);
 
-  if (deployKeyHex) {
+  if (deviceKeyHex) {
     keyGenButton.setAttribute('disabled', true);
-    showKey(imgHolder, deployKeyHex);
+    showKey(deviceKeyHex, imgHolder, addrField);
   } else {
     keyGenButton.addEventListener('click', (event) => {
       const eckeylen = 32; // based on https://github.com/tgrospic/rnode-grpc-js/blob/master/src/rnode-address.js#L69
       const buf = new Uint8Array(eckeylen);
       getRandomValues(buf);
-      deployKeyHex = Base16.encode(buf);
-      localStorage.setItem(storeKey, deployKeyHex);
-      showKey(imgHolder, deployKeyHex);
+      deviceKeyHex = Base16.encode(buf);
+      localStorage.setItem(storeKey, deviceKeyHex);
+      showKey(deviceKeyHex, imgHolder, addrField);
       keyGenButton.setAttribute('disabled', true);
     });
   }
+
+  const nf = new Intl.NumberFormat();
+  const formValue = (id) => inputElement(id).value;
+
+  async function showBalance() {
+    const node = Node(fetch, formValue('observerApiBase'));
+    if (deviceKeyHex) {
+      try {
+        balanceField.setAttribute('disabled', true);
+        balanceButton.setAttribute('disabled', true);
+        const info = rnode.getAddrFromPrivateKey(deviceKeyHex);
+        const balance = await checkBalance(node, info.revAddr);
+        balanceField.value = nf.format(balance);
+        balanceField.removeAttribute('disabled');
+      } catch (oops) {
+        console.log(oops);
+        // ISSUE: hmm... now what?
+      }
+      balanceButton.removeAttribute('disabled');
+    }
+  }
+
+  showBalance();
+  balanceButton.addEventListener('click', showBalance);
 }
 
-function showKey(imgHolder, keyHex) {
+function showKey(keyHex, imgHolder, addrField) {
   // First remove the '0x' and convert the 8 digit hex number to
   // decimal with i.e. `parseInt('e30a34bc, 16)` to generate a
   // "jazzicon".
   // -- Parker Sep 2018
   //    https://www.reddit.com/r/ethdev/comments/9fwffj/wallet_ui_trick_mock_the_metamask_account_icon_by/
-  const seed = parseInt(keyHex.replace('0x', '').slice(0, 8), 16);
+  const info = rnode.getAddrFromPrivateKey(keyHex);
+  console.log(info);
+  addrField.value = info.revAddr;
+  const seed = parseInt(info.ethAddr.slice(0, 8), 16);
   const el = jazzicon(100, seed);
   imgHolder.appendChild(el);
 }
