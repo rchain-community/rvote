@@ -1,35 +1,69 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>Deploy from Web Integration Test -- RChain</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RV2020 Alpha - RChain Community Governance</title>
   <style>
     .privateKeyQR { display: hidden }  /* issue: fail safe if no CSS? */
+    .attachment-full { float: right }
+    #devKeyViz { float: right }
   </style>
+  <link rel="stylesheet"
+        href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css">
 </head>
 <body>
-  <h2>Device REV Account</h2>
+  <a href="https://github.com/rchain-community/rv2020">
+    <img width="149" height="149"
+         src="https://github.blog/wp-content/uploads/2008/12/forkme_right_green_007200.png?resize=149%2C149"
+         class="attachment-full size-full" alt="Fork me on GitHub"
+         data-recalc-dims="1">
+  </a>
+
+  <label for="drawer-control" class="drawer-toggle persistent"></label>
+  <input  type="checkbox" id="drawer-control" class="drawer persistent" />
+  <nav>
+    <label for="drawer-control" class="drawer-close"></label>
+    <ul>
+      <a href="#card-dev-acct">Account</a>
+      <a href="#card-intro">Intro</a>
+      <a href="#card-deploy-test">Testing</a>
+      <a href="#card-contact">Contact</a>
+    </ul>
+  </nav>
+
+  <h1>RV2020: An exploration into RChain governance</h1>
+
+  <div class="card fluid" id="card-dev-acct">
+  <h2 class="content-subhead">Device REV Account</h2>
+  <p>
+    <strong>Welcome!</strong> To participate in rv2020, this app
+    maintains an account <strong>on this device</strong> to hold
+    a small amount of REV for contract execution.
+  </p>
   <form id="deployKey3">
-    <p id="noDeviceKeyNotice">
-      <strong>Welcome!</strong> To participate in rv2020, this app
-      maintains an account <strong>on this device</strong> to hold
-      a small amount of REV for contract execution.
-    </p>
     <fieldset>
+      <legend>Device Account</legend>
       <div id="devKeyViz"></div>
-      <label>Device REV address: <input id="devAddr" readonly="readonly" /></label>
-      <br />
-      <label>
-        Device REV balance:
-        <input id="devBal" readonly="readonly" placeholder='?'/>
+
+      <div>
+        <label for="devAddr">Device REV address</label>
+        <input id="devAddr" readonly="readonly" size="50" />
+      </div>
+
+      <div>
+        <label for="devBal">Device REV balance</label>
+        <input id="devBal" readonly="readonly" placeholder='?' />
         <button id="checkBalance" type="button">re-check</button>
-      </label>
-      <br />
-      <button type="button" id="devKeyGen">Create Device REV Account</button>
+      </div>
+      <button type="button"
+              id="devKeyGen">Create Device REV Account</button>
+
       <p>
         <small><strong>Note:</strong> the private key is stored in
           <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage"
              >localStorage</a> for this web site. To see it, enter
-          <code>localStorage.get('deviceKey')</code> in a javascript console.
+          <code>localStorage.getItem('deviceKey')</code> in a javascript console.
         </small>
       </p>
       <img id="qr3" class="privateKeyQR" />
@@ -45,6 +79,9 @@
       localStorage: window.localStorage,
     });
   </script>
+  </div>
+
+  <div class="card fluid" id="card-intro">
   <h2>Introductions: accounts, icons, names</h2>
   <form id="intro1">
     <fieldset>
@@ -60,8 +97,9 @@
       inputElement: (id) => document.getElementById(id),
     });
   </script>
-    <hr />
-    <h1>Deploy Integration Test</h1>
+  </div>
+  <div class="card fluid" id="card-deploy-test">
+    <h2>Deploy Integration Test</h2>
     <form id="deploy1">
         <fieldset>
             <label>
@@ -105,10 +143,6 @@ in {
             <button id="deploy" type="button">Deploy</button>
         </fieldset>
     </form>
-    <hr />
-    <address>
-        <a href="https://www.madmode.com/">Dan Connolly</a>
-    </address>
     <noscript>Please excuse lack of non-JavaScript support.</noscript>
     <script type="module">
         import ui from "./_dist_/rgate.js";
@@ -119,5 +153,18 @@ in {
             clock: () => new Date()
         })
     </script>
+  </div>
+  <div class="card fluid" id="card-contact">
+    <h2>Contact</h2>
+    <ul>
+      <li>
+        <a href="https://github.com/rchain-community">
+          rchain-community</a>/<a href="https://github.com/rchain-community/rv2020">rv2020</a>
+      </li>
+    </ul>
+    <address>
+        <a href="https://www.madmode.com/">Dan Connolly</a>
+    </address>
+  </div>
 </body>
 </html>
