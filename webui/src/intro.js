@@ -6,8 +6,8 @@
 
 import makeBlockie from 'ethereum-blockies-base64';
 import jazzicon from 'jazzicon';
-import rnode from '@tgrospic/rnode-grpc-js';
 
+import { getAddrFromPrivateKey } from './vendor/rnode-address.js';
 import './vendor/qrcode/qrcode.js'; // ISSUE: global
 import { Base16 } from './hex.js';
 import { Node, checkBalance } from './rgate.js';
@@ -63,7 +63,7 @@ export function acctUI({
       try {
         balanceField.setAttribute('disabled', true);
         balanceButton.setAttribute('disabled', true);
-        const info = rnode.getAddrFromPrivateKey(deviceKeyHex);
+        const info = getAddrFromPrivateKey(deviceKeyHex);
         const balance = await checkBalance(node, info.revAddr);
         balanceField.value = nf.format(balance);
         balanceField.removeAttribute('disabled');
@@ -85,7 +85,7 @@ function showKey(keyHex, imgHolder, addrField) {
   // "jazzicon".
   // -- Parker Sep 2018
   //    https://www.reddit.com/r/ethdev/comments/9fwffj/wallet_ui_trick_mock_the_metamask_account_icon_by/
-  const info = rnode.getAddrFromPrivateKey(keyHex);
+  const info = getAddrFromPrivateKey(keyHex);
   console.log(info);
   addrField.value = info.revAddr;
   const seed = parseInt(info.ethAddr.slice(0, 8), 16);
