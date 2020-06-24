@@ -8,17 +8,20 @@ import makeBlockie from 'ethereum-blockies-base64';
 import jazzicon from 'jazzicon';
 import rnode from '@tgrospic/rnode-grpc-js';
 
-import './vendor/qrcode/qrcode.js';  // ISSUE: global
+import './vendor/qrcode/qrcode.js'; // ISSUE: global
 import { Base16 } from './hex.js';
 import { Node, checkBalance } from './rgate.js';
 
 // console.log(QRCode);
 
-export function acctUI({ setTimeout,
-                         getElementById, inputElement,
-                         localStorage,
-                         getRandomValues,
-                         fetch }) {
+export function acctUI({
+  setTimeout,
+  getElementById,
+  inputElement,
+  localStorage,
+  getRandomValues,
+  fetch,
+}) {
   console.log('setting up key ui...');
 
   // don't submit
@@ -31,7 +34,7 @@ export function acctUI({ setTimeout,
   const imgHolder = getElementById('devKeyViz');
   const addrField = getElementById('devAddr');
   const balanceField = getElementById('devBal');
-  const balanceButton = getElementById("checkBalance");
+  const balanceButton = getElementById('checkBalance');
   const keyGenButton = getElementById('devKeyGen');
 
   let deviceKeyHex = localStorage.getItem(storeKey);
