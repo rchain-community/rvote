@@ -17,18 +17,11 @@ const harden = (x) => Object.freeze(x); // @agoric/harden
 console.log({ secp256k1 });
 
 /*::
-interface Doc {
-    fetch: typeof fetch,
-    getElementById: typeof document.getElementById,
-    inputElement: (string) => ?HTMLInputElement,
-    clock: () => Date
-}
-
 type BlockInfo = {
   blockNumber: number,
 }
 
-type DeployInfo = {|
+export type DeployInfo = {|
     term: string,
     timestamp: number, // milliseconds
     phloprice: number,
@@ -36,7 +29,7 @@ type DeployInfo = {|
     validafterblocknumber: number,
 |}
 
-type WebDeploy = {|
+export type WebDeploy = {|
   data: {|
     term: string,
     timestamp: number,
@@ -49,62 +42,31 @@ type WebDeploy = {|
   deployer: string, // hex
 |}
 
-interface RNode {
+export interface RNode {
   blocks(number): Promise<BlockInfo[]>
 }
 
-type Expr = {| ExprString: {| data: string |} |} |
+export type Expr = {| ExprString: {| data: string |} |} |
             {| ExprInt: {| data: number |} |};
 
-type Process = {
+export type Process = {
   expr: Expr[]
 }
 
-interface Observer extends RNode {
+export interface Observer extends RNode {
   exploreDeploy(string): Promise<Process>
 }
 
-interface Validator extends Observer {
+export interface Validator extends Observer {
   deploy(WebDeploy): Promise<mixed>
 }
 
 */
 
-const defaultPhloInfo = {
-  phloprice: 1,
-  phlolimit: 10e3,
-};
-
-export default function ui(
-  { getElementById, inputElement, clock, fetch } /*: Doc */,
-) {
-  const formValue = (id) => the(inputElement(id)).value;
-  async function handleDeploy(_ /*: Event */) {
-    const node = Node(fetch, formValue('apiBase'));
-    const [{ blockNumber }] = await node.blocks(1);
-    console.log({ blockNumber });
-    const testing = false;
-    const deployInfo /*: DeployInfo */ = testing
-      ? testVector[0].input.deployObj
-      : {
-          ...defaultPhloInfo,
-          term: formValue('term'),
-          timestamp: clock().valueOf(),
-          validafterblocknumber: blockNumber,
-        };
-    alert(JSON.stringify(deployInfo));
-    const keyHex = testing ? testVector[0].input.keyHex : formValue('account');
-    const apiBase = formValue('apiBase');
-    const data = sign(keyHex, deployInfo);
-    const result = node.deploy(data);
-    console.log({ result });
-  }
-
-  const deployButton = the(getElementById('deploy'));
-  deployButton.addEventListener('click', handleDeploy);
-}
-
-export function Node(fetch /*: typeof fetch */, apiBase /*: string */) /* : Validator */ {
+export function Node(
+  fetch /*: typeof fetch */,
+  apiBase /*: string */,
+) /* : Validator */ {
   return harden({
     async blocks(n /*: number */) /*: Promise<BlockInfo[]> */ {
       const reply = await fetch(`${apiBase}/api/blocks/${n}`);
@@ -131,7 +93,10 @@ export function Node(fetch /*: typeof fetch */, apiBase /*: string */) /* : Vali
   });
 }
 
-function sign(keyHex /*: string */, info /*: DeployInfo */) /*: WebDeploy */ {
+export function sign(
+  keyHex /*: string */,
+  info /*: DeployInfo */,
+) /*: WebDeploy */ {
   const key = secp256k1.keyFromPrivate(keyHex);
   const {
     term,
@@ -169,18 +134,11 @@ function sign(keyHex /*: string */, info /*: DeployInfo */) /*: WebDeploy */ {
   };
 }
 
-function the /*:: <T> */(x /*: ?T */) /*: T */ {
-  if (!x) {
-    throw new TypeError();
-  }
-  return x;
-}
-
-const checkBalance_rho = (addr) => `
+export const checkBalance_rho = (addr /*: string*/) => `
   new return, rl(\`rho:registry:lookup\`), RevVaultCh, vaultCh in {
     rl!(\`rho:rchain:revVault\`, *RevVaultCh) |
     for (@(_, RevVault) <- RevVaultCh) {
-      @RevVault!("findOrCreate", "${addr}", *vaultCh) |
+      @RevVault!("findOrCreate", ${JSON.stringify(addr)}, *vaultCh) |
       for (@maybeVault <- vaultCh) {
         match maybeVault {
           (true, vault) => @vault!("balance", *return)
@@ -191,12 +149,7 @@ const checkBalance_rho = (addr) => `
   }
 `;
 
-
-export async function checkBalance(node /*: Observer */, revAddr /*: string */) /*: Promise<number> */ {
-  console.log({ revAddr });
-  const deloyCode = checkBalance_rho(revAddr);
-  const result /*: Process */ = await node.exploreDeploy(deloyCode);
-  console.log({ result });
+export function extractBalance(result /*: Process */) /*: number */ {
   const {
     expr: [e],
   } = result;
