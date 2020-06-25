@@ -5,6 +5,7 @@ import elliptic from 'elliptic';
 import casper from 'rchain-proto';
 
 import { Base16 } from './hex.js';
+import { testVector } from './rgate_test.js';
 
 console.log({ casper });
 
@@ -27,281 +28,52 @@ type BlockInfo = {
   blockNumber: number,
 }
 
-type DeployInfo = {
+type DeployInfo = {|
     term: string,
     timestamp: number, // milliseconds
     phloprice: number,
     phlolimit: number,
     validafterblocknumber: number,
-}
+|}
 
-type WebDeploy = {
-  data: {
+type WebDeploy = {|
+  data: {|
     term: string,
     timestamp: number,
     phloPrice: number,
     phloLimit: number,
     validAfterBlockNumber: number,
-  },
+  |},
   sigAlgorithm: 'secp256k1',
   signature: string, // hex
   deployer: string, // hex
+|}
+
+interface RNode {
+  blocks(number): Promise<BlockInfo[]>
 }
+
+type Expr = {| ExprString: {| data: string |} |} |
+            {| ExprInt: {| data: number |} |};
+
+type Process = {
+  expr: Expr[]
+}
+
+interface Observer extends RNode {
+  exploreDeploy(string): Promise<Process>
+}
+
+interface Validator extends Observer {
+  deploy(WebDeploy): Promise<mixed>
+}
+
 */
 
 const defaultPhloInfo = {
   phloprice: 1,
   phlolimit: 10e3,
 };
-
-const testVector = [
-  {
-    input: {
-      keyHex:
-        'fd894a416f7157075c5dade8a914099f8d7ab1d0d50533420f67139370f8f562',
-      deployObj: {
-        term:
-          'new deployId(`rho:rchain:deployId`),\nlog(`rho:io:stdout`)\nin {\n  log!("hello") |\n  deployId!(1 + 1)\n}\n',
-        phlolimit: 250000,
-        phloprice: 1,
-        validafterblocknumber: 216617,
-        timestamp: 1592863933369,
-      },
-    },
-    expected: {
-      deploySerialized: [
-        18,
-        102,
-        110,
-        101,
-        119,
-        32,
-        100,
-        101,
-        112,
-        108,
-        111,
-        121,
-        73,
-        100,
-        40,
-        96,
-        114,
-        104,
-        111,
-        58,
-        114,
-        99,
-        104,
-        97,
-        105,
-        110,
-        58,
-        100,
-        101,
-        112,
-        108,
-        111,
-        121,
-        73,
-        100,
-        96,
-        41,
-        44,
-        10,
-        108,
-        111,
-        103,
-        40,
-        96,
-        114,
-        104,
-        111,
-        58,
-        105,
-        111,
-        58,
-        115,
-        116,
-        100,
-        111,
-        117,
-        116,
-        96,
-        41,
-        10,
-        105,
-        110,
-        32,
-        123,
-        10,
-        32,
-        32,
-        108,
-        111,
-        103,
-        33,
-        40,
-        34,
-        104,
-        101,
-        108,
-        108,
-        111,
-        34,
-        41,
-        32,
-        124,
-        10,
-        32,
-        32,
-        100,
-        101,
-        112,
-        108,
-        111,
-        121,
-        73,
-        100,
-        33,
-        40,
-        49,
-        32,
-        43,
-        32,
-        49,
-        41,
-        10,
-        125,
-        10,
-        24,
-        185,
-        135,
-        219,
-        240,
-        173,
-        46,
-        56,
-        1,
-        64,
-        144,
-        161,
-        15,
-        80,
-        169,
-        156,
-        13,
-      ],
-      hashed:
-        'e92f8b886c9c39f7c6b8673d83c7b1d9102702c6fc04a0d9a8aac8c1f489604b',
-    },
-  },
-  {
-    input: {
-      keyHex:
-        'fd894a416f7157075c5dade8a914099f8d7ab1d0d50533420f67139370f8f562',
-      deployObj: {
-        term:
-          'new deployId!(`rho:rchain:deployId`),\nlog(`rho:io:stdout`)\nin {\n  log!("hello") |\n  deployId!(1 + 1)\n}\n',
-        phlolimit: 250000,
-        phloprice: 1,
-        validafterblocknumber: 216586,
-        timestamp: 1592862572365,
-      },
-    },
-    expected: {
-      key: {
-        ec: '...',
-        priv: [
-          16315746,
-          29680860,
-          53747958,
-          54744084,
-          59603633,
-          38077031,
-          31121034,
-          22814065,
-          37842801,
-          4153938,
-          0,
-        ],
-      },
-      sigArray: [
-        48,
-        69,
-        2,
-        33,
-        0,
-        206,
-        27,
-        248,
-        53,
-        92,
-        55,
-        253,
-        130,
-        244,
-        127,
-        168,
-        200,
-        123,
-        90,
-        38,
-        76,
-        9,
-        191,
-        83,
-        23,
-        224,
-        199,
-        212,
-        178,
-        169,
-        210,
-        67,
-        201,
-        145,
-        214,
-        146,
-        130,
-        2,
-        32,
-        51,
-        128,
-        230,
-        77,
-        143,
-        48,
-        241,
-        149,
-        197,
-        241,
-        175,
-        132,
-        41,
-        176,
-        37,
-        64,
-        1,
-        93,
-        209,
-        175,
-        206,
-        54,
-        165,
-        179,
-        228,
-        185,
-        81,
-        172,
-        255,
-        182,
-        136,
-        87,
-      ],
-    },
-  },
-];
 
 export default function ui(
   { getElementById, inputElement, clock, fetch } /*: Doc */,
@@ -319,7 +91,6 @@ export default function ui(
           term: formValue('term'),
           timestamp: clock().valueOf(),
           validafterblocknumber: blockNumber,
-          sigalgorithm: 'secp256k1',
         };
     alert(JSON.stringify(deployInfo));
     const keyHex = testing ? testVector[0].input.keyHex : formValue('account');
@@ -333,7 +104,7 @@ export default function ui(
   deployButton.addEventListener('click', handleDeploy);
 }
 
-export function Node(fetch, apiBase) {
+export function Node(fetch /*: typeof fetch */, apiBase /*: string */) /* : Validator */ {
   return harden({
     async blocks(n /*: number */) /*: Promise<BlockInfo[]> */ {
       const reply = await fetch(`${apiBase}/api/blocks/${n}`);
@@ -348,7 +119,7 @@ export function Node(fetch, apiBase) {
       });
       return await reply.json();
     },
-    async exploreDeploy(term /*: string */) /*: Promise<mixed> */ {
+    async exploreDeploy(term /*: string */) /*: Promise<Process> */ {
       const methodUrl = `${apiBase}/api/explore-deploy`;
       console.log({ methodUrl, term });
       const reply = await fetch(methodUrl, {
@@ -369,7 +140,7 @@ function sign(keyHex /*: string */, info /*: DeployInfo */) /*: WebDeploy */ {
     phlolimit: phloLimit,
     validafterblocknumber: validAfterBlockNumber,
   } = info;
-  const dd = new DeployDataProto(info);
+  const dd = new DeployDataProto();
   // boring imperative style; why can't I use fromObject(info)?
   dd.setTerm(term);
   dd.setTimestamp(timestamp);
@@ -420,17 +191,17 @@ const checkBalance_rho = (addr) => `
   }
 `;
 
-export async function checkBalance(node, revAddr /*: string */) /*: number */ {
+
+export async function checkBalance(node /*: Observer */, revAddr /*: string */) /*: Promise<number> */ {
   console.log({ revAddr });
   const deloyCode = checkBalance_rho(revAddr);
-  const result = await node.exploreDeploy(deloyCode);
+  const result /*: Process */ = await node.exploreDeploy(deloyCode);
   console.log({ result });
   const {
     expr: [e],
   } = result;
-  const dataError = e && e.ExprString && e.ExprString.data;
-  if (dataError) {
-    throw new Error(dataError);
+  if (e && e.ExprString) {
+    throw new Error(e.ExprString.data);
   }
   return e && e.ExprInt && e.ExprInt.data;
 }

@@ -106,3 +106,9 @@ dist
 
 # emacs backups
 *~
+
+.envrc
+,sv
+,deployed
+.build/
+build/
