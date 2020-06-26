@@ -290,7 +290,7 @@ function createAgenda_rho(createURI, title, questions /*: QAs */) {
   const rho = `
 new deployId(\`rho:rchain:deployId\`),
 deployerId(\`rho:rchain:deployerId\`),
-lookup(\`rho:regitry:lookup\`),
+lookup(\`rho:registry:lookup\`),
 secCh,
 trace(\`rho:io:stderr\`)
 in {
