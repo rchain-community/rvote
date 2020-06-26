@@ -225,11 +225,6 @@ export function introUI({ getElementById, inputElement } /*: DocAccess */) {
   });
 }
 
-const defaultPhloInfo = {
-  phloprice: 1,
-  phlolimit: 10e3, // ISSUE: default phloLimit?
-};
-
 export function validatorUI(
   keyHexP /*: Promise<string> */,
   {
@@ -243,6 +238,7 @@ export function validatorUI(
 
   const validatorControl = the(inputElement('validatorApiBase'));
   const termField = the(inputElement('term'));
+  const phloLimitField = the(inputElement('phloLimit'));
   const deployButton = the(getElementById('deploy'));
 
   async function deploy(term /*: string */) /*: Promise<string> */{
@@ -250,12 +246,14 @@ export function validatorUI(
     const node = Node(fetch, validatorControl.value);
     disable(validatorControl);
     try {
+      const phlolimit = parseInt(phloLimitField.value, 10);
       // TODO: cache blockNumber with TTL ~30sec
       const [{ blockNumber }] = await node.blocks(1);
       console.log({ blockNumber });
       const deployInfo /*: DeployInfo */ = {
-        ...defaultPhloInfo,
         term,
+        phlolimit,
+        phloprice: 1,
         timestamp: clock().valueOf(),
         validafterblocknumber: blockNumber,
       };
