@@ -58,7 +58,7 @@ export interface Observer extends RNode {
 }
 
 export interface Validator extends Observer {
-  deploy(WebDeploy): Promise<mixed>
+  deploy(WebDeploy): Promise<{ deployId: string }>
 }
 
 */
@@ -72,7 +72,7 @@ export function Node(
       const reply = await fetch(`${apiBase}/api/blocks/${n}`);
       return await reply.json();
     },
-    async deploy(data /*: WebDeploy */) /*: Promise<mixed> */ {
+    async deploy(data /*: WebDeploy */) /*: Promise<{ deployId: string }> */ {
       const methodUrl = `${apiBase}/api/deploy`;
       console.log({ methodUrl, data });
       const reply = await fetch(methodUrl, {

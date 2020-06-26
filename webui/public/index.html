@@ -70,7 +70,10 @@
     </fieldset>
   </form>
   <script type="module">
-    import { observerUI, acctUI, walletUI, validatorUI } from './_dist_/intro.js';
+    import {
+      observerUI, acctUI, walletUI, validatorUI, createAgendaUI,
+      introUI,
+    } from './_dist_/intro.js';
     const docAccess = {
       getElementById: (id) => document.getElementById(id),
       inputElement: (id) => document.getElementById(id),
@@ -82,9 +85,52 @@
     const wallet = walletUI({ ...docAccess, ...randomAccess, localStorage });
     acctUI(wallet.getAddrInfo(), observer, docAccess)
     const clock = () => new Date();
-    validatorUI(wallet.getKeyHex(), { ...docAccess, fetch, clock });
+    const validator = validatorUI(wallet.getKeyHex(), { ...docAccess, fetch, clock });
+
+    createAgendaUI(validator.deploy, { ...docAccess });
+
+    introUI(docAccess);
   </script>
   </script>
+  </div>
+
+  <div class="card fluid" id="card-create-agenda">
+    <h2>Create Meeting Agenda</h2>
+    <form id="agenda1">
+      <fieldset>
+        <legend>Create Agenda</legend>
+        <div>
+          <label for="meeting-title">Meeting Title</label>
+          <input id="meeting-title" />
+        </div>
+        <div>
+          <!--TODO:
+          <label for="preamble">Preamble</label>
+          <div contenteditable="true" id="preamble">
+            <em>edit preamble to questions here...</em>
+          </div>
+          -->
+        </div>
+        <div>
+          <label for="questions">Questions and Answers</label>
+          <p><em><strong>Instructions:</strong> copy and paste from
+              a spreadsheet with each question in column A
+              followed by its answers in column B.
+            </em>
+          </p>
+          <pre id="agenda-data" style="float: right"></pre>
+          <textarea id="questions" rows="12" cols="40"></textarea>
+        </div>
+        <div>
+          <label for="agenda-contract-uri">Agenda Contract URI</label>
+          <input id="agenda-contract-uri" size="50"/>
+          <br />
+          <small><em><strong>TODO:</strong> register automatically
+              and keep in <code>localStorage</code></em></small>
+        </div>
+        <button type="button" id="create-agenda">Create Agenda</button>
+      </fieldset>
+    </form>
   </div>
 
   <div class="card fluid" id="card-deploy-test">
@@ -119,7 +165,11 @@ in {
     <noscript>Please excuse lack of non-JavaScript support.</noscript>
   </div>
   <div class="card fluid" id="card-intro">
-  <h2>Introductions: accounts, icons, names</h2>
+  <h2>Introductions: icons, names</h2>
+  <p><em>WIP...
+      see <a href="https://github.com/rchain-community/rv2020/issues/22"
+             >secure avatar icons: identicons / jazzicons for zulip #22</a></em>
+  </p>
   <form id="intro1">
     <fieldset>
       <label>Nickname <input id="nickname" /></label>

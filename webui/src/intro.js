@@ -245,7 +245,7 @@ export function validatorUI(
   const termField = the(inputElement('term'));
   const deployButton = the(getElementById('deploy'));
 
-  async function handleDeploy(_ /*: Event */) {
+  async function deploy(term /*: string */) /*: Promise<string> */{
     const keyHex = await keyHexP;
     const node = Node(fetch, validatorControl.value);
     disable(validatorControl);
@@ -255,19 +255,121 @@ export function validatorUI(
       console.log({ blockNumber });
       const deployInfo /*: DeployInfo */ = {
         ...defaultPhloInfo,
-        term: termField.value,
+        term,
         timestamp: clock().valueOf(),
         validafterblocknumber: blockNumber,
       };
       const data = sign(keyHex, deployInfo);
-      const result = node.deploy(data);
+      // TODO: double-check error handling
+      const result = await node.deploy(data);
       console.log({ result });
-    } catch (oops) {
-      console.log(oops);
-      // ISSUE: now what?
+      return result.deployId;
+    } finally {
+      enable(validatorControl);
     }
-    enable(validatorControl);
+  }
+
+  async function handleDeploy(_ /*: Event */) {
+    return deploy(termField.value);
   }
 
   deployButton.addEventListener('click', handleDeploy);
+  return harden({ deploy });
 }
+
+
+/*::
+type QAs = { [string]: string[] }
+ */
+
+function createAgenda_rho(createURI, title, questions /*: QAs */) {
+  const lit = val => JSON.stringify(val, null, 2);
+  const rhoSetExpr = items => `Set(${ items.map(lit).join(', ') })`;
+  const fmtQuestion = ([q, as] /*: [string, string[]] */) => `${ lit(q) }: ${ rhoSetExpr(as) }`;
+  // $FlowFixMe$  flow core.js says entries(...): Array<[string, mixed]>
+  const qaExpr = Object.entries(questions).map(fmtQuestion).join(',\n');
+
+  const rho = `
+new deployId(\`rho:rchain:deployId\`),
+deployerId(\`rho:rchain:deployerId\`),
+lookup(\`rho:regitry:lookup\`),
+secCh,
+trace(\`rho:io:stderr\`)
+in {
+  lookup!(\`${ createURI }\`, *secCh) |
+  for (Secretary <- secCh) {
+    Secretary!(${ lit(title) },
+               {${ qaExpr }},
+               *secCh) |
+    for(secretary <- secCh) {
+      deployId!(true) |
+      // store secretary at combination of deployer and meeting title
+      @[*deployerId, ${ lit(title) }]!(*secretary)
+    }
+  }
+}
+`;
+  return rho;
+}
+
+function parseQuestions(text /*: string*/) /*: QAs */ {
+  let questions = {};
+  let question;
+  let answers = [];
+  for (const line of text.split('\n')) {
+    if (line.trim() === '') {
+      continue;
+    }
+    if (line.match(/^\t/)) {
+      answers.push(line.trim());
+    } else {
+      if (question && answers.length) {
+        questions[question] = answers;
+      }
+      question = line.trim();
+      answers = [];
+    }
+    if (question && answers.length) {
+      questions[question] = answers;
+    }
+  }
+  return questions;
+}
+
+export function createAgendaUI(
+  deploy /*: (string) => Promise<string> */,
+  {
+    getElementById,
+    inputElement,
+  } /*: DocAccess  */,
+) {
+  console.log('setting up create agenda ui...');
+  const titleField = the(inputElement('meeting-title'));
+  const qaControl = the(inputElement('questions'));
+  const agendaDataSection = the(getElementById('agenda-data'));
+  const contractControl = the(inputElement('agenda-contract-uri'));
+  const createButton = the(getElementById('create-agenda'));
+  // TODO: const preambleBuffer = the(getElementById('preamble'));
+
+  function updateAgenda(event /*: Event */) {
+    const questions = parseQuestions(qaControl.value);
+    // TODO: provide to voters: preambleBuffer.innerHTML.trim(),
+    agendaDataSection.textContent = JSON.stringify(questions, null, 2);
+  }
+  qaControl.addEventListener('change', updateAgenda);
+
+  createButton.addEventListener('click', async (event /*: Event */) => {
+    let questions;
+    try {
+      questions = JSON.parse(agendaDataSection.textContent);
+    } catch (badJSON) {
+      // TODO: UI feedback
+      console.log(badJSON);
+      return;
+    }
+    const rho = createAgenda_rho(contractControl.value, titleField.value, questions);
+    const deployId = deploy(rho);
+    console.log('create agenda', { deployId });
+  });
+}
+
