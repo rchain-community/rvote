@@ -1,0 +1,47 @@
+{
+  "dependencies": {
+    "base-58": "0.0.1",
+    "blakejs": "^1.1.0",
+    "elliptic": "^6.5.3",
+    "ethereum-blockies-base64": "^1.0.2",
+    "jazzicon": "^1.5.0",
+    "js-sha3": "^0.8.0"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.127.0",
+    "grpc-tools": "^1.8.1",
+    "prettier": "^2.0.5",
+    "protobufjs": "^6.9.0",
+    "snowpack": "^2.5.3"
+  },
+  "scripts": {
+    "realclean": "rm -rf dist build node_modules web_modules",
+    "postinstall": "npm link ../rchain-proto",
+    "start": "snowpack dev",
+    "build": "snowpack build",
+    "format": "prettier --write \"src/**/*.js\"",
+    "lint": "prettier --check \"src/**/*.js\""
+  },
+  "snowpack": {
+    "devOptions": {
+      "bundle": false
+    },
+    "install": [
+      "blakejs",
+      "elliptic"
+    ],
+    "installOptions": {
+      "namedExports": [
+        "blakejs",
+        "elliptic"
+      ]
+    },
+    "plugins": [],
+    "scripts": {
+      "mount:public": "mount public --to /",
+      "mount:web_modules": "mount web_modules",
+      "mount:src": "mount src --to /_dist_"
+    }
+  },
+  "type": "module"
+}

@@ -2,9 +2,11 @@
   "name": "rchain-proto",
   "version": "0.9.23",
   "description": "RChain protobuf generated stubs",
-  "main": "index.js",
+  "main": "rnode-grpc-gen/js/CasperMessage_pb.js",
   "scripts": {
+    "realclean": "rm -rf dist",
     "rnode-generate": "rnode-grpc --rnode-version v0.9.23",
+    "build-xxx": "mkdir -p dist && pbjs -t static-module --wrap es6 --no-comments --keep-case -o dist/index.js rnode-grpc-gen/proto/CasperMessage.proto",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
