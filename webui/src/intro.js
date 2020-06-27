@@ -11,11 +11,16 @@ import { getAddrFromPrivateKey } from './vendor/rnode-address.js';
 import './vendor/qrcode/qrcode.js'; // ISSUE: global
 import { Base16 } from './hex.js';
 import { Node, checkBalance_rho, extractBalance, sign } from './rgate.js';
+import { getDataForDeploy } from './rnode-web.js';
 
 const eckeylen = 32; // rnode-address.js#L69
 
 /*::
-import type { Process, DeployInfo, Observer } from './rgate.js';
+import type {
+  Observer,
+  RhoExpr, DataRequest, DeployRequest, DeployData, ExploratoryDeployResponse
+} from './rgate.js';
+import type { SchedulerAccess } from './rnode-web.js';
 
 type AddrInfo = {
   ethAddr: string,
@@ -40,7 +45,9 @@ interface LocalStorageAccess {
 }
 */
 
-const harden = (x) => Object.freeze(x); // ISSUE: recursive a la @agoric/harden
+function harden /*::<T>*/(x /*: T*/) /*: T*/ {
+  return Object.freeze(x); // ISSUE: recursive a la @agoric/harden
+}
 
 function the /*:: <T> */(x /*: ?T */) /*: T */ {
   if (!x) {
@@ -82,16 +89,23 @@ function enable(elt /*: HTMLElement*/) {
 
 export function observerUI(
   { inputElement, fetch } /*: DocAccess & WebAccess */,
-) {
+) /*: Observer */ {
   console.log('setting up observer ui...');
 
   const observerControl = the(inputElement('observerApiBase'));
+  const node = () => Node(fetch, observerControl.value);
   return harden({
-    async exploreDeploy(term /*: string*/) /*: Promise<Process> */ {
-      const node = Node(fetch, observerControl.value);
+    listenForDataAtName: (request /*: DataRequest*/) =>
+      node().listenForDataAtName(request),
+    getBlocks: (depth /*: number*/) => node().getBlocks(depth),
+    getBlock: (hash /*: string*/) => node().getBlock(hash),
+    findDeploy: (deployId /*: string*/) => node().findDeploy(deployId),
+    async exploratoryDeploy(
+      term /*: string*/,
+    ) /*: Promise<ExploratoryDeployResponse>*/ {
       console.log(observerControl.value);
       disable(observerControl);
-      const result = node.exploreDeploy(term);
+      const result = node().exploratoryDeploy(term);
       enable(observerControl);
       console.log({ result });
       return result;
@@ -145,7 +159,7 @@ export function acctUI(
     const info = await addrInfoP;
     console.log({ revAddr: info.revAddr });
     try {
-      const result = await observer.exploreDeploy(
+      const result = await observer.exploratoryDeploy(
         checkBalance_rho(info.revAddr),
       );
       const balance = extractBalance(result);
@@ -208,19 +222,90 @@ export function walletUI(
   });
 }
 
-export function introUI({ getElementById, inputElement } /*: DocAccess */) {
+function register_rho(inboxContract) {
+  const rho = `
+new deployId(\`rho:rchain:deployId\`),
+deployerId(\`rho:rchain:deployerId\`),
+lookup(\`rho:registry:lookup\`),
+ch,
+log(\`rho:io:stderr\`)
+in {
+  lookup!(\`${inboxContract}\`, *ch) |
+  for (Inbox <- ch) {
+    Inbox!(*ch) |
+    for(@{"inbox": *inbox, "address": address, ..._} <- ch) {
+      log!({"created social Id": address}) |
+      @[*deployerId, "inbox"]!(*inbox) |
+      @[*deployerId, "address"]!(address) |
+      deployId!(address)
+    }
+  }
+}
+`;
+  return rho;
+}
+
+export function introUI(
+  deploy /*: (string) => Promise<DeployRequest> */,
+  observer /*: Observer*/,
+  {
+    getElementById,
+    inputElement,
+    localStorage,
+    setTimeout,
+    clearTimeout,
+  } /*: DocAccess & LocalStorageAccess & SchedulerAccess */,
+) {
   console.log('setting up intro ui...');
 
-  // don't submit
-  getElementById('intro1').addEventListener('submit', (event) => {
-    event.preventDefault();
+  const socialIdField = the(inputElement('socialId'));
+  const inboxContract = the(inputElement('inboxContract'));
+  const blockie1 = the(getElementById('blockie1'));
+  const idGenButton = getElementById('socialIdGen');
+
+  const storeKey = 'socialId';
+
+  const socialIdD = makeDeferred/*:: <string> */();
+
+  ((contents) => {
+    if (contents) {
+      socialIdD.resolve(contents);
+    }
+  })(localStorage.getItem(storeKey));
+
+  idGenButton.addEventListener('click', async (event) => {
+    disable(idGenButton);
+    try {
+      const signed = await deploy(register_rho(inboxContract.value));
+      const onProgress = async () => {
+        console.log('progres... @@TODO: cancel?');
+        return false;
+      };
+      const result = await getDataForDeploy(
+        observer,
+        signed.signature,
+        onProgress,
+        {
+          clearTimeout,
+          setTimeout,
+        },
+      );
+      if (!result.data.expr.ExprUri) {
+        throw new TypeError(result);
+      }
+      const socialId = result.data.expr.ExprUri.data;
+      localStorage.setItem(storeKey, socialId);
+      socialIdD.resolve(socialId);
+    } catch (oops) {
+      console.log(oops);
+      enable(idGenButton);
+    }
   });
 
-  const nickField = the(inputElement('nickname'));
-  const blockie1 = the(getElementById('blockie1'));
-  nickField.addEventListener('change', (event /*: Event*/) => {
-    // console.log('change!' + nickField.value);
-    const png = makeBlockie(nickField.value);
+  socialIdD.promise.then((socialId) => {
+    socialIdField.value = socialId;
+    disable(idGenButton);
+    const png = makeBlockie(socialId);
     blockie1.setAttribute('src', png);
   });
 }
@@ -241,27 +326,27 @@ export function validatorUI(
   const phloLimitField = the(inputElement('phloLimit'));
   const deployButton = the(getElementById('deploy'));
 
-  async function deploy(term /*: string */) /*: Promise<string> */{
+  async function deploy(term /*: string */) /*: Promise<DeployRequest> */ {
     const keyHex = await keyHexP;
     const node = Node(fetch, validatorControl.value);
     disable(validatorControl);
     try {
-      const phlolimit = parseInt(phloLimitField.value, 10);
+      const phloLimit = parseInt(phloLimitField.value, 10);
       // TODO: cache blockNumber with TTL ~30sec
-      const [{ blockNumber }] = await node.blocks(1);
+      const [{ blockNumber }] = await node.getBlocks(1);
       console.log({ blockNumber });
-      const deployInfo /*: DeployInfo */ = {
+      const deployInfo /*: DeployData */ = {
         term,
-        phlolimit,
-        phloprice: 1,
+        phloLimit,
+        phloPrice: 1,
         timestamp: clock().valueOf(),
-        validafterblocknumber: blockNumber,
+        validAfterBlockNumber: blockNumber,
       };
       const data = sign(keyHex, deployInfo);
       // TODO: double-check error handling
       const result = await node.deploy(data);
       console.log({ result });
-      return result.deployId;
+      return data;
     } finally {
       enable(validatorControl);
     }
@@ -275,15 +360,15 @@ export function validatorUI(
   return harden({ deploy });
 }
 
-
 /*::
 type QAs = { [string]: string[] }
  */
 
 function createAgenda_rho(createURI, title, questions /*: QAs */) {
-  const lit = val => JSON.stringify(val, null, 2);
-  const rhoSetExpr = items => `Set(${ items.map(lit).join(', ') })`;
-  const fmtQuestion = ([q, as] /*: [string, string[]] */) => `${ lit(q) }: ${ rhoSetExpr(as) }`;
+  const lit = (val) => JSON.stringify(val, null, 2);
+  const rhoSetExpr = (items) => `Set(${items.map(lit).join(', ')})`;
+  const fmtQuestion = ([q, as] /*: [string, string[]] */) =>
+    `${lit(q)}: ${rhoSetExpr(as)}`;
   // $FlowFixMe$  flow core.js says entries(...): Array<[string, mixed]>
   const qaExpr = Object.entries(questions).map(fmtQuestion).join(',\n');
 
@@ -294,15 +379,15 @@ lookup(\`rho:registry:lookup\`),
 secCh,
 trace(\`rho:io:stderr\`)
 in {
-  lookup!(\`${ createURI }\`, *secCh) |
+  lookup!(\`${createURI}\`, *secCh) |
   for (Secretary <- secCh) {
-    Secretary!(${ lit(title) },
-               {${ qaExpr }},
+    Secretary!(${lit(title)},
+               {${qaExpr}},
                *secCh) |
     for(secretary <- secCh) {
       deployId!(true) |
       // store secretary at combination of deployer and meeting title
-      @[*deployerId, ${ lit(title) }]!(*secretary)
+      @[*deployerId, ${lit(title)}]!(*secretary)
     }
   }
 }
@@ -335,11 +420,8 @@ function parseQuestions(text /*: string*/) /*: QAs */ {
 }
 
 export function createAgendaUI(
-  deploy /*: (string) => Promise<string> */,
-  {
-    getElementById,
-    inputElement,
-  } /*: DocAccess  */,
+  deploy /*: (string) => Promise<DeployRequest> */,
+  { getElementById, inputElement } /*: DocAccess  */,
 ) {
   console.log('setting up create agenda ui...');
   const titleField = the(inputElement('meeting-title'));
@@ -365,9 +447,12 @@ export function createAgendaUI(
       console.log(badJSON);
       return;
     }
-    const rho = createAgenda_rho(contractControl.value, titleField.value, questions);
+    const rho = createAgenda_rho(
+      contractControl.value,
+      titleField.value,
+      questions,
+    );
     const deployId = deploy(rho);
     console.log('create agenda', { deployId });
   });
 }
-

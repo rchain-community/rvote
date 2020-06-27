@@ -7,7 +7,7 @@
   <style>
     .privateKeyQR { display: hidden }  /* issue: fail safe if no CSS? */
     .attachment-full { float: right }
-    #devKeyViz { float: right }
+    .vizHash { float: right }
   </style>
   <link rel="stylesheet"
         href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css">
@@ -44,7 +44,7 @@
   <form id="deviceKeyForm">
     <fieldset>
       <legend>Device Account</legend>
-      <div id="devKeyViz"></div>
+      <div id="devKeyViz" class="vizHash"></div>
 
       <div>
         <label for="devAddr">Device REV address</label>
@@ -89,9 +89,31 @@
 
     createAgendaUI(validator.deploy, { ...docAccess });
 
-    introUI(docAccess);
+    introUI(validator.deploy, observer, { ...docAccess, localStorage, setTimeout, clearTimeout });
   </script>
   </script>
+  </div>
+
+  <div class="card fluid" id="card-intro">
+  <h2>Social Identity: Inbox, Identicon</h2>
+  <p><em>WIP...
+      see <a href="https://github.com/rchain-community/rv2020/issues/22"
+             >secure avatar icons: identicons / jazzicons for zulip #22</a></em>
+  </p>
+  <form id="intro1">
+    <fieldset>
+      <img id="blockie1" class="vizHash" />
+      <label>Social Identifier <small>(registry URI)</small>
+        <input type="URL" id="socialId" readonly="readonly" /></label>
+      <br />
+      <label>Inbox contractr <small>(registry URI)</small>
+        <input type="URL" id="inboxContract" readonly="readonly"
+               value="rho:id:3h4w86aabn3hmnbhgzbsh376675x9synrparmkm9ocgz3iowi3xos4" /></label>
+      <br />
+      <button type="button"
+              id="socialIdGen">Create Social Identity</button>
+    </fieldset>
+  </form>
   </div>
 
   <div class="card fluid" id="card-create-agenda">
@@ -168,20 +190,6 @@ in {
         </fieldset>
     </form>
     <noscript>Please excuse lack of non-JavaScript support.</noscript>
-  </div>
-  <div class="card fluid" id="card-intro">
-  <h2>Introductions: icons, names</h2>
-  <p><em>WIP...
-      see <a href="https://github.com/rchain-community/rv2020/issues/22"
-             >secure avatar icons: identicons / jazzicons for zulip #22</a></em>
-  </p>
-  <form id="intro1">
-    <fieldset>
-      <label>Nickname <input id="nickname" /></label>
-      <br />
-      <img id="blockie1" />
-    </fieldset>
-  </form>
   </div>
   <div class="card fluid" id="card-contact">
     <h2>Contact</h2>

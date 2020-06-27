@@ -17,48 +17,86 @@ const harden = (x) => Object.freeze(x); // @agoric/harden
 console.log({ secp256k1 });
 
 /*::
-type BlockInfo = {
+interface LightBlockInfo {
+  blockHash: string,
   blockNumber: number,
 }
 
-export type DeployInfo = {|
+interface BlockInfo extends LightBlockInfo {
+  blockNumber: number,
+  blockHash: string,
+  deploys: DeployInfo[],
+}
+
+// ISSUE: inexact Promise...
+export type DeployInfo = {
+  deployer: string,
+  term: string,
+  timestamp: number,
+  sig: string,
+  sigAlgorithm: string,
+  phloPrice: number,
+  phloLimit: number,
+  validAfterBlockNumber: number,
+  cost: number,
+  errored: bool,
+  systemDeployError: string,
+}
+
+export type DeployData = {|
     term: string,
     timestamp: number, // milliseconds
-    phloprice: number,
-    phlolimit: number,
-    validafterblocknumber: number,
-|}
-
-export type WebDeploy = {|
-  data: {|
-    term: string,
-    timestamp: number,
     phloPrice: number,
     phloLimit: number,
     validAfterBlockNumber: number,
-  |},
+|}
+
+export type DeployRequest = {|
+  data: DeployData,
   sigAlgorithm: 'secp256k1',
   signature: string, // hex
   deployer: string, // hex
 |}
 
 export interface RNode {
-  blocks(number): Promise<BlockInfo[]>
+  getBlocks(depth: number): Promise<LightBlockInfo[]>,
 }
 
-export type Expr = {| ExprString: {| data: string |} |} |
-            {| ExprInt: {| data: number |} |};
+export type RhoExpr = {| ExprString: {| data: string |} |} |
+            {| ExprInt: {| data: number |} |} |
+            {| ExprUri: {| data: string |} |} |
+            {| ExprMap: {| data: { [string]: RhoExpr } |} |};
+// ... others; see https://github.com/rchain/rchain/blob/dev/node/src/main/scala/coop/rchain/node/api/WebApi.scala#L120
 
-export type Process = {
-  expr: Expr[]
+export type ExploratoryDeployResponse = {
+  expr: RhoExpr[],
+  block: LightBlockInfo,
 }
+
+
+export type DataRequest = {|
+  name: RhoUnforg,
+  depth: number,
+|};
+export type RhoUnforg = {| UnforgDeploy: {| data: string |} |}; // | ...
+export type DataResponse = {|
+  exprs: RhoExprWithBlock[],
+  length: number,
+|};
+export type RhoExprWithBlock = {|
+  expr: RhoExpr,
+  block: LightBlockInfo
+|}
 
 export interface Observer extends RNode {
-  exploreDeploy(string): Promise<Process>
+  listenForDataAtName(request: DataRequest): Promise<DataResponse>,
+  getBlock(hash: string): Promise<BlockInfo>,
+  findDeploy(deployId: string): Promise<LightBlockInfo>,
+  exploratoryDeploy(string): Promise<ExploratoryDeployResponse>,
 }
 
 export interface Validator extends Observer {
-  deploy(WebDeploy): Promise<{ deployId: string }>
+  deploy(DeployRequest): Promise<string>
 }
 
 */
@@ -67,44 +105,75 @@ export function Node(
   fetch /*: typeof fetch */,
   apiBase /*: string */,
 ) /* : Validator */ {
+  async function finish(resp) {
+    const result = await resp.json();
+    // Add status if server error
+    if (!resp.ok) {
+      const ex = new Error(result);
+      // $FlowFixMe$ kludge...
+      ex.status = resp.status;
+      throw ex;
+    }
+    return result;
+  }
+
   return harden({
-    async blocks(n /*: number */) /*: Promise<BlockInfo[]> */ {
-      const reply = await fetch(`${apiBase}/api/blocks/${n}`);
-      return await reply.json();
-    },
-    async deploy(data /*: WebDeploy */) /*: Promise<{ deployId: string }> */ {
+    async deploy(request /*: DeployRequest */) /*: Promise<string> */ {
       const methodUrl = `${apiBase}/api/deploy`;
-      console.log({ methodUrl, data });
-      const reply = await fetch(methodUrl, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
-      return await reply.json();
+      console.log({ methodUrl, request });
+      return finish(
+        await fetch(methodUrl, {
+          method: 'POST',
+          body: JSON.stringify(request),
+        }),
+      );
     },
-    async exploreDeploy(term /*: string */) /*: Promise<Process> */ {
+    async listenForDataAtName(
+      request /*: DataRequest*/,
+    ) /*: Promise<DataResponse> */ {
+      const methodUrl = `${apiBase}/api/data-at-name`;
+      console.log({ methodUrl, request });
+      return finish(
+        await fetch(methodUrl, {
+          method: 'POST',
+          body: JSON.stringify(request),
+        }),
+      );
+    },
+    async getBlock(hash /*: string */) /*: Promise<BlockInfo> */ {
+      const methodUrl = `${apiBase}/api/block/${hash}`;
+      console.log({ methodUrl });
+      return finish(await fetch(methodUrl));
+    },
+    async getBlocks(depth /*: number */) /*: Promise<LightBlockInfo[]> */ {
+      return finish(await fetch(`${apiBase}/api/blocks/${depth}`));
+    },
+    async findDeploy(deployId /*: string */) /*: Promise<BlockInfo> */ {
+      const methodUrl = `${apiBase}/api/deploy/${deployId}`;
+      console.log({ methodUrl });
+      return finish(await fetch(methodUrl, { method: 'GET' }));
+    },
+    async exploratoryDeploy(
+      term /*: string */,
+    ) /*: Promise<ExploratoryDeployResponse> */ {
       const methodUrl = `${apiBase}/api/explore-deploy`;
       console.log({ methodUrl, term });
-      const reply = await fetch(methodUrl, {
-        method: 'POST',
-        body: term,
-      });
-      return await reply.json();
+      return finish(
+        await fetch(methodUrl, {
+          method: 'POST',
+          body: term,
+        }),
+      );
     },
   });
 }
 
 export function sign(
   keyHex /*: string */,
-  info /*: DeployInfo */,
-) /*: WebDeploy */ {
+  info /*: DeployData */,
+) /*: DeployRequest */ {
   const key = secp256k1.keyFromPrivate(keyHex);
-  const {
-    term,
-    timestamp,
-    phloprice: phloPrice,
-    phlolimit: phloLimit,
-    validafterblocknumber: validAfterBlockNumber,
-  } = info;
+  const { term, timestamp, phloPrice, phloLimit, validAfterBlockNumber } = info;
   const dd = new DeployDataProto();
   // boring imperative style; why can't I use fromObject(info)?
   dd.setTerm(term);
@@ -149,12 +218,14 @@ export const checkBalance_rho = (addr /*: string*/) => `
   }
 `;
 
-export function extractBalance(result /*: Process */) /*: number */ {
+export function extractBalance(
+  result /*: ExploratoryDeployResponse */,
+) /*: number */ {
   const {
     expr: [e],
   } = result;
-  if (e && e.ExprString) {
-    throw new Error(e.ExprString.data);
+  if (!e || !e.ExprInt) {
+    throw new Error(e && e.ExprString && e.ExprString.data);
   }
   return e && e.ExprInt && e.ExprInt.data;
 }
