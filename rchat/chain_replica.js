@@ -43,7 +43,8 @@ async function main(argv, env, { timer, fsp, postgres, grpcLib }) {
     const deployService = rnodeDeploy({ grpcLib, host: env.RNODE || '127.0.0.1:40401', protoSchema });
     const secretKey = Buffer.from(env.SECRET_KEY, 'hex');
     const validafterblocknumber = parseInt(env.BLOCKNUM) || -1;  // TODO: warn if missing?
-    const phlolimit = 10e3;
+    const phlolimit = 10e7;
+    console.log({ validafterblocknumber, phlolimit });
     dest = chain_dest(secretKey, deployService, { validafterblocknumber, phlolimit });
   } else {
     if (!filename) {
