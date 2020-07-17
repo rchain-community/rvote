@@ -5,19 +5,27 @@ new
 deployId, //(`rho:rchain:deployId`),
 deployerId, //(`rho:rchain:deployerId`),
 lookup(`rho:registry:lookup`),
+insertArbitrary(`rho:registry:insertArbitrary`),
 IdDBCh,
 log(`rho:io:stderr`)
 in {
-    lookup!(`rho:id:ka9r5c1ha5fk7y8qwgqjmhcfrm53pz1kxjq4of9qm1mhbt8dsgzp3r`, *IdDBCh) |
+    lookup!(`rho:id:FIXME` /* ISSUE: how to sync IdDB registry URI? */, *IdDBCh) |
     for (IdDB <- IdDBCh) {
         log!({"IdDB": *IdDB}) |
         new dbCh in {
             IdDB!(*dbCh) |
-            for (db <- dbCh) {
-                log!({"db": *db}) |
+            for (db, readOnly <- dbCh) {
+                log!({"db": *db, "readOnly": *readOnly}) |
+                new uriCh in {
+                    insertArbitrary!(*readOnly, *uriCh)|
+                    for (@uri <- uriCh) {
+                        log!({"db readOnly facet registered at": uri})
+                    }
+                } |
                 db!("create_table", "zerver_message", Nil) |
                 db!("create_table", "zerver_usermessage", Nil) |
-                @{[*deployerId, "zulip_iddb3"]}!(*db)
+                // ISSUE: sync zulip_iddb4 with chain_replica.js
+                @{[*deployerId, "zulip_iddb4"]}!(*db)
             }
         }
     }

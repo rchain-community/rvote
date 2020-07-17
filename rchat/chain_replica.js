@@ -106,9 +106,9 @@ function notice_as_rho({ op, table_name, OLD = undefined, NEW = undefined}) {
   // KLUDGE: replacing null with Nil in string form has false positives
   const lit = val => val ? JSON.stringify(val).replace(/\bnull\b/g, 'Nil') : 'Nil';
 
-  // ISSUE: sync "zulip_iddb3" with myzulipdb.rho
+  // ISSUE: sync "zulip_iddb4" with myzulipdb.rho
   return `new deployerId(\`rho:rchain:deployerId\`) in {
-    for(db <<- @{[*deployerId, "zulip_iddb3"]}) {
+    for(db <<- @{[*deployerId, "zulip_iddb4"]}) {
         // ISSUE: Nil return channel: no sync
         db!(${lit(op)}, ${lit(table_name)}, ${lit(OLD)}, ${lit(NEW)}, Nil)
     }

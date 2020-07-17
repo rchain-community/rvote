@@ -18,8 +18,10 @@ in {
     }
     |
     contract IdDB(return) = {
-        new self, tablesCh in {
-            return!(*self) |
+        new self, readOnly, tablesCh in {
+            return!(*self, *readOnly) |
+
+            contract self(@"readOnly", return) = { return!(*readOnly) } |
 
             tablesCh!({}) | // table_name -> channel with Set of keys
             // rows are stored at @{[self, table_name, key]}
@@ -37,7 +39,13 @@ in {
             } |
             // TODO: drop table: delete from map @tablesCh; consume keysCh, all rows
 
-            contract self(@"keys", @table_name /\ String, return) = {
+            contract readOnly(@"tables", return) = {
+                for (@tables <<- tablesCh) {
+                    return!(tables)
+                }
+            } |
+
+            contract readOnly(@"keys", @table_name /\ String, return) = {
                 for (@tables <<- tablesCh) {
                     match tables.get(table_name) {
                         Nil => { return!((false, "no such table")) }
@@ -50,8 +58,37 @@ in {
                     }
                 }
             } |
-            // TODO: select method to get record from table_name, key
-            // TODO: move keys, select to read-only facet
+
+            contract readOnly(@"select", @table_name /\ String, @wanted /\ List, return) = {
+                for (@tables <<- tablesCh) {
+                    match tables.get(table_name) {
+                        Nil => { return!((false, "no such table")) }
+                        {*keysCh} => {
+                            for (@keys <<- keysCh) {
+                                log!({"select: keys for": table_name, "qty": keys.size()}) |
+                                new loop in {
+                                    loop!(wanted, {}) |
+                                    contract loop(@todo, @acc) = {
+                                        match todo {
+                                            [] => return!((true, acc))
+                                            [target, ...rest] => {
+                                                if (keys.contains(target)) {
+                                                    for (@record <<- @{[*self, table_name, target]}) {
+                                                        loop!(rest, acc.put(target, record))
+                                                    }
+                                                } else {
+                                                    // TODO: warn?
+                                                    loop!(rest, acc)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } |
 
             contract self(@"INSERT", @table_name /\ String, _OLD, @NEW, return) = {
                 for (@tables <<- tablesCh) {
@@ -133,12 +170,12 @@ in {
     // testing
     new ch, logKeys in {
         IdDB!(*ch) |
-        for (db1 <- ch) {
-            log!({"db1": *db1}) |
+        for (db1, ro1 <- ch) {
+            log!({"db1": *db1, "readOnly": *ro1}) |
             contract logKeys(@label, @key) = {
                 new keysCh in {
                     log!({label: key}) |
-                    db1!("keys", "player", *keysCh) |
+                    ro1!("keys", "player", *keysCh) |
                     for (@{(true, keys)} <- keysCh) {
                         log!({label: key, "keys": keys})
                     }
