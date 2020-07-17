@@ -19,7 +19,7 @@ Using an SQL IDE such as dbeaver, we find tables such as `zerver_messge`.
 ## Listening to Zulip DB events and traslating to Rholang
 
 Using [postgres LISTEN][pgl], we can see messages as they arrive.
-`node chain_mirror.js ,db_actions.rho 15` listens for 15 seconds and
+`node chain_replica.js ,db_actions.rho 15` listens for 15 seconds and
 records the actions in rholang:
 
 [pgl]: https://www.postgresql.org/docs/9.0/sql-listen.html
