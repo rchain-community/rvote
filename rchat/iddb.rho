@@ -41,7 +41,7 @@ in {
 
             contract readOnly(@"tables", return) = {
                 for (@tables <<- tablesCh) {
-                    return!(tables)
+                    return!(tables.keys())
                 }
             } |
 
