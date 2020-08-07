@@ -2,19 +2,15 @@
 
 import blake from 'blakejs';
 import elliptic from 'elliptic';
-import casper from 'rchain-proto';
+import jspb from 'google-protobuf';
 
 import { Base16 } from './hex.js';
-import { testVector } from './rgate_test.js';
 
-console.log({ casper });
-
-const { DeployDataProto } = casper;
 const secp256k1 = new elliptic.ec('secp256k1');
 
 const harden = (x) => Object.freeze(x); // @agoric/harden
 
-console.log({ secp256k1 });
+// console.log({ secp256k1 });
 
 /*::
 interface LightBlockInfo {
@@ -168,26 +164,36 @@ export function Node(
   });
 }
 
-export function sign(
+export function signPrep(
   keyHex /*: string */,
   info /*: DeployData */,
-) /*: DeployRequest */ {
+) {
   const key = secp256k1.keyFromPrivate(keyHex);
   const { term, timestamp, phloPrice, phloLimit, validAfterBlockNumber } = info;
-  const dd = new DeployDataProto();
-  // boring imperative style; why can't I use fromObject(info)?
-  dd.setTerm(term);
-  dd.setTimestamp(timestamp);
-  dd.setPhloprice(phloPrice);
-  dd.setPhlolimit(phloLimit);
-  dd.setValidafterblocknumber(validAfterBlockNumber);
-  const deploySerialized = dd.serializeBinary();
+
+  // Serialize payload with protobuf
+  const writer = new jspb.BinaryWriter();
+  writer.writeString(2, term);
+  writer.writeInt64(3, timestamp);
+  writer.writeInt64(7, phloPrice);
+  writer.writeInt64(8, phloLimit);
+  writer.writeInt64(10, validAfterBlockNumber);
+  const deploySerialized = writer.getResultBuffer();
+
   const hashed = blake.blake2bHex(deploySerialized, void 666, 32);
   const deployer = Uint8Array.from(key.getPublic('array'));
   const sigArray = key.sign(hashed, { canonical: true }).toDER('array');
   const sig = Uint8Array.from(sigArray);
   const signedDeploy = { ...info, sig, deployer };
-  console.log({ deploySerialized, key, sigArray, sig, signedDeploy });
+  return { hashed, deployer, deploySerialized, key, sigArray, sig, signedDeploy };
+}
+
+export function sign(
+  keyHex /*: string */,
+  info /*: DeployData */,
+) /*: DeployRequest */ {
+  const { term, timestamp, phloPrice, phloLimit, validAfterBlockNumber } = info;
+  const { deployer, sig } = signPrep(keyHex, info);
 
   return {
     data: {
