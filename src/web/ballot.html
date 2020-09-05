@@ -14,12 +14,19 @@
             <p>Use the private key for your <a href="#govRevAddr">annual meeting REV address<sup>1</sup></a>
                 to set up a <a href="#revmm">MetaMask-style account<sup>2</sup></a>
                 and then use the button below to connect it to this ballot:</p>
-            <button id="pickAccount">Pick Account</button>
-            <div><strong id="REVAddress">... rev addr...</strong></div>
+            <div><button id="pickAccount">Pick Account</button> <strong id="REVAddress">... rev addr...</strong></div>
+
+            <br />
+            <!--  added to testnet Sep 5 -->
+            <label>Agenda URI: <input id="agendaURI" size="60" value="rho:id:g9hj5p66muy1n9d6bors494ikupqma4qj9q8kmxdgzhzkzz3957hmf" /></label>
+            <br />
             <button id="getQuestions">Get Questions</button>
             <ol id="questionList">
 
             </ol>
+            <br />
+            <label>Phlo limit: <input id="phloLimit" type="number" value="250000" placeholder="Phlo limit (in revlettes x10^8)" /></label>
+            <div id="deployStatus"></div>
         </fieldset>
     </form>
     <ol>
@@ -31,11 +38,12 @@
         </li>
         <li id="revmm">
             As explained in <a href="https://medium.com/@jimscarver/using-metamask-with-rchain-2f05311976f"
-            >Using MetaMask with RChain</a>, MetaMask (or a compatible tool) can be used to control REV addresses.
+            >Using MetaMask with RChain</a>, MetaMask (or a compatible tool) can be used to sign RChain transactions.
         </li>
     </ol>
+    <hr />
     <address>
-        by Dan Connolly for the RChain Community<br />
+        by Dan Connolly for the <a href="https://github.com/rchain-community/">RChain Community</a><br />
         Sep 2020
     </address>
     <!-- <script type="module"> https://github.com/parcel-bundler/parcel/issues/3927 -->
