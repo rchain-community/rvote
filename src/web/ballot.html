@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<head>
+    <title>RChain Ballot Experiment</title>
+</head>
+<body>
+    <h1>Ballot</h1>
+    <p>
+        </p>
+        <p></p>
+
+    </p>
+    <form id='ballotForm'>
+        <fieldset>
+            <p>Use the private key for your <a href="#govRevAddr">annual meeting REV address<sup>1</sup></a>
+                to set up a <a href="#revmm">MetaMask-style account<sup>2</sup></a>
+                and then use the button below to connect it to this ballot:</p>
+            <button id="pickAccount">Pick Account</button>
+            <div><strong id="REVAddress">... rev addr...</strong></div>
+        </fieldset>
+    </form>
+    <ol>
+        <li id="govRevAddr">
+            According to a <a href="https://github.com/rchain/board/tree/master/2020/06-23#bod-resolution-member-rev-address-for-voting"
+            >23 Jun resolution of the RChain Board of Directors</a>,
+            <strong>members must provide a REV address to the Co-op
+            to vote in the Annual General Meeting</strong>.
+        </li>
+        <li id="revmm">
+            As explained in <a href="https://medium.com/@jimscarver/using-metamask-with-rchain-2f05311976f"
+            >Using MetaMask with RChain</a>, MetaMask (or a compatible tool) can be used to control REV addresses.
+        </li>
+    </ol>
+    <address>
+        by Dan Connolly for the RChain Community<br />
+        Sep 2020
+    </address>
+    <!-- <script type="module"> https://github.com/parcel-bundler/parcel/issues/3927 -->
+    <script src='./ballot.js'></script>
+</body>
