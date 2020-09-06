@@ -89,7 +89,7 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
         setStatus('');
         registryLookup(ui.agendaURI.value, pmt(), { rnodeWeb, setStatus }).then(qas => {
             showQuestions(qas, ui.questionList, { createElement });
-            const controls = querySelectorAll('fieldset input[type="radio"]');
+            const controls = querySelectorAll('fieldset input[type="checkbox"]');
             controls.forEach(radio => {
                 radio.addEventListener('change', _ => { ui.response.value = response(state.account, controls); });
             })
@@ -165,55 +165,53 @@ function runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus }) {
 }
 
 /**
- * @typedef {{[q: string]: { labels: string[], addresses: string[] }}} QAs
  * @param {QAs} qas
  * @param { Element } questionList
  * @param {{ createElement: typeof document.createElement }} powers
  */
 function showQuestions(qas, questionList, { createElement }) {
     /** @type { (tag: string, attrs: {[name: string]: string}, children: Array<Element | string>) => Element } */
-    function elt(tag, attrs, children) {
+    function elt(tag, attrs = {}, children = []) {
         const it = createElement(tag);
         entries(attrs).forEach(([name, value]) => it.setAttribute(name, value));
         children.forEach(ch => it.append(ch));
         return it;
     };
-    /** @type { (name: string, label: string, value: string) => Element } */
-    const choiceElt = (name, label, value) => elt('label', { title: value },
-        [elt('input', { name, value, type: 'radio' }, []), label]);
     questionList.innerHTML = '';
-    entries(qas).forEach(([q, as], qix) => {
-        const { labels, addresses } = as;
-        const qElt = elt('li', {}, [elt('strong', {}, [q]),
-            ...labels.map((ans, aix) => choiceElt(`q${qix}`, ans, addresses[aix]))]);
-        questionList.appendChild(qElt);
+    entries(qas).forEach(([id, { shortDesc, docLink, revAddr }], qix) => {
+        const link = docLink ? [elt('br'), 'see: ', elt('a', { href: docLink, target: '_blank' }, [id])] : [];
+        questionList.appendChild(elt('dt', { title: revAddr }, [id]));
+        questionList.appendChild(elt('dd', {},
+         [elt('label', { title: revAddr }, [elt('input', { type: 'checkbox', title: revAddr }), shortDesc]),
+         ...link]));
     });
 }
 
-/** @type { QAs } */
+/**
+ * @typedef {{[refID: string]: { shortDesc: string, docLink?: string, revAddr: string }}} QAs
+ * @type { QAs }
+ */
 const testQuestions = {
-    "Set Membership Fee To": {
-        "labels": ["$10", "$20", "$50", "$100"],
-        "addresses": ["11112uGayGEi57D44Drq3V4iw5WWyfXbcVvsDangRTE7TaR3J4U4FD",
-         "11111Nr7m7SfhgXEghQfQqEBwQGddoa3vHAf4x1UVR6Nm32piqFwh",
-        "11117p8GtmatxaAYK5iQxnYrMy7dH9iquDDWmNTVdUQyvvoVpUzNN",
-        "1111Lq2S8ZoViqAiWvEAfBYxMEtBsdrid8rh58CusJJRVjfdpqb6o"]
+    "Member Swag": {
+        "shortDesc": "The Item of Business I want to propose is to provide all new members with stickers and t-shirts with the RChain logo on it as part of their membership onboarding package.",
+        "docLink": "https://docs.google.com/docs/SWAG.doc",
+        "revAddr": "11112uGayGEi57D44Drq3V4iw5WWyfXbcVvsDangRTE7TaR3J4U4FD"
     },
-    "Daffy for Board Member": {
-        "labels": ["no", "yes"],
-        "addresses": ["1111Cp4n2pydnBKbWh9eZdeKxxsqFY9pwPJHQfuqe9RnTPyKBR8ax", "11112Cwtg2Bs4WUAYrXhL9xZXXSXr9Gn62Cty39RhUaBnqjrKkqwAZ"]
+    "Board: Daffy": {
+        "shortDesc": "Daffy Duck for Board Member",
+        "revAddr": "11112Cwtg2Bs4WUAYrXhL9xZXXSXr9Gn62Cty39RhUaBnqjrKkqwAZ"
     },
-    "Donald for Board Member": {
-        "labels": ["no", "yes"],
-        "addresses": ["1111JoeZHDYXqyAgo89VaidQnp7W7M9pvdkFUJTqEBU7SHKx6WF2z", "11112cruhUBUk9WriamwCZARkYXAun1L5GiVSWxeB4ZQSUM1o2h6b9"]
+    "Board: Donald": {
+        "shortDesc": "Donald Duck for Board Member",
+        "revAddr": "1111JoeZHDYXqyAgo89VaidQnp7W7M9pvdkFUJTqEBU7SHKx6WF2z"
     },
-    "Wile E. Coyote for Board Member": {
-        "labels": ["no", "yes"],
-        "addresses": ["11112aoa6NLYomYZro566XZVGEXyCDqeqDcp8Pzg81Ckuws6SexC99", "1111wqGepMkvKCeoJC2rpa7dHiZsZUq8NiXH1y3JyF5jSvH341zYK"]
+    "Board: Coyote": {
+        "shortDesc": "Wile E. Coyote for Board Member",
+        "revAddr": "11112aoa6NLYomYZro566XZVGEXyCDqeqDcp8Pzg81Ckuws6SexC99"
     },
-    "Road Runner for Board Member": {
-        "labels": ["no", "yes"],
-        "addresses": ["1111swBFUPVRwR4ugkDBCvrLwPeR1621B1cHQf3cAkNxt3Zad2eac", "1111rQuiaZj6sKJx4Cj8HzFbF5NJTRj3iGgkdiLPWJaJybs6EZPY3"]
+    "Board: Road Runner": {
+        "shortDesc": "Road Runner for Board Member",
+        "revAddr": "1111swBFUPVRwR4ugkDBCvrLwPeR1621B1cHQf3cAkNxt3Zad2eac"
     }
 };
 
@@ -222,7 +220,7 @@ function response(account, controls) {
     const choiceAddrs = Array.from(controls)
         .map(radio => check.theInput(radio)) // filter rather than throw?
         .reduce((acc, cur, _ix, _src) => cur.checked ? [...acc, cur] : acc, [])
-        .map(radio => radio.value);
+        .map(radio => radio.getAttribute('title'));
     return transferMulti_rho(account.revAddr, choiceAddrs, DUST);
 }
 

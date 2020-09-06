@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <head>
-    <title>RChain Ballot Experiment</title>
+    <title>Ballot Experiment - RChain</title>
+    <link rel="icon" href="favicon.ico">
 </head>
 <body>
     <h1>Ballot</h1>
-    <p>
-        </p>
-        <p></p>
-
-    </p>
     <form id='ballotForm'>
         <fieldset>
             <p>Use the private key for your <a href="#govRevAddr">annual meeting REV address<sup>1</sup></a>
@@ -21,15 +17,15 @@
             the questions and candidate responses on the chain. <strong>Carefully verify this URI against official
                 communications from the RChain secretary.</strong>
             </p>
-            <!--  added to testnet Sep 5, take 3 with real rev addresses -->
-            <label>Agenda URI: <input id="agendaURI" size="60" value="rho:id:n3pbaohszwio3iicwfsjcpif7r7o71px4afz61mueznommdpbkinsb" /></label>
+            <!--  added to testnet Sep 5, take 4: with id/shortDesc/link, yes/no only, real rev addresses -->
+            <label>Agenda URI: <input id="agendaURI" size="60" value="rho:id:t7hufifegxuuk7jtyo6ay1ruapzyxd8qh5zpt3d8jmk7wtdc6p9w5h" /></label>
             <br />
             <button id="getQuestions">Get Questions</button>
-            <ol id="questionList">
+            <dl id="questionList">
 
-            </ol>
+            </dl>
             <p>Your response, in rholang:</p>
-            <textarea id="response" rows="24" cols="80"></textarea>
+            <textarea id="response" rows="12" cols="80"></textarea>
             <br />
             <input id="submitResponse" type="submit" />
             <hr />
@@ -51,8 +47,9 @@
     </ol>
     <hr />
     <address>
-        by Dan Connolly for the <a href="https://github.com/rchain-community/">RChain Community</a><br />
-        Sep 2020
+        Sep 2020 by Dan Connolly<br />
+        for the <a href="https://github.com/rchain-community/">RChain Community</a><br />
+        <small>RCHAIN is a registered trademark of <a href="https://rchain.coop">RChain Cooperative</a>.</small>
     </address>
     <!-- <script type="module"> https://github.com/parcel-bundler/parcel/issues/3927 -->
     <script src='./ballot.js'></script>
