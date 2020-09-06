@@ -60,6 +60,7 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
         response: check.theTextArea(theElt('response')),
         agendaURI: check.theInput(theElt('agendaURI')),
         getQuestions: check.theButton(theElt('getQuestions')),
+        submitResponse: theElt('submitResponse'),
         phloLimit: check.theInput(theElt('phloLimit')),
         deployStatus: theElt('deployStatus'),
     };
@@ -81,12 +82,12 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
         };
     }));
 
+    const pmt = () => ({ account: state.account, phloLimit: parseInt(ui.phloLimit.value) });
+    /** @type { (status: string) => void } */
+    const setStatus = status => { ui.deployStatus.textContent = status; };
     function updateQuestions() {
-        /** @type { (status: string) => void } */
-        const setStatus = status => { ui.deployStatus.textContent = status; };
         setStatus('');
-        const pmt = { account: state.account, phloLimit: parseInt(ui.phloLimit.value) };
-        registryLookup(ui.agendaURI.value, pmt, { rnodeWeb, setStatus }).then(qas => {
+        registryLookup(ui.agendaURI.value, pmt(), { rnodeWeb, setStatus }).then(qas => {
             showQuestions(qas, ui.questionList, { createElement });
             const controls = querySelectorAll('fieldset input[type="radio"]');
             controls.forEach(radio => {
@@ -95,7 +96,7 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
         })
         .catch(err => {
             console.log({ err });
-            ui.deployStatus.textContent = `${err}`;
+            setStatus(`${err}`);
         });
     }
     ui.getQuestions.addEventListener('click', _ => {
@@ -105,10 +106,18 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
         }
         updateQuestions();
     });
+
+    ui.submitResponse.addEventListener('click', _ => {
+        setStatus('');
+        runDeploy(ui.response.value, pmt(), { rnodeWeb, setStatus })
+            .catch(err => {
+                console.log({ err });
+                setStatus(`${err}`);
+            });
+    });
 }
 
 /**
- *
  * @param {string} uri
  * @param {{ account: { revAddr: string }, phloLimit: number }} pmt
  * @param {{ rnodeWeb: any, setStatus: (s: string) => void}} powers
@@ -118,6 +127,21 @@ function registryLookup(uri, { account, phloLimit }, { rnodeWeb, setStatus }) {
     // return Promise.resolve(testQuestions);
 
     console.log('looking up agenda on chain...');
+    const code = lookup_rho(uri);
+    return runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus })
+        .then(deployReturnData => {
+            const { args } = deployReturnData;
+            return args[1];
+        });
+}
+
+/**
+ * @param {string} code
+ * @param {{ account: { revAddr: string }, phloLimit: number }} pmt
+ * @param {{ rnodeWeb: any, setStatus: (s: string) => void}} powers
+ * @returns { Promise<{ args: any[], cost: number, rawData: any }> }
+ */
+function runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus }) {
     const misc = { name: 'testNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
     const node = getNodeUrls({ ...misc, ...testNet.hosts[0] }); // TODO: get next validator?
 
@@ -134,11 +158,9 @@ function registryLookup(uri, { account, phloLimit }, { rnodeWeb, setStatus }) {
         warn: console.warn,
     });
 
-    const code = lookup_rho(uri);
     return appSendDeploy({ node, code, account, phloLimit, setStatus }).then(result => {
         setStatus(result);
-        const { args, cost } = deployReturnData;
-        return args[1];
+        return deployReturnData;
     });
 }
 
@@ -170,20 +192,35 @@ function showQuestions(qas, questionList, { createElement }) {
 
 /** @type { QAs } */
 const testQuestions = {
+    "Set Membership Fee To": {
+        "labels": ["$10", "$20", "$50", "$100"],
+        "addresses": ["11112uGayGEi57D44Drq3V4iw5WWyfXbcVvsDangRTE7TaR3J4U4FD",
+         "11111Nr7m7SfhgXEghQfQqEBwQGddoa3vHAf4x1UVR6Nm32piqFwh",
+        "11117p8GtmatxaAYK5iQxnYrMy7dH9iquDDWmNTVdUQyvvoVpUzNN",
+        "1111Lq2S8ZoViqAiWvEAfBYxMEtBsdrid8rh58CusJJRVjfdpqb6o"]
+    },
     "Daffy for Board Member": {
         "labels": ["no", "yes"],
-        "addresses": ["111daffy-no", "111daffy-yes"]
+        "addresses": ["1111Cp4n2pydnBKbWh9eZdeKxxsqFY9pwPJHQfuqe9RnTPyKBR8ax", "11112Cwtg2Bs4WUAYrXhL9xZXXSXr9Gn62Cty39RhUaBnqjrKkqwAZ"]
     },
     "Donald for Board Member": {
         "labels": ["no", "yes"],
-        "addresses": ["111donald-no", "111donald-yes"]
+        "addresses": ["1111JoeZHDYXqyAgo89VaidQnp7W7M9pvdkFUJTqEBU7SHKx6WF2z", "11112cruhUBUk9WriamwCZARkYXAun1L5GiVSWxeB4ZQSUM1o2h6b9"]
+    },
+    "Wile E. Coyote for Board Member": {
+        "labels": ["no", "yes"],
+        "addresses": ["11112aoa6NLYomYZro566XZVGEXyCDqeqDcp8Pzg81Ckuws6SexC99", "1111wqGepMkvKCeoJC2rpa7dHiZsZUq8NiXH1y3JyF5jSvH341zYK"]
+    },
+    "Road Runner for Board Member": {
+        "labels": ["no", "yes"],
+        "addresses": ["1111swBFUPVRwR4ugkDBCvrLwPeR1621B1cHQf3cAkNxt3Zad2eac", "1111rQuiaZj6sKJx4Cj8HzFbF5NJTRj3iGgkdiLPWJaJybs6EZPY3"]
     }
 };
 
 /** @type {(account: { revAddr: string }, controls: NodeListOf<Element> ) => string} */
 function response(account, controls) {
     const choiceAddrs = Array.from(controls)
-        .map(radio => check.theInput(radio))
+        .map(radio => check.theInput(radio)) // filter rather than throw?
         .reduce((acc, cur, _ix, _src) => cur.checked ? [...acc, cur] : acc, [])
         .map(radio => radio.value);
     return transferMulti_rho(account.revAddr, choiceAddrs, DUST);

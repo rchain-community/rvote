@@ -21,8 +21,8 @@
             the questions and candidate responses on the chain. <strong>Carefully verify this URI against official
                 communications from the RChain secretary.</strong>
             </p>
-            <!--  added to testnet Sep 5 "timestamp": 1599348580691 with rev addresses -->
-            <label>Agenda URI: <input id="agendaURI" size="60" value="rho:id:ux5jj58at7b7ro8ybecjpcp14kmdbm6y4xqnoin8u6x43m84nq1awu" /></label>
+            <!--  added to testnet Sep 5, take 3 with real rev addresses -->
+            <label>Agenda URI: <input id="agendaURI" size="60" value="rho:id:n3pbaohszwio3iicwfsjcpif7r7o71px4afz61mueznommdpbkinsb" /></label>
             <br />
             <button id="getQuestions">Get Questions</button>
             <ol id="questionList">
@@ -31,7 +31,7 @@
             <p>Your response, in rholang:</p>
             <textarea id="response" rows="24" cols="80"></textarea>
             <br />
-            <input type="submit" />
+            <input id="submitResponse" type="submit" />
             <hr />
             <label>Phlo limit: <input id="phloLimit" type="number" value="250000" placeholder="Phlo limit (in revlettes x10^8)" /></label>
             <div id="deployStatus"></div>

@@ -11,8 +11,8 @@ export const transferMulti_rho = (revAddrFrom, revAddrTo, amount) => `
     rl!(\`rho:rchain:revVault\`, *RevVaultCh) |
     rl!(\`rho:lang:listOps\`, *ListOpsCh) |
     for (@(_, RevVault) <- RevVaultCh;
-         @(_, ListOps) <- ListOpsCh) {
-      new vaultCh, vaultTo, revVaultkeyCh,
+        @(_, ListOps) <- ListOpsCh) {
+      new vaultCh, revVaultkeyCh, txfr1,
         deployerId(\`rho:rchain:deployerId\`),
         deployId(\`rho:rchain:deployId\`)
       in {
@@ -20,19 +20,15 @@ export const transferMulti_rho = (revAddrFrom, revAddrTo, amount) => `
           (revAddrFrom, amount) => {
             @RevVault!("findOrCreate", revAddrFrom, *vaultCh) |
             @RevVault!("deployerAuthKey", *deployerId, *revVaultkeyCh) |
-            for (@vault <- vaultCh; key <- revVaultkeyCh; _ <- vaultTo) {
+            for (@vault <- vaultCh; key <- revVaultkeyCh) {
               match vault {
                 (true, vault) => {
-                  @ListOps("parMap", ${JSON.stringify(revAddrTo)}, txfr, deployId) |
-                  ///@@@
-                  
-                  @RevVault!("findOrCreate", revAddrTo, *vaultTo) |
-                  new resultCh in {
-                    @vault!("transfer", revAddrTo, amount, *key, *resultCh) |
-                    for (@result <- resultCh) {
-                      match result {
-                        (true , _  ) => deployId!((true, "Transfer successful (not yet finalized)."))
-                        (false, err) => deployId!((false, err))
+                  @ListOps!("parMap", ${JSON.stringify(revAddrTo)}, *txfr1, *deployId) |
+                  contract txfr1(@revAddrTo, return) = {
+                    new vaultTo in {
+                      @RevVault!("findOrCreate", revAddrTo, *vaultTo) |
+                      for (_ <- vaultTo) {
+                        @vault!("transfer", revAddrTo, amount, *key, *return)
                       }
                     }
                   }
