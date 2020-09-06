@@ -11,6 +11,10 @@
         #deployStatus { background: lightyellow }
         .setting { text-align: right }
         .app { margin: 1em }
+        table tr:nth-child(even) { background: lightgray; }
+        table td, table th { border: 1px solid #AAAAAA; }
+        table thead th { text-align: center; }
+        table td.choice { text-align: center; }
     </style>
 </head>
 <body>
@@ -38,18 +42,21 @@
             the questions and candidate responses on the chain. <strong>Carefully verify this URI against official
                 communications from the RChain secretary.</strong>
             </p>
-            <!--  added to testnet Sep 5, take 4: with id/shortDesc/link, yes/no only, real rev addresses -->
             <label>
                 <div id="agendaUriViz" class="vizHash coop"></div>
                 Agenda URI:
+                <!--  added to testnet Sep 6, take 5: yes/no rev addresses -->
                 <input id="agendaURI" size="60" class="coop"
-                 value="rho:id:t7hufifegxuuk7jtyo6ay1ruapzyxd8qh5zpt3d8jmk7wtdc6p9w5h" />
+                 value="rho:id:ar17ohqq83kx7a16nbfquwu9gxidduk9hstgbs9gkbj63o8gqyh1ye" />
             </label>
             <br />
             <button id="getQuestions">Get Questions</button>
-            <dl id="questionList">
+            <table>
+                <thead><tr><th>ID</th><th>Short Description</th><th>Oppose</th><th>Abstain</th><th>Support</th></tr></thead>
+                <tbody id="questionList">
 
-            </dl>
+                </tbody>
+            </table>
             <p>Your response, in rholang:</p>
             <textarea id="response" rows="12" cols="80"></textarea>
             <br />

@@ -92,7 +92,7 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
         setStatus('');
         registryLookup(ui.agendaURI.value, pmt(), { rnodeWeb, setStatus }).then(qas => {
             showQuestions(qas, ui.questionList, { createElement });
-            const controls = querySelectorAll('fieldset input[type="checkbox"]');
+            const controls = querySelectorAll('fieldset input[type="radio"]');
             controls.forEach(radio => {
                 radio.addEventListener('change', _ => { ui.response.value = response(state.account, controls); });
             })
@@ -219,40 +219,49 @@ function showQuestions(qas, questionList, { createElement }) {
         return it;
     };
     questionList.innerHTML = '';
-    entries(qas).forEach(([id, { shortDesc, docLink, revAddr }], qix) => {
+    entries(qas).forEach(([id, { shortDesc, docLink, yesAddr, noAddr }], qix) => {
         const link = docLink ? [elt('br'), 'see: ', elt('a', { href: docLink, target: '_blank' }, [id])] : [];
-        questionList.appendChild(elt('dt', { title: revAddr }, [id]));
-        questionList.appendChild(elt('dd', {},
-         [elt('label', { title: revAddr }, [elt('input', { type: 'checkbox', title: revAddr }), shortDesc]),
-         ...link]));
+        const name = `q${qix}`;
+        /** @type { (label: string, value: string) => Element } */
+        const radio = (label, value) => elt('td', { class: 'choice' }, [
+            elt('input', { name, value, type: 'radio', title: value, ...(value === '' ? { checked: 'checked' } : {}) }),
+            ]);
+        const qrow = elt('tr', {}, [elt('td', {}, [id]), elt('td', {}, [shortDesc, ...link]),
+            radio('no', noAddr), radio('abstain', ''), radio('yes', yesAddr)])
+        questionList.appendChild(qrow);
     });
 }
 
 /**
- * @typedef {{[refID: string]: { shortDesc: string, docLink?: string, revAddr: string }}} QAs
+ * @typedef {{[refID: string]: { shortDesc: string, docLink?: string, yesAddr: string, noAddr: string }}} QAs
  * @type { QAs }
  */
 const testQuestions = {
     "Member Swag": {
         "shortDesc": "The Item of Business I want to propose is to provide all new members with stickers and t-shirts with the RChain logo on it as part of their membership onboarding package.",
         "docLink": "https://docs.google.com/docs/SWAG.doc",
-        "revAddr": "11112uGayGEi57D44Drq3V4iw5WWyfXbcVvsDangRTE7TaR3J4U4FD"
+        "yesAddr": "11112i8bYVDYcm4MSbY3d1As28uY151xoMS7AyiTvZ2YmNJ8Nw13v9",
+        "noAddr": "11112uGayGEi57D44Drq3V4iw5WWyfXbcVvsDangRTE7TaR3J4U4FD"
     },
-    "Board: Daffy": {
+    "Board: DaD": {
         "shortDesc": "Daffy Duck for Board Member",
-        "revAddr": "11112Cwtg2Bs4WUAYrXhL9xZXXSXr9Gn62Cty39RhUaBnqjrKkqwAZ"
+        "yesAddr": "1111TnFUN7eZBWXp3QQACQRRxpcS5uH5Bpf67vikWhA5e3F6ikAmU",
+        "noAddr": "11112Cwtg2Bs4WUAYrXhL9xZXXSXr9Gn62Cty39RhUaBnqjrKkqwAZ"
     },
-    "Board: Donald": {
+    "Board: DoD": {
         "shortDesc": "Donald Duck for Board Member",
-        "revAddr": "1111JoeZHDYXqyAgo89VaidQnp7W7M9pvdkFUJTqEBU7SHKx6WF2z"
+        "yesAddr": "1111rbdV9Lsw6DyMSq8ySXDacX7pRUxmVGoYho9gGtfZcQYFdAN42",
+        "noAddr": "1111JoeZHDYXqyAgo89VaidQnp7W7M9pvdkFUJTqEBU7SHKx6WF2z"
     },
-    "Board: Coyote": {
+    "Board: WEC": {
         "shortDesc": "Wile E. Coyote for Board Member",
-        "revAddr": "11112aoa6NLYomYZro566XZVGEXyCDqeqDcp8Pzg81Ckuws6SexC99"
+        "yesAddr": "11112gUFvJR6JBDYJURETaWUBpEDa1EyjgRHFncEfQ4hGECnciPnhw",
+        "noAddr": "11112aoa6NLYomYZro566XZVGEXyCDqeqDcp8Pzg81Ckuws6SexC99"
     },
-    "Board: Road Runner": {
+    "Board: RR": {
         "shortDesc": "Road Runner for Board Member",
-        "revAddr": "1111swBFUPVRwR4ugkDBCvrLwPeR1621B1cHQf3cAkNxt3Zad2eac"
+        "yesAddr": "1111krbAKSbyGA9vfa7w4K2pKAxZZn6qjaVEduDLWotDZ8HLt2aXR",
+        "noAddr": "1111swBFUPVRwR4ugkDBCvrLwPeR1621B1cHQf3cAkNxt3Zad2eac"
     }
 };
 
@@ -260,8 +269,8 @@ const testQuestions = {
 function response(account, controls) {
     const choiceAddrs = Array.from(controls)
         .map(radio => check.theInput(radio)) // filter rather than throw?
-        .reduce((acc, cur, _ix, _src) => cur.checked ? [...acc, cur] : acc, [])
-        .map(radio => radio.getAttribute('title'));
+        .reduce((acc, cur, _ix, _src) => cur.checked && cur.value > '' ? [...acc, cur] : acc, [])
+        .map(radio => radio.value);
     return transferMulti_rho(account.revAddr, choiceAddrs, DUST);
 }
 
