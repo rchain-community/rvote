@@ -2,15 +2,32 @@
 <head>
     <title>Ballot Experiment - RChain</title>
     <link rel="icon" href="favicon.ico">
+    <style>
+        .vizHash { float: right; border: 1px dotted; padding: 4px }
+        #addrViz { background: lightgray }
+        .coop { background: #eba3bb; /* reddish for RChain */ }
+        #agendaUriViz {  border: 2px dotted red; }
+        #deployStatus { background: lightyellow }
+        .setting { text-align: right }
+    </style>
 </head>
 <body>
-    <h1>Ballot</h1>
+    <h1>RChain Governance</h1>
+    <div class="setting">
+        <label><small>Phlo limit: <input id="phloLimit" type="number" value="5000000" /></small></label><br />
+        <em id="deployStatus"></em>
+    </div>
     <form id='ballotForm'>
         <fieldset>
+            <legend>Ballot</legend>
             <p>Use the private key for your <a href="#govRevAddr">annual meeting REV address<sup>1</sup></a>
                 to set up a <a href="#revmm">MetaMask-style account<sup>2</sup></a>
                 and then use the button below to connect it to this ballot:</p>
-            <div><button id="pickAccount">Pick Account</button> <strong id="REVAddress">... rev addr...</strong></div>
+            <div>
+                <div id="addrViz" class="vizHash"></div>
+                <button id="pickAccount">Pick Account</button>
+                <input id="REVAddress" readonly="readonly" size="60" />
+            </div>
 
             <br />
             <p>The RChain secretary <em>or rather, someone acting like it, for testing purposes</em> has stored
@@ -18,7 +35,12 @@
                 communications from the RChain secretary.</strong>
             </p>
             <!--  added to testnet Sep 5, take 4: with id/shortDesc/link, yes/no only, real rev addresses -->
-            <label>Agenda URI: <input id="agendaURI" size="60" value="rho:id:t7hufifegxuuk7jtyo6ay1ruapzyxd8qh5zpt3d8jmk7wtdc6p9w5h" /></label>
+            <label>
+                <div id="agendaUriViz" class="vizHash coop"></div>
+                Agenda URI:
+                <input id="agendaURI" size="60" class="coop"
+                 value="rho:id:t7hufifegxuuk7jtyo6ay1ruapzyxd8qh5zpt3d8jmk7wtdc6p9w5h" />
+            </label>
             <br />
             <button id="getQuestions">Get Questions</button>
             <dl id="questionList">
@@ -28,9 +50,6 @@
             <textarea id="response" rows="12" cols="80"></textarea>
             <br />
             <input id="submitResponse" type="submit" />
-            <hr />
-            <label>Phlo limit: <input id="phloLimit" type="number" value="5000000" placeholder="Phlo limit (in revlettes x10^8)" /></label>
-            <div id="deployStatus"></div>
         </fieldset>
     </form>
     <ol>

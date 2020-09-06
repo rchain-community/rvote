@@ -1,4 +1,5 @@
 // @ts-check
+import jazzicon from 'jazzicon';
 import { getAddrFromEth } from '@tgrospic/rnode-grpc-js';
 import { ethereumAddress } from '../eth/eth-wrapper';
 import { makeRNodeWeb } from '../rnode-web';
@@ -55,17 +56,19 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
     const ui = {
         ballotForm: theElt('ballotForm'),
         pickButton: check.theButton(theElt('pickAccount')),
-        addrField: theElt('REVAddress'),
+        addrField: check.theInput(theElt('REVAddress')),
+        addrViz: theElt('addrViz'),
         questionList: theElt('questionList'),
         response: check.theTextArea(theElt('response')),
         agendaURI: check.theInput(theElt('agendaURI')),
+        agendaUriViz: theElt('agendaUriViz'),
         getQuestions: check.theButton(theElt('getQuestions')),
         submitResponse: theElt('submitResponse'),
         phloLimit: check.theInput(theElt('phloLimit')),
         deployStatus: theElt('deployStatus'),
     };
 
-    /** @type {{ account?: { revAddr: string, ethAddr: string, name: string }}} */
+    /** @type {{ account?: Account }} */
     const state = { account: undefined };
 
     /** @type { (form: Element) => void } */
@@ -74,12 +77,12 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
 
     ui.pickButton.addEventListener('click', _ => ethereumAddress().then(ethAddr => {
         const revAddr = getAddrFromEth(ethAddr);
-        ui.addrField.textContent = revAddr;
         state.account = {
             revAddr,
             name: `gov ${revAddr.slice(0, 8) }`,
             ethAddr: ethAddr.replace(/^0x/, ''),
         };
+        showAccount(state.account, ui.addrViz, ui.addrField);
     }));
 
     const pmt = () => ({ account: state.account, phloLimit: parseInt(ui.phloLimit.value) });
@@ -96,7 +99,7 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
         })
         .catch(err => {
             console.log({ err });
-            setStatus(`${err}`);
+            setStatus(`${err && typeof err === 'object' && err.message ? err.message : err}`);
         });
     }
     ui.getQuestions.addEventListener('click', _ => {
@@ -106,7 +109,8 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
         }
         updateQuestions();
     });
-
+    vizHash(hashCode(ui.agendaURI.value), ui.agendaUriViz);
+    ui.agendaURI.addEventListener('change', _ => vizHash(hashCode(ui.agendaURI.value), ui.agendaUriViz));
     ui.submitResponse.addEventListener('click', _ => {
         setStatus('');
         runDeploy(ui.response.value, pmt(), { rnodeWeb, setStatus })
@@ -115,6 +119,43 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
                 setStatus(`${err}`);
             });
     });
+}
+
+/**
+ * Show Account
+ * @param { Account } info
+ * @param { Element } imgHolder
+ * @param { HTMLInputElement } addrField
+ *
+ * @typedef {{ revAddr: string, ethAddr: string, name: string }} Account
+ */
+function showAccount(info, imgHolder, addrField) {
+    // First remove the '0x' and convert the 8 digit hex number to
+    // decimal with i.e. `parseInt('e30a34bc, 16)` to generate a
+    // "jazzicon".
+    // -- Parker Sep 2018
+    //    https://www.reddit.com/r/ethdev/comments/9fwffj/wallet_ui_trick_mock_the_metamask_account_icon_by/
+    console.log(info);
+    addrField.value = info.revAddr;
+    const seed = parseInt(info.ethAddr.slice(0, 8), 16);
+    vizHash(seed, imgHolder);
+}
+
+
+/** @type { (seed: number, holder: Element) => void } */
+function vizHash(seed, holder, size = 60) {
+    const el = jazzicon(size, seed);
+    holder.innerHTML = '';
+    holder.appendChild(el);
+}
+
+/** @type { (s: string) => number } */
+function hashCode(s) {
+    // ack: bryc Aug 31, 2018
+    // https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0#gistcomment-2694461
+    for(var i = 0, h = 0; i < s.length; i++)
+        h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+    return h;
 }
 
 /**
