@@ -3,7 +3,7 @@ import jazzicon from 'jazzicon';
 import { getAddrFromEth } from '@tgrospic/rnode-grpc-js';
 import { ethereumAddress } from '../eth/eth-wrapper';
 import { makeRNodeWeb } from '../rnode-web';
-import { makeRNodeActions } from './rnode-actions';
+import { makeRNodeActions, rhoExprToJS } from './rnode-actions';
 import { testNet, getNodeUrls } from '../rchain-networks';
 import { transferMulti_rho } from '../rho/transfer-multi';
 import { lookup_rho } from '../rho/lookup';
@@ -90,7 +90,10 @@ function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElem
     const setStatus = status => { ui.deployStatus.textContent = status; };
     function updateQuestions() {
         setStatus('');
-        registryLookup(ui.agendaURI.value, pmt(), { rnodeWeb, setStatus }).then(qas => {
+        const misc = { name: 'testNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
+        const node = getNodeUrls({ ...misc, ...testNet.readOnlys[0] });
+        const { rnodeHttp } = rnodeWeb;
+        registryLookup(ui.agendaURI.value, node.httpUrl, { rnodeHttp, setStatus }).then(qas => {
             showQuestions(qas, ui.questionList, { createElement });
             const controls = querySelectorAll('fieldset input[type="radio"]');
             controls.forEach(radio => {
@@ -160,20 +163,22 @@ function hashCode(s) {
 
 /**
  * @param {string} uri
- * @param {{ account: { revAddr: string }, phloLimit: number }} pmt
- * @param {{ rnodeWeb: any, setStatus: (s: string) => void}} powers
+ * @param { string } httpUrl
+ * @param {{ rnodeHttp: any, setStatus: (s: string) => void}} powers
  * @returns { Promise<any> }
  */
-function registryLookup(uri, { account, phloLimit }, { rnodeWeb, setStatus }) {
+async function registryLookup(uri, httpUrl, { rnodeHttp, setStatus }) {
     // return Promise.resolve(testQuestions);
 
     console.log('looking up agenda on chain...');
     const code = lookup_rho(uri);
-    return runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus })
-        .then(deployReturnData => {
-            const { args } = deployReturnData;
-            return args[1];
-        });
+
+    const { expr } = await rnodeHttp(httpUrl, 'explore-deploy', code);
+    const [{ ExprTuple: { data: [{ ExprBool: { data: ok }}, result]}}] = expr;
+    if (!ok) {
+        throw new Error(JSON.stringify(result));
+    }
+    return rhoExprToJS(result);
 }
 
 /**
