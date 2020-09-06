@@ -7,8 +7,8 @@
  * @returns { string }
  */
 export const transferMulti_rho = (revAddrFrom, revAddrTo, amount) =>
- `match(${JSON.stringify(revAddrTo, null, 2)}) {
-  addrs => {
+ `match(${lit(revAddrFrom)}, ${lit(amount)}, ${lit(revAddrTo)}) {
+    (revAddrFrom, amount, toAddrs) => {
   new rl(\`rho:registry:lookup\`), RevVaultCh, ListOpsCh in {
     rl!(\`rho:rchain:revVault\`, *RevVaultCh) |
     rl!(\`rho:lang:listOps\`, *ListOpsCh) |
@@ -18,14 +18,12 @@ export const transferMulti_rho = (revAddrFrom, revAddrTo, amount) =>
         deployerId(\`rho:rchain:deployerId\`),
         deployId(\`rho:rchain:deployId\`)
       in {
-        match ("${revAddrFrom}", ${amount}) {
-          (revAddrFrom, amount) => {
             @RevVault!("findOrCreate", revAddrFrom, *vaultCh) |
             @RevVault!("deployerAuthKey", *deployerId, *revVaultkeyCh) |
             for (@vault <- vaultCh; key <- revVaultkeyCh) {
               match vault {
                 (true, vault) => {
-                  @ListOps!("parMap", addrs, *txfr1, *deployId) |
+                  @ListOps!("parMap", toAddrs, *txfr1, *deployId) |
                   contract txfr1(@revAddrTo, return) = {
                     new vaultTo in {
                       @RevVault!("findOrCreate", revAddrTo, *vaultTo) |
@@ -40,11 +38,13 @@ export const transferMulti_rho = (revAddrFrom, revAddrTo, amount) =>
                 }
               }
             }
-          }
-        }
       }
     }
   }
 }
 }
-`
+`;
+
+function lit(v) {
+  return JSON.stringify(v, null, 2);
+}
