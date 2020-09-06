@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <head>
     <title>Ballot Experiment - RChain</title>
-    <link rel="icon" href="favicon.ico">
+    <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.less" />
     <style>
         .vizHash { float: right; border: 1px dotted; padding: 4px }
         #addrViz { background: lightgray }
@@ -9,9 +10,12 @@
         #agendaUriViz {  border: 2px dotted red; }
         #deployStatus { background: lightyellow }
         .setting { text-align: right }
+        .app { margin: 1em }
     </style>
 </head>
 <body>
+    <div class="app">
+    <div class="testNet">
     <h1>RChain Governance</h1>
     <div class="setting">
         <label><small>Phlo limit: <input id="phloLimit" type="number" value="5000000" /></small></label><br />
@@ -70,6 +74,8 @@
         for the <a href="https://github.com/rchain-community/">RChain Community</a><br />
         <small>RCHAIN is a registered trademark of <a href="https://rchain.coop">RChain Cooperative</a>.</small>
     </address>
+    </div>
+    </div>
     <!-- <script type="module"> https://github.com/parcel-bundler/parcel/issues/3927 -->
     <script src='./ballot.js'></script>
 </body>
