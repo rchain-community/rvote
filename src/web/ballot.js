@@ -6,7 +6,6 @@ import { makeRNodeActions, rhoExprToJS } from './rnode-actions';
 import { testNet, getNodeUrls } from '../rchain-networks';
 import { transferMulti_rho } from '../rho/transfer-multi';
 import { lookup_rho } from '../rho/lookup';
-import { forEachObjIndexed } from 'ramda';
 
 const DUST = 1;
 
