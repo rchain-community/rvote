@@ -1,7 +1,6 @@
 // @ts-check
 import jazzicon from 'jazzicon';
 import { getAddrFromEth } from '@tgrospic/rnode-grpc-js';
-import { ethereumAddress } from '../eth/eth-wrapper';
 import { makeRNodeWeb } from '../rnode-web';
 import { makeRNodeActions, rhoExprToJS } from './rnode-actions';
 import { testNet, getNodeUrls } from '../rchain-networks';
@@ -49,7 +48,7 @@ const check = {
  *  ethereumAddress: () => Promise<string>,
  *  }} powers
  */
-function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElement, fetch }) {
+export function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElement, fetch }) {
     const rnodeWeb = makeRNodeWeb({ fetch });
 
     const theElt = id => check.notNull(getElementById(id));
@@ -278,14 +277,3 @@ function response(account, controls) {
         .map(radio => radio.value);
     return transferMulti_rho(account.revAddr, choiceAddrs, DUST);
 }
-
-
-window.addEventListener('DOMContentLoaded', (event) => {
-    buildUI({
-        ethereumAddress,
-        fetch: window.fetch,
-        createElement: tag => document.createElement(tag),
-        getElementById: id => document.getElementById(id),
-        querySelectorAll: selector => document.querySelectorAll(selector),
-    });
-});

@@ -83,6 +83,20 @@
     </address>
     </div>
     </div>
-    <!-- <script type="module"> https://github.com/parcel-bundler/parcel/issues/3927 -->
-    <script src='./ballot.js'></script>
+<script type="module">
+import { ethereumAddress } from './_dist_/eth/eth-wrapper.js';
+
+import { buildUI } from './_dist_/web/ballot.js';
+
+window.addEventListener('DOMContentLoaded', (event) => {
+    buildUI({
+        ethereumAddress,
+        fetch: window.fetch,
+        createElement: tag => document.createElement(tag),
+        getElementById: id => document.getElementById(id),
+        querySelectorAll: selector => document.querySelectorAll(selector),
+    });
+});
+
+</script>
 </body>
