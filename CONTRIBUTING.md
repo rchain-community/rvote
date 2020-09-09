@@ -1,4 +1,16 @@
-trying out snowpack
+
+## Roads not taken
+
+The current edb6ec3 rev results from porting work from
+https://github.com/rchain-community/rnode-client-js/tree/ballot-ui
+git format-patch e4d97ee..c480f4c
+
+after rebasing away history of other designs:
+  - o2r   thru e76e7b64cdc2
+  - rchat thru cb1055f75c91
+  - webui thru 252964964f08
+
+## trying out snowpack
 
 never mind @tgrospic/rnode-grpc-js; go straight to pbjs, elliptic
 
