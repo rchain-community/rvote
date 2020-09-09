@@ -1,6 +1,7 @@
 // @ts-check
 import jazzicon from 'jazzicon';
-import { getAddrFromEth } from '@tgrospic/rnode-grpc-js';
+
+import { getAddrFromEth } from '../vendor/rnode-address';
 import { makeRNodeWeb } from '../rnode-web';
 import { makeRNodeActions, rhoExprToJS } from './rnode-actions';
 import { testNet, getNodeUrls } from '../rchain-networks';
