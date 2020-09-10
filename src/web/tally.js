@@ -4,6 +4,8 @@
 // # The case of a person voting for multiple choices the most recent is used.
 // # the check for the account being allowed to vote is not handled.
 
+// @ts-check
+
 const { assert } = require('console');
 
 const jq = JSON.parse;
@@ -14,27 +16,30 @@ async function main(argv, { fsp, http, echo }) {
   const ballot = argv.length >= 3 ? argv[2]: 'ballotexample.json';
   const server = argv.length >= 4 ? argv[3]: 'kc-strip.madmode.com:7070';
 
-  const toCache = url => `,cache/${url.slice(-20)}`;
-  let whichCurl = curl;
-
   const ballotData = JSON.parse(await fsp.readFile(ballot, 'utf8'));
+
+  let whichCurl = curl;
 
   if (argv.includes('--test')) {
     runTests(ballotData, { fsp });
     return;
   } else if (argv.includes('--cache')) {
-    const plainCurl = curl;
-    const cachingCurl = async (url, { http }) => {
-      const contents = await plainCurl(url, { http });
-      assert(url.match('/api/transfer/'));
-      await fsp.writeFile(toCache(url), contents);
-      return contents;
-    }
-    whichCurl = cachingCurl;
+    whichCurl = cachingCurl(',cache', { fsp, http });
   }
 
   const perItem = await tally(ballotData, server, { curl: whichCurl, echo });
   console.log(perItem);
+}
+
+function cachingCurl(dirname, { fsp, http }) {
+  const toCache = url => `${dirname}/${url.slice(-20)}`;
+
+  return async (url, { http }) => {
+    const contents = await curl(url, { http });
+    assert(url.match('/api/transfer/'));
+    await fsp.writeFile(toCache(url), contents);
+    return contents;
+  }
 }
 
 function curlFromCache(dirname, { fsp }) {
@@ -63,13 +68,13 @@ const testSuite = [
 // TODO: move this from ./src to ./test
 async function runTests(ballotData, { fsp }) {
   // TODO: ballot data should be part of test input
-  for (testCase of testSuite) {
+  for (const testCase of testSuite) {
     let result = 'pass';
     const { dirname, expected } = testCase;
-    curl = curlFromCache(dirname, { fsp });
+    const curl = curlFromCache(dirname, { fsp });
     const actual = await tally(ballotData, 'TEST_SERVER', { curl, echo: console.log });
     // console.log(JSON.stringify({ actual, expected }, null, 2));
-    for ([id, value] of Object.entries(expected)) {
+    for (const [id, value] of Object.entries(expected)) {
       if (actual[id].yes !== value.yes) {
         console.error({ id, field: 'yes', expected: value.yes, actual: actual[id].yes });
         result = 'FAIL';
@@ -92,13 +97,13 @@ async function tally(ballotData, server, { curl, echo }) {
 
   const perItem = {};
 
-  for ([id, item] of Object.entries(ballotData)) {
+  for (const [id, item] of Object.entries(ballotData)) {
     const { shortDesc: desc, yesAddr, noAddr } = item;
     echo(desc);
 
     const yesVotes = uniq(voteData[id].yes
                           .map(tx => tx.fromAddr));
-    const yes = yesVotes.length;
+    let yes = yesVotes.length;
     const noVotes = uniq(voteData[id].no
                          .map(tx => tx.fromAddr));
     let no = noVotes.length;
@@ -110,8 +115,8 @@ async function tally(ballotData, server, { curl, echo }) {
     if (double.length !== 0) {
       echo(` ALERT: ${double} voted both yes and no.`);
       const doubleVotes = await voterTransactions(double, server, { curl });
-      for (voter of double) {
-        for (acct of doubleVotes[voter].map(tx => tx.toAddr)) {
+      for (const voter of double) {
+        for (const acct of doubleVotes[voter].map(tx => tx.toAddr)) {
           if (acct === yesAddr ) {
             // echo(`yes found`)
             no = no - 1;
@@ -133,7 +138,7 @@ async function tally(ballotData, server, { curl, echo }) {
 
 async function voteTransactions(ballotData, server, { curl }) {
   const votes = {};
-  for ([id, item] of Object.entries(ballotData)) {
+  for (const [id, item] of Object.entries(ballotData)) {
     const { shortDesc, yesAddr, noAddr } = item;
 
     votes[id] = {
@@ -146,7 +151,7 @@ async function voteTransactions(ballotData, server, { curl }) {
 
 async function voterTransactions(fromAddrs, server, { curl }) {
   const byVoter = {};
-  for (voter of fromAddrs) {
+  for (const voter of fromAddrs) {
     byVoter[voter] = jq(await curl(`http://${server}/api/transfer/${voter}`));
   }
   return byVoter;
@@ -176,6 +181,6 @@ function uniq(items) {
 
 main(process.argv, {
   fsp: require('fs').promises,
-  http: new require('http'),
+  http: require('http'),
   echo: console.log,
 }).catch(err => console.error(err));
