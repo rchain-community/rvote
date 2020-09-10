@@ -4,7 +4,6 @@
 // # The case of a person voting for multiple choices the most recent is used.
 // # the check for the account being allowed to vote is not handled.
 
-const { asPromise } = require('./asPromise');
 const { assert } = require('console');
 
 const jq = JSON.parse;
