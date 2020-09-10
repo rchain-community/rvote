@@ -40,8 +40,8 @@ async function main(argv, { fsp, http, echo }) {
 function curlFromCache(dirname, { fsp }) {
   const toCache = url => `../../test/${dirname}/${url.slice(-20)}`;
   const curl = async (url, _powers) => {
-    console.log('look ma, no network!', url);
-   return await fsp.readFile(toCache(url), 'utf8');
+    // console.log('look ma, no network!', url);
+    return await fsp.readFile(toCache(url), 'utf8');
   }
   return curl;
 }
@@ -69,11 +69,14 @@ async function runTests(ballotData, { fsp }) {
     for ([id, value] of Object.entries(expected)) {
       if (actual[id].yes !== value.yes) {
         console.error({ id, field: 'yes', expected: value.yes, actual: actual[id].yes });
+        result = 'FAIL';
       }
       if (actual[id].no !== value.no) {
         console.error({ id, field: 'no', expected: value.no, actual: actual[id].no });
+        result = 'FAIL';
       }
     }
+    console.log({ dirname, result });
   }
 }
 
