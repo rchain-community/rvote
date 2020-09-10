@@ -17,7 +17,12 @@ async function main(argv, { fsp, http, echo }) {
   const toCache = url => `,cache/${url.slice(-20)}`;
   let whichCurl = curl;
 
-  if (argv.includes('--cache')) {
+  const ballotData = JSON.parse(await fsp.readFile(ballot, 'utf8'));
+
+  if (argv.includes('--test')) {
+    runTests(ballotData, { fsp });
+    return;
+  } else if (argv.includes('--cache')) {
     const plainCurl = curl;
     const cachingCurl = async (url, { http }) => {
       const contents = await plainCurl(url, { http });
@@ -26,17 +31,50 @@ async function main(argv, { fsp, http, echo }) {
       return contents;
     }
     whichCurl = cachingCurl;
-  } else if (argv.includes('--test')) {
-    const curlFromCache = async (url, _powers) => {
-      console.log('look ma, no network!', url);
-      return await fsp.readFile(toCache(url), 'utf8');
-    }
-    whichCurl = curlFromCache;
   }
 
-  const ballotData = JSON.parse(await fsp.readFile(ballot, 'utf8'));
+  const perItem = await tally(ballotData, server, { curl: whichCurl, echo });
+  console.log(perItem);
+}
 
-  await tally(ballotData, server, { curl: whichCurl, echo });
+function curlFromCache(dirname, { fsp }) {
+  const toCache = url => `../../test/${dirname}/${url.slice(-20)}`;
+  const curl = async (url, _powers) => {
+    console.log('look ma, no network!', url);
+   return await fsp.readFile(toCache(url), 'utf8');
+  }
+  return curl;
+}
+
+const testSuite = [
+  {
+    dirname: 'test-dup-order',
+    expected: {
+      'Member Swag': { yes: 1, no: 2 },
+      'Board: DaD': { yes: 1, no: 2 },
+      'Board: DoD': { yes: 1, no: 2 },
+      'Board: WEC': { yes: 1, no: 2 },
+      'Board: RR': { yes: 1, no: 1 },
+    }
+  },
+];
+
+async function runTests(ballotData, { fsp }) {
+  // TODO: ballot data should be part of test input
+  for (testCase of testSuite) {
+    const { dirname, expected } = testCase;
+    curl = curlFromCache(dirname, { fsp });
+    const actual = await tally(ballotData, 'TEST_SERVER', { curl, echo: console.log });
+    // console.log(JSON.stringify({ actual, expected }, null, 2));
+    for ([id, value] of Object.entries(expected)) {
+      if (actual[id].yes !== value.yes) {
+        console.error({ id, field: 'yes', expected: value.yes, actual: actual[id].yes });
+      }
+      if (actual[id].no !== value.no) {
+        console.error({ id, field: 'no', expected: value.no, actual: actual[id].no });
+      }
+    }
+  }
 }
 
 async function tally(ballotData, server, { curl, echo }) {
@@ -45,6 +83,8 @@ async function tally(ballotData, server, { curl, echo }) {
   const lastblock = '???????'; // when election is over
 
   const voteData = await voteTransactions(ballotData, server, { curl });
+
+  const perItem = {};
 
   for ([id, item] of Object.entries(ballotData)) {
     const { shortDesc: desc, yesAddr, noAddr } = item;
@@ -56,11 +96,12 @@ async function tally(ballotData, server, { curl, echo }) {
     const noVotes = uniq(voteData[id].no
                          .map(tx => tx.fromAddr));
     let no = noVotes.length;
+    perItem[id] = { yes: yes, no: no };
     echo(`  ${yes} yes votes ${yesAddr}`);
     echo(`  ${no} no votes ${noAddr}`);
 
     const double = Array.from(new Set([...yesVotes].filter(x => new Set(noVotes).has(x))));
-    if (double.size !== 0) {
+    if (double.length !== 0) {
       echo(` ALERT: ${double} voted both yes and no.`);
       const doubleVotes = await voterTransactions(double, server, { curl });
       const tac = items => items.reverse();
@@ -69,10 +110,12 @@ async function tally(ballotData, server, { curl, echo }) {
           if (acct === yesAddr ) {
             // echo(`yes found`)
             no = no - 1;
+            perItem[id].no = no;
             break;
           } else if (acct === noAddr) {
             //  echo no found
             yes = yes - 1;
+            perItem[id].yes = no;
             break;
           }
         }
@@ -80,6 +123,7 @@ async function tally(ballotData, server, { curl, echo }) {
       echo(`  ${yes} yes votes ${yesAddr}`);echo(`  ${no} no votes ${noAddr}`);
     }
   }
+  return perItem;
 }
 
 async function voteTransactions(ballotData, server, { curl }) {
