@@ -46,22 +46,25 @@ function curlFromCache(dirname, { fsp }) {
   return curl;
 }
 
+// TODO: move this from ./src to ./test
 const testSuite = [
   {
     dirname: 'test-dup-order',
     expected: {
-      'Member Swag': { yes: 1, no: 2 },
+      'Member Swag': { yes: 1, no: 1 },
       'Board: DaD': { yes: 1, no: 2 },
       'Board: DoD': { yes: 1, no: 2 },
-      'Board: WEC': { yes: 1, no: 2 },
-      'Board: RR': { yes: 1, no: 1 },
+      'Board: WEC': { yes: 2, no: 2 },
+      'Board: RR': { yes: 2, no: 1 },
     }
   },
 ];
 
+// TODO: move this from ./src to ./test
 async function runTests(ballotData, { fsp }) {
   // TODO: ballot data should be part of test input
   for (testCase of testSuite) {
+    let result = 'pass';
     const { dirname, expected } = testCase;
     curl = curlFromCache(dirname, { fsp });
     const actual = await tally(ballotData, 'TEST_SERVER', { curl, echo: console.log });
@@ -107,9 +110,8 @@ async function tally(ballotData, server, { curl, echo }) {
     if (double.length !== 0) {
       echo(` ALERT: ${double} voted both yes and no.`);
       const doubleVotes = await voterTransactions(double, server, { curl });
-      const tac = items => items.reverse();
       for (voter of double) {
-        for (acct in tac(doubleVotes[voter]).map(tx => tx.toAddr)) {
+        for (acct of doubleVotes[voter].map(tx => tx.toAddr)) {
           if (acct === yesAddr ) {
             // echo(`yes found`)
             no = no - 1;
