@@ -17,20 +17,18 @@ async function main(argv, { fsp, http, echo }) {
   const ballotData = JSON.parse(await fsp.readFile(ballot, 'utf8'));
   // console.log('ballot:', ballotData);
 
-  const shortDesc = Object.values(ballotData).map(item => item.shortDesc);
-  const yesAddr = Object.values(ballotData).map(item => item.yesAddr);
-  const noAddr = Object.values(ballotData).map(item => item.noAddr);
-
   const lastblock = '???????'; // when election is over
 
-  for (item of Object.values(ballotData)) {
+  const voteData = await voteTransactions(ballotData, server, { http });
+
+  for ([id, item] of Object.entries(ballotData)) {
     const { shortDesc: desc, yesAddr, noAddr } = item;
     echo(desc);
 
-    const yesVotes = uniq(jq(await curl(`http://${server}/api/transfer/${yesAddr}`, { http }))
+    const yesVotes = uniq(voteData[id].yes
                           .map(tx => tx.fromAddr));
     const yes = yesVotes.length;
-    const noVotes = uniq(jq(await curl(`http://${server}/api/transfer/${noAddr}`, { http }))
+    const noVotes = uniq(voteData[id].no
                          .map(tx => tx.fromAddr));
     let no = noVotes.length;
     echo(`  ${yes} yes votes ${yesAddr}`);
@@ -39,9 +37,10 @@ async function main(argv, { fsp, http, echo }) {
     const double = new Set([...yesVotes].filter(x => new Set(noVotes).has(x)));
     if (double.size !== 0) {
       echo(` ALERT: ${Array.from(double)} voted both yes and no.`);
+      const doubleVotes = await voterTransactions(double, server, { http });
       const tac = items => items.reverse();
       for (voter of double) {
-        for (acct in tac(jq(await curl(`http://${server}/api/transfer/${voter}`, { http })).map(tx => tx.toAddr))) {
+        for (acct in tac(doubleVotes[voter]).map(tx => tx.toAddr)) {
           if (acct === yesAddr ) {
             // echo(`yes found`)
             no = no - 1;
@@ -57,6 +56,28 @@ async function main(argv, { fsp, http, echo }) {
     }
   }
 }
+
+async function voteTransactions(ballotData, server, { http }) {
+  const votes = {};
+  for ([id, item] of Object.entries(ballotData)) {
+    const { shortDesc, yesAddr, noAddr } = item;
+
+    votes[id] = {
+      yes: jq(await curl(`http://${server}/api/transfer/${yesAddr}`, { http })),
+      no: jq(await curl(`http://${server}/api/transfer/${noAddr}`, { http })),
+    };
+  }
+  return votes;
+}
+
+async function voterTransactions(fromAddrs, server, { http }) {
+  const byVoter = {};
+  for (voter of fromAddrs) {
+    byVoter[voter] = jq(await curl(`http://${server}/api/transfer/${voter}`, { http }));
+  }
+  return byVoter;
+}
+
 
 function curl(url, { http }) {
   // console.log('get', { url });
