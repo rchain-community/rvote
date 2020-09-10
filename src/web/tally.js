@@ -5,6 +5,7 @@
 // # the check for the account being allowed to vote is not handled.
 
 const { asPromise } = require('./asPromise');
+const { assert } = require('console');
 
 const jq = JSON.parse;
 
@@ -14,12 +15,37 @@ async function main(argv, { fsp, http, echo }) {
   const ballot = argv.length >= 3 ? argv[2]: 'ballotexample.json';
   const server = argv.length >= 4 ? argv[3]: 'kc-strip.madmode.com:7070';
 
+  const toCache = url => `,cache/${url.slice(-20)}`;
+  let whichCurl = curl;
+
+  if (argv.includes('--cache')) {
+    const plainCurl = curl;
+    const cachingCurl = async (url, { http }) => {
+      const contents = await plainCurl(url, { http });
+      assert(url.match('/api/transfer/'));
+      await fsp.writeFile(toCache(url), contents);
+      return contents;
+    }
+    whichCurl = cachingCurl;
+  } else if (argv.includes('--test')) {
+    const curlFromCache = async (url, _powers) => {
+      console.log('look ma, no network!', url);
+      return await fsp.readFile(toCache(url), 'utf8');
+    }
+    whichCurl = curlFromCache;
+  }
+
   const ballotData = JSON.parse(await fsp.readFile(ballot, 'utf8'));
+
+  await tally(ballotData, server, { curl: whichCurl, echo });
+}
+
+async function tally(ballotData, server, { curl, echo }) {
   // console.log('ballot:', ballotData);
 
   const lastblock = '???????'; // when election is over
 
-  const voteData = await voteTransactions(ballotData, server, { http });
+  const voteData = await voteTransactions(ballotData, server, { curl });
 
   for ([id, item] of Object.entries(ballotData)) {
     const { shortDesc: desc, yesAddr, noAddr } = item;
@@ -34,10 +60,10 @@ async function main(argv, { fsp, http, echo }) {
     echo(`  ${yes} yes votes ${yesAddr}`);
     echo(`  ${no} no votes ${noAddr}`);
 
-    const double = new Set([...yesVotes].filter(x => new Set(noVotes).has(x)));
+    const double = Array.from(new Set([...yesVotes].filter(x => new Set(noVotes).has(x))));
     if (double.size !== 0) {
-      echo(` ALERT: ${Array.from(double)} voted both yes and no.`);
-      const doubleVotes = await voterTransactions(double, server, { http });
+      echo(` ALERT: ${double} voted both yes and no.`);
+      const doubleVotes = await voterTransactions(double, server, { curl });
       const tac = items => items.reverse();
       for (voter of double) {
         for (acct in tac(doubleVotes[voter]).map(tx => tx.toAddr)) {
@@ -57,23 +83,23 @@ async function main(argv, { fsp, http, echo }) {
   }
 }
 
-async function voteTransactions(ballotData, server, { http }) {
+async function voteTransactions(ballotData, server, { curl }) {
   const votes = {};
   for ([id, item] of Object.entries(ballotData)) {
     const { shortDesc, yesAddr, noAddr } = item;
 
     votes[id] = {
-      yes: jq(await curl(`http://${server}/api/transfer/${yesAddr}`, { http })),
-      no: jq(await curl(`http://${server}/api/transfer/${noAddr}`, { http })),
+      yes: jq(await curl(`http://${server}/api/transfer/${yesAddr}`)),
+      no: jq(await curl(`http://${server}/api/transfer/${noAddr}`)),
     };
   }
   return votes;
 }
 
-async function voterTransactions(fromAddrs, server, { http }) {
+async function voterTransactions(fromAddrs, server, { curl }) {
   const byVoter = {};
   for (voter of fromAddrs) {
-    byVoter[voter] = jq(await curl(`http://${server}/api/transfer/${voter}`, { http }));
+    byVoter[voter] = jq(await curl(`http://${server}/api/transfer/${voter}`));
   }
   return byVoter;
 }
