@@ -16,23 +16,17 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   echo  "$desc"
   yesVotes=$(curl -s http://"$server"/api/transfer/"$yesAddr"| jq -r '.[].fromAddr'|sort -u)
   yes=$(echo "$yesVotes"|wc -l)
-  echo "$yesVotes" yesVotes
   noVotes=$(curl -s http://"$server"/api/transfer/"$noAddr"| jq -r '.[].fromAddr'|sort -u)
   no=$(echo "$noVotes"|wc -l)
-  echo "$noVotes" novotes
-  echo  "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr"
   double=$(printf "$yesVotes\n$noVotes\n"|sort|uniq -d)
   if [ "$double" != "" ]; then
-    echo ALERT: "$double" voted both yes and no.
     for voter in $double; do
-#           curl -s http://$server/api/transfer/$voter| jq -r '.|.[].deploy.validAfterBlockNumber'
-            # .| {xxx: .[].deploy.validAfterBlockNumber}
       for acct in $(curl -s http://"$server"/api/transfer/"$voter"| jq -r '.|.[].toAddr'); do
         if [ "$acct" = "$yesAddr" ]; then : echo yes found; let no=no-1; break
         elif [ "$acct" = "$noAddr" ]; then : echo no found; let yes=yes-1; break
         fi
       done
     done
-    echo  "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr"
   fi
+  echo  "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr"
 done
