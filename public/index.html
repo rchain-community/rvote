@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <head>
     <title>Ballot Experiment - RChain</title>
-    <link rel="icon" href="favicon.ico" />
-    <link rel="stylesheet" href="style.less" />
+    <link rel="icon" href="./_dist_/vendor/rnode-client-js/src/web/favicon.ico" />
     <style>
+        @import './_dist_/vendor/rnode-client-js/src/web/style.less';
         .vizHash { float: right; border: 1px dotted; padding: 4px }
         #addrViz { background: lightgray }
         .coop { background: #eba3bb; /* reddish for RChain */ }
@@ -84,7 +84,7 @@
     </div>
     </div>
 <script type="module">
-import { ethereumAddress } from './_dist_/eth/eth-wrapper.js';
+import { ethereumAddress } from './_dist_/vendor/rnode-client-js/src/eth/eth-wrapper.js';
 
 import { buildUI } from './_dist_/web/ballot.js';
 

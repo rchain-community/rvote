@@ -1,10 +1,11 @@
 // @ts-check
 import jazzicon from 'jazzicon';
 
-import { getAddrFromEth } from '../vendor/rnode-address';
-import { makeRNodeWeb } from '../rnode-web';
-import { makeRNodeActions, rhoExprToJS } from './rnode-actions';
-import { testNet, getNodeUrls } from '../rchain-networks';
+import { makeRNodeWeb } from '../vendor/rnode-client-js/src/rnode-web';
+import { makeRNodeActions, rhoExprToJS } from '../vendor/rnode-client-js/src/web/rnode-actions';
+import { testNet, getNodeUrls } from '../vendor/rnode-client-js/src/rchain-networks';
+import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
+
 import { transferMulti_rho } from '../rho/transfer-multi';
 import { lookup_rho } from '../rho/lookup';
 
