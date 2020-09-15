@@ -26,7 +26,6 @@
   },
   "scripts": {
     "realclean": "rm -rf dist build node_modules web_modules",
-    "postinstall": "npm link ../rchain-proto",
     "start": "snowpack dev",
     "build": "snowpack build",
     "format": "prettier --write \"src/**/*.js\"",
