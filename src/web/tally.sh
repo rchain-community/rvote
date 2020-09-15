@@ -11,23 +11,23 @@ server=${2-kc-strip.madmode.com:7070}
 shortDescs=$(cat "$ballot"|jq -r '.|.[].shortDesc')
 yesAddrs=$(cat "$ballot"|jq -r '.|.[].yesAddr')
 noAddrs=$(cat "$ballot"|jq -r '.|.[].noAddr')
-lastblock=159959156003900 # 100 time current for now
+timestamp=159959156003900 # 100 times current for now. blocknumber not easy to get
 for n in $(seq $(echo "$shortDescs"|wc -l)); do
   desc=$(echo "$shortDescs"|sed -n "${n}"p)
   yesAddr=$(echo "$yesAddrs"|sed -n "${n}"p)
   noAddr=$(echo "$noAddrs"|sed -n "${n}"p)
   echo  "$desc"
-  yesVotes=$(curl -s http://"$server"/api/transfer/"$yesAddr"| jq -r '.[].fromAddr'|sort -u)
+  yesVotes=$(curl -s http://"$server"/api/transfer/"$yesAddr"| jq -r ".[] | select(.deploy.timestamp < $timestamp) | .fromAddr"|sort -u)
   yes=$(echo "$yesVotes"|wc -l)
   for acct in $yesVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let yes=yes-1;fi
   done
+  noVotes=$(curl -s http://"$server"/api/transfer/"$noAddr"| jq -r ".[] | select(.deploy.timestamp < $timestamp) | .fromAddr"|sort -u)
+  no=$(echo "$noVotes"|wc -l)
   for acct in $noVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let no=no-1;fi
   done
   $debug  "$yesVotes" yesVotes
-  noVotes=$(curl -s http://"$server"/api/transfer/"$noAddr"| jq -r '.[].fromAddr'|sort -u)
-  no=$(echo "$noVotes"|wc -l)
   $debug  "$noVotes" novotes
   double=$(printf "$yesVotes\n$noVotes\n"|sort|uniq -d)
   printf "$yesVotes\n$noVotes\n" >>/tmp/voters
@@ -45,3 +45,5 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   fi
   echo  "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr"
 done
+#cat /tmp/voters|sort|uniq>voters #for testing only
+# cat voters |sed '1,$s/^/"/;1,$s/$/",/;$s/,$/\]/;1s/^/\[/' # acct text list to json list
