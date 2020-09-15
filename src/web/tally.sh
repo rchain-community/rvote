@@ -34,8 +34,6 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   if [ "$double" != "" ]; then
     $debug  ALERT: "$double" voted both yes and no.
     for voter in $double; do
-#           curl -s http://$server/api/transfer/$voter| jq -r '.|.[].deploy.validAfterBlockNumber'
-            # .| {xxx: .[].deploy.validAfterBlockNumber}
       for acct in $(curl -s http://"$server"/api/transfer/"$voter"| jq -r '.|.[].toAddr'); do
         if [ "$acct" = "$yesAddr" ]; then : echo yes found; let no=no-1; break
         elif [ "$acct" = "$noAddr" ]; then : echo no found; let yes=yes-1; break
