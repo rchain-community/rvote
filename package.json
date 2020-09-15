@@ -39,7 +39,6 @@
     },
     "plugins": []
   },
-  "type": "module",
   "dependencies": {
     "base-58": "0.0.1",
     "blakejs": "^1.1.0",
