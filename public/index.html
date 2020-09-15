@@ -92,6 +92,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     buildUI({
         ethereumAddress,
         fetch: window.fetch,
+        now: Date.now,
         createElement: tag => document.createElement(tag),
         getElementById: id => document.getElementById(id),
         querySelectorAll: selector => document.querySelectorAll(selector),

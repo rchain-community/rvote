@@ -46,11 +46,12 @@ const check = {
  *  querySelectorAll: typeof document.querySelectorAll,
  *  createElement: typeof document.createElement,
  *  fetch: typeof window.fetch,
+ *  now: typeof Date.now,
  *  ethereumAddress: () => Promise<string>,
  *  }} powers
  */
-export function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElement, fetch }) {
-    const rnodeWeb = makeRNodeWeb({ fetch });
+export function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElement, fetch, now }) {
+    const rnodeWeb = makeRNodeWeb({ fetch, now });
 
     const theElt = id => check.notNull(getElementById(id));
     const ui = {
