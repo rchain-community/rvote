@@ -40,12 +40,15 @@
     "plugins": []
   },
   "dependencies": {
-    "base-58": "0.0.1",
-    "blakejs": "^1.1.0",
-    "elliptic": "^6.5.3",
-    "google-protobuf": "^3.13.0",
     "jazzicon": "^1.5.0",
+    "blakejs": "^1.1.0",
+    "bs58": "^4.0.1",
+    "elliptic": "^6.5.3",
+    "ethereumjs-util": "^6.2.1",
+    "google-protobuf": "^3.13.0",
+    "htm": "^3.0.4",
     "js-sha3": "^0.8.0",
-    "ramda": "^0.27.1"
+    "mithril": "^2.0.4",
+    "ramda": "^0.26.1"
   }
 }
