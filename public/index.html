@@ -13,6 +13,7 @@
       .setting { text-align: right }
       table td.choice { text-align: center; }
     </style>
+    <link rel="stylesheet" href="https://shepherdjs.dev/dist/css/shepherd.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
           integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous" />
   </head>
@@ -29,17 +30,24 @@
         </div>
 
         <button id="signIn" class="navbar-right">Sign In</button>
-        <p class="hidden navbar-text navbar-right">Signed in as <span id="addrViz" class="btn vizHash">...</span></p>
+        <p class="navbar-text navbar-right">Signed in as <span id="addrViz" class="btn vizHash">...</span>
+        <br />
+        <em id="deployStatus">...</em>
+      </p>
+
       </div>
     </nav>
     <div class="app container">
       <div class="testNet">
         <div class="jumbotron">
           <h1>RChain Annual Meeting 2020 Ballot <sup>(Beta Test)</sup></h1>
+          <hr />
+          <button id='startTour' class="btn btn-primary">Show Me How</button>
         </div>
         <p>For background, see</p>
         <ul>
           <li><cite><a href="https://blog.rchain.coop/2020/07/09/notice-of-annual-meeting-2020/"
+            id="meetingNotice"
                        >Notice of Annual Meeting 2020</a> RChain Blog July 9</cite></li>
           <li><a href="https://medium.com/@jimscarver/using-metamask-with-rchain-2f05311976f"
                  >Using MetaMask with RChain</a></li>
@@ -68,7 +76,6 @@
                   <textarea id="response" rows="4" cols="80"></textarea>
                   <div class="setting">
                     <label><small>Phlo limit: <input id="phloLimit" type="number" value="0.05" /></small></label><br />
-                    <em id="deployStatus"></em>
                   </div>
                   <input id="submitResponse" type="submit" value="Sign and Submit" />
                 </div>
@@ -106,5 +113,14 @@ window.addEventListener('DOMContentLoaded', (event) => {
             integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
             integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+<script type="module">
+
+import { addTour } from './_dist_/web/ballot.js';
+
+window.addEventListener('DOMContentLoaded', (event) => {
+  addTour();
+});
+</script>
   </body>
 </html>

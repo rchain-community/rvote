@@ -1,5 +1,8 @@
 // @ts-check
 import jazzicon from 'jazzicon';
+import Shepherd from 'shepherd.js'; // WARNING: Ambient access to Dom
+import m from 'mithril'; // WARNIN: Ambient access to Dom
+import htm from 'htm';
 
 import { makeRNodeWeb } from '../vendor/rnode-client-js/src/rnode-web';
 import { makeRNodeActions, rhoExprToJS } from '../vendor/rnode-client-js/src/web/rnode-actions';
@@ -12,6 +15,8 @@ import { lookup_rho } from '../rho/lookup';
 const DUST = 1;
 
 const { entries } = Object;
+
+const html = htm.bind(m);
 
 const check = {
     notNull(x, context) {
@@ -207,28 +212,25 @@ function runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus }) {
 /**
  * @param {QAs} qas
  * @param { Element } questionList
- * @param {{ createElement: typeof document.createElement }} powers
  */
-function showQuestions(qas, questionList, { createElement }) {
-    /** @type { (tag: string, attrs: {[name: string]: string}, children: Array<Element | string>) => Element } */
-    function elt(tag, attrs = {}, children = []) {
-        const it = createElement(tag);
-        entries(attrs).forEach(([name, value]) => it.setAttribute(name, value));
-        children.forEach(ch => it.append(ch));
-        return it;
-    };
+function showQuestions(qas, questionList) {
     questionList.innerHTML = '';
-    entries(qas).forEach(([id, { shortDesc, docLink, yesAddr, noAddr }], qix) => {
-        const link = docLink ? [elt('br'), 'see: ', elt('a', { href: docLink, target: '_blank' }, [id])] : [];
+
+    const markup = entries(qas).map(([id, { shortDesc, docLink, yesAddr, noAddr }], qix) => {
         const name = `q${qix}`;
-        /** @type { (label: string, value: string) => Element } */
-        const radio = (label, value) => elt('td', { class: 'choice' }, [
-            elt('input', { name, value, type: 'radio', title: value, ...(value === '' ? { checked: 'checked' } : {}) }),
-            ]);
-        const qrow = elt('tr', {}, [elt('td', {}, [id]), elt('td', {}, [shortDesc, ...link]),
-            radio('no', noAddr), radio('abstain', ''), radio('yes', yesAddr)])
-        questionList.appendChild(qrow);
+        /** @type { (value: string, props?: Object) => any } */
+        const radio = (value, props = {}) => html`
+          <td class="choice">
+            <input type="radio" ...${{name, value, title: value, ...props}} />
+          </td>`;
+        return html`
+          <tr><td>${id}</td>
+          <td>${shortDesc}
+           ${docLink ? html`<br />see: <a href=${docLink} target="_blank">${id}</a>` : ''}</td>
+          ${radio(noAddr)} ${radio('', {checked: 'checked'})} ${radio(yesAddr)}
+          </dd>`;
     });
+    m.render(questionList, markup);
 }
 
 /**
@@ -275,4 +277,42 @@ function response(account, controls) {
         .reduce((acc, cur, _ix, _src) => cur.checked && cur.value > '' ? [...acc, cur] : acc, [])
         .map(radio => radio.value);
     return transferMulti_rho(account.revAddr, choiceAddrs, DUST);
+}
+
+export function addTour() {
+  const tour = new Shepherd.Tour({
+    defaultStepOptions: {
+      cancelIcon: { enabled: true },
+      classes: 'alert alert-info',
+      buttons: [{ text: 'Next', action: () => tour.next() }],
+      scrollTo: { behavior: 'smooth', block: 'center' }
+    }
+  });
+
+  [
+    { element: "#meetingNotice", content: "Do you have a REV Address registered with the coop? Does it have at least 0.1 REV?" },
+    {
+      element: "#signIn",
+      content: "Press <b>Sign In</b> to connect to Metamask. Choose the ethereum account corresponding to your REV address."
+    },
+    {
+      element: "#questionList",
+      content: "Once you are signed in, the ballot quesitions appear here, along with links for more information."
+    },
+    {
+      element: "#response",
+      content: "The rholang transactions representing your responses will be prepared for you.",
+    },
+    {
+      element: "#submitResponse",
+      content: "When you are ready, press <b>Sign and Submit</b>. This will bring up metamask in order to sign your rholang response."
+    },
+    {
+      element: "#deployStatus",
+      content: "Confirm here that your transactions succeeded. It could fail if you don't have any REV."
+    },
+  ].forEach(({ element, content }) => {
+    tour.addStep({ text: content, attachTo: { element, on: 'auto' } });
+  });
+  document.querySelector('#startTour').addEventListener('click', _e => tour.start());
 }
