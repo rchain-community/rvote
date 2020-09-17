@@ -1,102 +1,110 @@
 <!DOCTYPE html>
-<head>
+<html lang="en">
+  <head>
     <title>Ballot Experiment - RChain</title>
-    <link rel="icon" href="favicon.ico" />
-    <link rel="stylesheet" href="style.less" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="./_dist_/vendor/rnode-client-js/src/web/favicon.ico" />
     <style>
-        .vizHash { float: right; border: 1px dotted; padding: 4px }
-        #addrViz { background: lightgray }
-        .coop { background: #eba3bb; /* reddish for RChain */ }
-        #agendaUriViz {  border: 2px dotted red; }
-        #deployStatus { background: lightyellow }
-        .setting { text-align: right }
-        .app { margin: 1em }
-        table tr:nth-child(even) { background: lightgray; }
-        table td, table th { border: 1px solid #AAAAAA; }
-        table thead th { text-align: center; }
-        table td.choice { text-align: center; }
+      body { padding-top: 120px; }
+      .coop { background: #eba3bb; /* reddish for RChain */ }
+      #agendaUriViz {  border: 2px dotted red; }
+      #deployStatus { background: lightyellow }
+      .setting { text-align: right }
+      table td.choice { text-align: center; }
     </style>
-</head>
-<body>
-    <div class="app">
-    <div class="testNet">
-    <h1>RChain Governance</h1>
-    <div class="setting">
-        <label><small>Phlo limit: <input id="phloLimit" type="number" value="5000000" /></small></label><br />
-        <em id="deployStatus"></em>
-    </div>
-    <form id='ballotForm'>
-        <fieldset>
-            <legend>Ballot</legend>
-            <p>Use the private key for your <a href="#govRevAddr">annual meeting REV address<sup>1</sup></a>
-                to set up a <a href="#revmm">MetaMask-style account<sup>2</sup></a>
-                and then use the button below to connect it to this ballot:</p>
-            <div>
-                <div id="addrViz" class="vizHash"></div>
-                <button id="pickAccount">Pick Account</button>
-                <input id="REVAddress" readonly="readonly" size="60" />
-            </div>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous" />
+  </head>
+  <body>
+    <nav class="navbar fixed-top navbar-light bg-light">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="https://github.com/rchain-community/">
+            <img alt="RChain Community" src="https://avatars1.githubusercontent.com/u/43198800?s=88&v=4">
+          </a>
+        </div>
+        <div class="progress" style="width: 50em">
+          <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+        </div>
 
-            <br />
-            <p>The RChain secretary <em>or rather, someone acting like it, for testing purposes</em> has stored
-            the questions and candidate responses on the chain. <strong>Carefully verify this URI against official
-                communications from the RChain secretary.</strong>
-            </p>
-            <label>
-                <div id="agendaUriViz" class="vizHash coop"></div>
-                Agenda URI:
-                <!--  added to testnet Sep 6, take 5: yes/no rev addresses -->
-                <input id="agendaURI" size="60" class="coop"
-                 value="rho:id:ar17ohqq83kx7a16nbfquwu9gxidduk9hstgbs9gkbj63o8gqyh1ye" />
-            </label>
-            <br />
-            <button id="getQuestions">Get Questions</button>
-            <table>
+        <button id="signIn" class="navbar-right">Sign In</button>
+        <p class="hidden navbar-text navbar-right">Signed in as <span id="addrViz" class="btn vizHash">...</span></p>
+      </div>
+    </nav>
+    <div class="app container">
+      <div class="testNet">
+        <div class="jumbotron">
+          <h1>RChain Annual Meeting 2020 Ballot <sup>(Beta Test)</sup></h1>
+        </div>
+        <p>For background, see</p>
+        <ul>
+          <li><cite><a href="https://blog.rchain.coop/2020/07/09/notice-of-annual-meeting-2020/"
+                       >Notice of Annual Meeting 2020</a> RChain Blog July 9</cite></li>
+          <li><a href="https://medium.com/@jimscarver/using-metamask-with-rchain-2f05311976f"
+                 >Using MetaMask with RChain</a></li>
+
+        </ul>
+        <form id='ballotForm'>
+          <fieldset class="panel panel-default">
+            <div class="panel-body">
+              <br />
+              <table class="table table-condensed table-hover table-bordered">
                 <thead><tr><th>ID</th><th>Short Description</th><th>Oppose</th><th>Abstain</th><th>Support</th></tr></thead>
                 <tbody id="questionList">
 
                 </tbody>
-            </table>
-            <p>Your response, in rholang:</p>
-            <textarea id="response" rows="12" cols="80"></textarea>
-            <br />
-            <input id="submitResponse" type="submit" />
-        </fieldset>
-    </form>
-    <ol>
-        <li id="govRevAddr">
-            According to a <a href="https://github.com/rchain/board/tree/master/2020/06-23#bod-resolution-member-rev-address-for-voting"
-            >23 Jun resolution of the RChain Board of Directors</a>,
-            <strong>members must provide a REV address to the Co-op
-            to vote in the Annual General Meeting</strong>.
-        </li>
-        <li id="revmm">
-            As explained in <a href="https://medium.com/@jimscarver/using-metamask-with-rchain-2f05311976f"
-            >Using MetaMask with RChain</a>, MetaMask (or a compatible tool) can be used to sign RChain transactions.
-        </li>
-    </ol>
-    <hr />
-    <address>
-        Sep 2020 by Dan Connolly<br />
-        for the <a href="https://github.com/rchain-community/">RChain Community</a><br />
-        <small>RCHAIN is a registered trademark of <a href="https://rchain.coop">RChain Cooperative</a>.</small>
-    </address>
-    </div>
+              </table>
+              <label>
+                Agenda URI:
+                <input id="agendaURI" size="60" class="coop"
+                       value="rho:id:ox38jie3k9tiot97fah831muos1waehtdo4mq1ixpzhda4r8gsybej" />
+                <span id="agendaUriViz" class="btn vizHash coop"></span>
+              </label>
+              <div class="card">
+                <div class="card-body">
+                  <h3>Sign and Submit</h3>
+                  <p>Your response, in rholang:</p>
+                  <textarea id="response" rows="4" cols="80"></textarea>
+                  <div class="setting">
+                    <label><small>Phlo limit: <input id="phloLimit" type="number" value="0.05" /></small></label><br />
+                    <em id="deployStatus"></em>
+                  </div>
+                  <input id="submitResponse" type="submit" value="Sign and Submit" />
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+        <hr />
+        <address>
+          Sep 2020 by Dan Connolly<br />
+          and the <a href="https://github.com/rchain-community/">RChain Community</a><br />
+          <small>RCHAIN is a registered trademark of <a href="https://rchain.coop">RChain Cooperative</a>.</small>
+        </address>
+      </div>
     </div>
 <script type="module">
-import { ethereumAddress } from './_dist_/eth/eth-wrapper.js';
+import { ethereumAddress } from './_dist_/vendor/rnode-client-js/src/eth/eth-wrapper.js';
 
 import { buildUI } from './_dist_/web/ballot.js';
 
 window.addEventListener('DOMContentLoaded', (event) => {
-    buildUI({
-        ethereumAddress,
-        fetch: window.fetch,
-        createElement: tag => document.createElement(tag),
-        getElementById: id => document.getElementById(id),
-        querySelectorAll: selector => document.querySelectorAll(selector),
-    });
+  buildUI({
+    ethereumAddress,
+    fetch: window.fetch,
+    now: Date.now,
+    createElement: tag => document.createElement(tag),
+    getElementById: id => document.getElementById(id),
+    querySelectorAll: selector => document.querySelectorAll(selector),
+  });
 });
-
 </script>
-</body>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+  </body>
+</html>

@@ -7,7 +7,7 @@ debug=echo  # set this value of debug last for debug ON
 debug=:     # set this value of debug last for debug OFF
 ballot=${1-ballot}
 voters=${2-voters}
-timestamp=${3-159959156003900} # 100 times current for now. blocknumber not easy to get
+timestamp=${3-$(date +%s)} # 100 times current for now. blocknumber not easy to get
 server=${4-kc-strip.madmode.com:7070}
 shortDescs=$(cat "$ballot"|jq -r '.|.[].shortDesc')
 yesAddrs=$(cat "$ballot"|jq -r '.|.[].yesAddr')
@@ -45,3 +45,4 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
 done
 #cat /tmp/voters|sort|uniq>voters #for testing only
 # cat voters |sed '1,$s/^/"/;1,$s/$/",/;$s/,$/\]/;1s/^/\[/' # acct text list to json list
+

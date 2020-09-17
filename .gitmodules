@@ -1,0 +1,3 @@
+[submodule "vendor/rnode-client-js"]
+	path = src/vendor/rnode-client-js
+	url = https://github.com/rchain-community/rnode-client-js.git
