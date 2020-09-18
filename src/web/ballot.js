@@ -11,6 +11,7 @@ import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
 
 import { transferMulti_rho } from '../rho/transfer-multi';
 import { lookup_rho } from '../rho/lookup';
+import { tourSteps } from './tour-steps';
 
 const DUST = 1;
 
@@ -289,29 +290,7 @@ export function addTour() {
     }
   });
 
-  [
-    { element: "#meetingNotice", content: "Do you have a REV Address registered with the coop? Does it have at least 0.1 REV?" },
-    {
-      element: "#signIn",
-      content: "Press <b>Sign In</b> to connect to Metamask. Choose the ethereum account corresponding to your REV address."
-    },
-    {
-      element: "#questionList",
-      content: "Once you are signed in, the ballot quesitions appear here, along with links for more information."
-    },
-    {
-      element: "#response",
-      content: "The rholang transactions representing your responses will be prepared for you.",
-    },
-    {
-      element: "#submitResponse",
-      content: "When you are ready, press <b>Sign and Submit</b>. This will bring up metamask in order to sign your rholang response."
-    },
-    {
-      element: "#deployStatus",
-      content: "Confirm here that your transactions succeeded. It could fail if you don't have any REV."
-    },
-  ].forEach(({ element, content }) => {
+  tourSteps.forEach(({ element, content }) => {
     tour.addStep({ text: content, attachTo: { element, on: 'auto' } });
   });
   document.querySelector('#startTour').addEventListener('click', _e => tour.start());
