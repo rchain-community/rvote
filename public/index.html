@@ -94,7 +94,7 @@
                   <p>Your response, in rholang:</p>
                   <textarea id="response" rows="4" cols="80"></textarea>
                   <div class="setting">
-                    <label><small>Max transaction fee: <input id="phloLimit" type="number" value="0.05" /></small></label><br />
+                    <label id="txFee"><small>Max transaction fee: <input id="phloLimit" type="number" value="0.05" /></small></label><br />
                   </div>
                   <input id="submitResponse" type="submit" value="Sign and Submit" />
                 </div>
@@ -134,11 +134,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
             integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
 
 <script type="module">
+import Shepherd from 'shepherd.js';
 
-import { addTour } from './_dist_/web/ballot.js';
+import { addTour } from './_dist_/web/tour-help.js';
 
 window.addEventListener('DOMContentLoaded', (event) => {
-  addTour();
+  addTour((...args) => new Shepherd.Tour(...args));
 });
 </script>
   </body>

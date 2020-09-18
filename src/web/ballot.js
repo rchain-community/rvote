@@ -1,6 +1,5 @@
 // @ts-check
 import jazzicon from 'jazzicon';
-import Shepherd from 'shepherd.js'; // WARNING: Ambient access to Dom
 import m from 'mithril'; // WARNIN: Ambient access to Dom
 import htm from 'htm';
 
@@ -11,7 +10,6 @@ import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
 
 import { transferMulti_rho } from '../rho/transfer-multi';
 import { lookup_rho } from '../rho/lookup';
-import { tourSteps } from './tour-steps';
 
 const DUST = 1;
 
@@ -278,20 +276,4 @@ function response(account, controls) {
         .reduce((acc, cur, _ix, _src) => cur.checked && cur.value > '' ? [...acc, cur] : acc, [])
         .map(radio => radio.value);
     return transferMulti_rho(account.revAddr, choiceAddrs, DUST);
-}
-
-export function addTour() {
-  const tour = new Shepherd.Tour({
-    defaultStepOptions: {
-      cancelIcon: { enabled: true },
-      classes: 'alert alert-info',
-      buttons: [{ text: 'Next', action: () => tour.next() }],
-      scrollTo: { behavior: 'smooth', block: 'center' }
-    }
-  });
-
-  tourSteps.forEach(({ element, content }) => {
-    tour.addStep({ text: content, attachTo: { element, on: 'auto' } });
-  });
-  document.querySelector('#startTour').addEventListener('click', _e => tour.start());
 }
