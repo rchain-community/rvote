@@ -1,6 +1,7 @@
 // @ts-check
 import jazzicon from 'jazzicon';
-import m from 'mithril'; // WARNIN: Ambient access to Dom
+import * as rxjs from 'rxjs';
+import * as rxop from 'rxjs/operators';
 import htm from 'htm';
 
 import { makeRNodeWeb } from '../vendor/rnode-client-js/src/rnode-web';
@@ -13,9 +14,12 @@ import { lookup_rho } from '../rho/lookup';
 
 const DUST = 1;
 
-const { entries } = Object;
+const { entries, fromEntries, values } = Object;
 
-const html = htm.bind(m);
+/**
+ * @template T
+ * @typedef {import('rxjs').Observable} Observable<T>
+ */
 
 const check = {
     notNull(x, context) {
@@ -44,6 +48,21 @@ const check = {
     },
 };
 
+const watchButton = button => rxjs.fromEvent(button, 'click');
+/** @type { (field: HTMLInputElement) => Observable<HTMLInputElement> } */
+const watchInput = field =>
+    rxjs.fromEvent(field, 'change').pipe(
+        rxop.map(event => check.theInput(event.target)),
+        rxop.startWith(field)
+    );
+/** @type { (field: HTMLInputElement) => Observable<string> } */
+const watchField = field => watchInput(field).pipe(rxop.map(f => f.value));
+
+function slog(label, obs) {
+    obs.subscribe(v => console.log(label, v));
+    return obs;
+}
+
 /**
  * @param {{
  *  getElementById: typeof document.getElementById,
@@ -53,6 +72,12 @@ const check = {
  *  now: typeof Date.now,
  *  ethereumAddress: () => Promise<string>,
  *  }} powers
+ *
+ * @typedef {{ status?: Status, account?: Account, questions?: QAs, choices?: REVAddress[], response?: RholangProcess }} State
+ * @typedef { 'sign in cancelled' | 'getting questions...' | 'sign response cancelled' | voteResult } Status
+ * @typedef { string } REVAddress
+ * @typedef { string } RholangProcess
+ * @typedef { { txOk: boolean[] } | { message: string} } voteResult
  */
 export function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElement, fetch, now }) {
     const rnodeWeb = makeRNodeWeb({ fetch, now });
@@ -61,6 +86,7 @@ export function buildUI({ ethereumAddress, getElementById, querySelectorAll, cre
     const ui = {
         ballotForm: theElt('ballotForm'),
         signIn: check.theButton(theElt('signIn')),
+        signedIn: theElt('signedIn'),
         addrViz: theElt('addrViz'),
         questionList: theElt('questionList'),
         response: check.theTextArea(theElt('response')),
@@ -71,77 +97,90 @@ export function buildUI({ ethereumAddress, getElementById, querySelectorAll, cre
         deployStatus: theElt('deployStatus'),
     };
 
-    /** @type {{ account?: Account }} */
-    const state = { account: undefined };
-
     /** @type { (form: Element) => void } */
     const turnOffSubmit = (form) => { form.addEventListener('submit', event => { event.preventDefault(); }) };
     turnOffSubmit(ui.ballotForm);
 
-    ui.signIn.addEventListener('click', _ => ethereumAddress().then(ethAddr => {
-        const revAddr = getAddrFromEth(ethAddr);
-        state.account = {
-            revAddr,
-            name: `gov ${revAddr.slice(0, 8) }`,
-            ethAddr: ethAddr.replace(/^0x/, ''),
-        };
-        showAccount(state.account, ui.addrViz);
+    const render = builder(createElement);
 
-        updateQuestions();
-    }));
+    /** @type { Observable<Account> } */
+    const acct$ = controlSignIn(ethereumAddress, { signIn: ui.signIn, signedIn: ui.signedIn, addrViz: ui.addrViz });
 
-    const pmt = () => ({ account: state.account, phloLimit: 100000000 * parseFloat(ui.phloLimit.value) });
+    const agendaURI$ = watchField(ui.agendaURI);
+    agendaURI$.subscribe(agendaURI => vizHash(hashCode(agendaURI), ui.agendaUriViz));
+
+    const choices$ = controlQAs(agendaURI$, ui.questionList, { rnodeHttp: rnodeWeb.rnodeHttp, render })
+
+    const response$ = rxjs.combineLatest(acct$, choices$).pipe(
+        rxop.map(([acct, votes]) => transferMulti_rho(acct.revAddr, values(votes), DUST))
+    );
+    response$.subscribe(response => {
+        ui.response.value = response;
+    });
+
+    // @@TODO: use rxjs for status
     /** @type { (status: string) => void } */
     const setStatus = status => { ui.deployStatus.textContent = status; };
-    function updateQuestions() {
-        setStatus('');
-        const misc = { name: 'testNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
-        const node = getNodeUrls({ ...misc, ...testNet.readOnlys[0] });
-        const { rnodeHttp } = rnodeWeb;
-        registryLookup(ui.agendaURI.value, node.httpUrl, { rnodeHttp, setStatus }).then(qas => {
-            showQuestions(qas, ui.questionList, { createElement });
-            const controls = querySelectorAll('fieldset input[type="radio"]');
-            controls.forEach(radio => {
-                radio.addEventListener('change', _ => { ui.response.value = response(state.account, controls); });
-            })
-        })
-        .catch(err => {
-            console.log({ err });
-            setStatus(`${err && typeof err === 'object' && err.message ? err.message : err}`);
-        });
-    }
 
-    vizHash(hashCode(ui.agendaURI.value), ui.agendaUriViz);
-    ui.agendaURI.addEventListener('change', _ => vizHash(hashCode(ui.agendaURI.value), ui.agendaUriViz));
-    ui.submitResponse.addEventListener('click', _ => {
-        setStatus('');
-        runDeploy(ui.response.value, pmt(), { rnodeWeb, setStatus })
-            .catch(err => {
-                console.log({ err });
-                setStatus(`${err}`);
-            });
+    const phloLimit$ = watchField(ui.phloLimit).pipe(rxop.map(numeral => 100000000 * parseFloat(numeral)));
+
+    // TODO: use rxjs for runDeploy promise
+    rxjs.combineLatest(acct$, response$, phloLimit$, watchButton(ui.submitResponse))
+        .subscribe(([account, response, phloLimit, _submit]) => {
+            setStatus('');
+            runDeploy(response, { account, phloLimit }, { rnodeWeb, setStatus })
+                .catch(err => {
+                    console.log({ err });
+                    setStatus(`${err}`);
+                });
     });
 }
 
-/**
- * Show Account
- * @param { Account } info
- * @param { Element } imgHolder
+ /**
+ * Sign In Control
+ * @param { () => Promise<string> } ethereumAddress
+ * @param { { signIn: Element, signedIn: Element, addrViz: Element } } ui
  *
  * @typedef {{ revAddr: string, ethAddr: string, name: string }} Account
+ * @returns { Observable<Account> }
  */
-function showAccount(info, imgHolder) {
-    // First remove the '0x' and convert the 8 digit hex number to
-    // decimal with i.e. `parseInt('e30a34bc, 16)` to generate a
-    // "jazzicon".
-    // -- Parker Sep 2018
-    //    https://www.reddit.com/r/ethdev/comments/9fwffj/wallet_ui_trick_mock_the_metamask_account_icon_by/
-    console.log(info);
-    imgHolder.setAttribute('title', info.revAddr);
-    const seed = parseInt(info.ethAddr.slice(0, 8), 16);
-    vizHash(seed, imgHolder);
+function controlSignIn(ethereumAddress, ui) {
+    /** @type Observable<Account> */
+    const acct$ = rxjs.combineLatest(rxjs.fromEvent(ui.signIn, 'click'), rxjs.from(ethereumAddress()))
+        .pipe(rxop.map(([_click, ethAddr]) => {
+            const revAddr = getAddrFromEth(ethAddr);
+            return {
+                revAddr,
+                name: `gov ${revAddr.slice(0, 8) }`,
+                ethAddr: ethAddr.replace(/^0x/, '')
+            }
+        }));
+
+    acct$.subscribe(acct => {
+        ui.signIn.classList.add('d-none');
+        ui.signedIn.classList.remove('d-none');
+
+        console.log(acct);
+        ui.addrViz.setAttribute('title', acct.revAddr);
+        vizHash(ethJazzSeed(acct.ethAddr), ui.addrViz);
+    });
+
+    return acct$;
 }
 
+/**
+ * First remove the '0x' and convert the 8 digit hex number to
+ * decimal with i.e. `parseInt('e30a34bc, 16)` to generate a
+ * "jazzicon".
+ * -- Parker Sep 2018
+ *    https://www.reddit.com/r/ethdev/comments/9fwffj/wallet_ui_trick_mock_the_metamask_account_icon_by/
+ *
+ * @param {string} ethAddr
+ * @returns { number }
+ */
+function ethJazzSeed(ethAddr) {
+    return parseInt(ethAddr.slice(0, 8), 16);
+}
 
 /** @type { (seed: number, holder: Element) => void } */
 function vizHash(seed, holder, size = 40) {
@@ -162,10 +201,10 @@ function hashCode(s) {
 /**
  * @param {string} uri
  * @param { string } httpUrl
- * @param {{ rnodeHttp: any, setStatus: (s: string) => void}} powers
+ * @param {{ rnodeHttp: any }} powers
  * @returns { Promise<any> }
  */
-async function registryLookup(uri, httpUrl, { rnodeHttp, setStatus }) {
+async function registryLookup(uri, httpUrl, { rnodeHttp }) {
     // return Promise.resolve(testQuestions);
 
     console.log('looking up agenda on chain...');
@@ -209,31 +248,116 @@ function runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus }) {
 }
 
 /**
- * @param {QAs} qas
- * @param { Element } questionList
+ * @param {typeof document.createElement} createElement
+ * @returns { Renderer }
+ *
+ * @typedef { (type: string, props?: Object, ...children: Span[]) => Element } Renderer
+ * @typedef { Element | Element[] } Span
  */
-function showQuestions(qas, questionList) {
-    questionList.innerHTML = '';
+function builder(createElement) {
+    let ix = 0;
 
-    const markup = entries(qas).map(([id, { shortDesc, docLink, yesAddr, noAddr }], qix) => {
-        const name = `q${qix}`;
-        /** @type { (value: string, props?: Object) => any } */
-        const radio = (value, props = {}) => html`
-          <td class="choice">
-            <input type="radio" ...${{name, value, title: value, ...props}} />
-          </td>`;
-        return html`
-          <tr><td>${id}</td>
-          <td>${shortDesc}
-           ${docLink ? html`<br />see: <a href=${docLink} target="_blank">${id}</a>` : ''}</td>
-          ${radio(noAddr)} ${radio('', {checked: 'checked'})} ${radio(yesAddr)}
-          </dd>`;
-    });
-    m.render(questionList, markup);
+    /** @type { Renderer } */
+    return function(type, props, ...children) {
+        /** @type Element */
+        const elt = createElement(type);
+        elt.setAttribute('id', `h_${ix++}`);
+        entries(props || {}).forEach(([name, value]) => elt.setAttribute(name, value));
+        function append(...more) {
+            for (const item of more) {
+                if (Array.isArray(item)) {
+                    append(...item);
+                } else {
+                    elt.append(item);
+                }
+            }
+        }
+        append(...children);
+        return elt;
+    };
 }
 
 /**
- * @typedef {{[refID: string]: { shortDesc: string, docLink?: string, yesAddr: string, noAddr: string }}} QAs
+ * @param { Observable<string> } agendaURI$
+ * @param { Element } questionList
+ * @param { { rnodeHttp: any, render: Renderer  }} powers
+ * @returns { Observable<{[qid: string]: REVAddress?}> }
+ */
+function controlQAs(agendaURI$, questionList, { rnodeHttp, render }) {
+    const misc = { name: 'testNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
+    const node = getNodeUrls({ ...misc, ...testNet.readOnlys[0] });
+
+    const cmp = (a, b) => a === b ? 0 : a < b ? -1 : 1;
+    const byKey = obj => fromEntries(entries(obj).sort(([a, _va], [b, _vb]) => cmp(a, b)));
+    const filterValues = (obj, pred) => fromEntries(entries(obj).filter(([_, val]) => pred(val)));
+
+    // rxop.flatMap seems to result in one call per subscriber
+    // "RxJS is "unicast" by default while Kefir and Bacon are multicast by default."
+    // -- https://github.com/tc39/proposal-observable/issues/66
+    const ballot$ = agendaURI$.pipe(
+        rxop.flatMap(agendaURI => rxjs.from(registryLookup(agendaURI, node.httpUrl, { rnodeHttp }))),
+        rxop.map(qas => byKey(qas))
+    );
+    /*@@TODO: handle errors from registry lookup
+    .catch(err => {
+        console.log({ err });
+        setStatus(`${err && typeof err === 'object' && err.message ? err.message : err}`);
+    });
+    */
+
+    ballot$.subscribe(qas => {
+        questionList.innerHTML = '';
+        const ea = entries(qas).map(([id, info], qix) => renderQuestion(id, qix, info, { render }));
+        questionList.append(...ea);
+    });
+
+    const withTarget = (votes, target) => (radio => ({...votes, [radio.name]: radio.value }))(check.theInput(target));
+    return rxjs.fromEvent(questionList, 'change').pipe(
+        rxop.scan((votes, event) => withTarget(votes, event.target), {}),
+        rxop.map(votes => filterValues(votes, addr => addr.length > 0))
+    );
+}
+
+/**
+ *
+ * @param {string} id
+ * @param { number } qix
+ * @param {QInfo} qInfo
+ * @param {{ render: Renderer }} io
+ * @returns { Element }
+ */
+function renderQuestion(id, qix, { shortDesc, docLink, yesAddr, noAddr }, { render }) {
+    const html = htm.bind(render);
+
+    const name = `q${qix}`;
+
+    /** @type { (value: string, props?: Object) => HTMLInputElement } */
+    const radio = (value, props = {}) =>
+        check.theInput(render('input', { type: 'radio', name, value, title: value, ...props }));
+
+    const answers = [radio(noAddr), radio('', {checked: 'checked'}), radio(yesAddr)];
+
+    const question = html`
+      <tr><td>${id}</td>
+      <td>${shortDesc}
+       ${docLink ? html`<br />see: <a href=${docLink} target="_blank">${id}</a>` : ''}</td>
+       ${answers.map(radio => html`<td class="choice">${radio}</td>`)}
+      </tr>`;
+    if (Array.isArray(question)) {
+        throw new TypeError('expected Element; got Element[]');
+    }
+    return question;
+}
+
+function logged(label, x) {
+    console.log(label, x);
+    return x;
+}
+
+/**
+ * @typedef {{ shortDesc: string, docLink?: string, yesAddr: string, noAddr: string }} QInfo
+ * @typedef {{[refID: string]: QInfo}} QAs
+ *
  * @type { QAs }
  */
 const testQuestions = {
@@ -268,12 +392,3 @@ const testQuestions = {
         "noAddr": "1111swBFUPVRwR4ugkDBCvrLwPeR1621B1cHQf3cAkNxt3Zad2eac"
     }
 };
-
-/** @type {(account: { revAddr: string }, controls: NodeListOf<Element> ) => string} */
-function response(account, controls) {
-    const choiceAddrs = Array.from(controls)
-        .map(radio => check.theInput(radio)) // filter rather than throw?
-        .reduce((acc, cur, _ix, _src) => cur.checked && cur.value > '' ? [...acc, cur] : acc, [])
-        .map(radio => radio.value);
-    return transferMulti_rho(account.revAddr, choiceAddrs, DUST);
-}
