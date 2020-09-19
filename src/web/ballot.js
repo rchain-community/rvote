@@ -48,6 +48,7 @@ const check = {
     },
 };
 
+/** @type { (button: Element) => Observable<Event> } */
 const watchButton = button => rxjs.fromEvent(button, 'click');
 /** @type { (field: HTMLInputElement) => Observable<HTMLInputElement> } */
 const watchInput = field =>
@@ -58,7 +59,12 @@ const watchInput = field =>
 /** @type { (field: HTMLInputElement) => Observable<string> } */
 const watchField = field => watchInput(field).pipe(rxop.map(f => f.value));
 
+/**
+ * @template T
+ * @type { (label: string, obs: Observable<T>) => Observable<T> }
+ **/
 function slog(label, obs) {
+    console.log('SLOG: subscribing to',label);
     obs.subscribe(v => console.log(label, v));
     return obs;
 }
@@ -77,13 +83,15 @@ function slog(label, obs) {
  * @typedef { 'sign in cancelled' | 'getting questions...' | 'sign response cancelled' | voteResult } Status
  * @typedef { string } REVAddress
  * @typedef { string } RholangProcess
- * @typedef { { txOk: boolean[] } | { message: string} } voteResult
+ * @typedef { { txid: string } | { message: string} } voteResult
  */
 export function buildUI({ ethereumAddress, getElementById, querySelectorAll, createElement, fetch, now }) {
     const rnodeWeb = makeRNodeWeb({ fetch, now });
 
+    /** @type { (id: string) => Element } */
     const theElt = id => check.notNull(getElementById(id));
     const ui = {
+        progressbar: theElt('progressbar'),
         ballotForm: theElt('ballotForm'),
         signIn: check.theButton(theElt('signIn')),
         signedIn: theElt('signedIn'),
@@ -92,7 +100,7 @@ export function buildUI({ ethereumAddress, getElementById, querySelectorAll, cre
         response: check.theTextArea(theElt('response')),
         agendaURI: check.theInput(theElt('agendaURI')),
         agendaUriViz: theElt('agendaUriViz'),
-        submitResponse: theElt('submitResponse'),
+        submitResponse: check.theInput(theElt('submitResponse')),
         phloLimit: check.theInput(theElt('phloLimit')),
         deployStatus: theElt('deployStatus'),
     };
@@ -103,36 +111,62 @@ export function buildUI({ ethereumAddress, getElementById, querySelectorAll, cre
 
     const render = builder(createElement);
 
+    // @@TODO: use rxjs for status
+    /** @type { (status: string) => void } */
+    const setStatus = status => { ui.deployStatus.textContent = status; };
+
     /** @type { Observable<Account> } */
     const acct$ = controlSignIn(ethereumAddress, { signIn: ui.signIn, signedIn: ui.signedIn, addrViz: ui.addrViz });
+    slog('acct$', acct$);
 
     const agendaURI$ = watchField(ui.agendaURI);
+    agendaURI$.subscribe(_ => setStatus('getting questions...'));
     agendaURI$.subscribe(agendaURI => vizHash(hashCode(agendaURI), ui.agendaUriViz));
 
-    const choices$ = controlQAs(agendaURI$, ui.questionList, { rnodeHttp: rnodeWeb.rnodeHttp, render })
+    const { ballot$, votes$ } = controlQAs(agendaURI$, ui.questionList, { rnodeHttp: rnodeWeb.rnodeHttp, render })
+    ballot$.subscribe(_ => setStatus(''));
 
-    const response$ = rxjs.combineLatest(acct$, choices$).pipe(
+    const response$ = rxjs.combineLatest(acct$, votes$).pipe(
         rxop.map(([acct, votes]) => transferMulti_rho(acct.revAddr, values(votes), DUST))
     );
     response$.subscribe(response => {
         ui.response.value = response;
     });
 
-    // @@TODO: use rxjs for status
-    /** @type { (status: string) => void } */
-    const setStatus = status => { ui.deployStatus.textContent = status; };
-
     const phloLimit$ = watchField(ui.phloLimit).pipe(rxop.map(numeral => 100000000 * parseFloat(numeral)));
 
-    // TODO: use rxjs for runDeploy promise
-    rxjs.combineLatest(acct$, response$, phloLimit$, watchButton(ui.submitResponse))
-        .subscribe(([account, response, phloLimit, _submit]) => {
-            setStatus('');
-            runDeploy(response, { account, phloLimit }, { rnodeWeb, setStatus })
+    const ready$ = rxjs.combineLatest(acct$, votes$).pipe(rxop.map(av => !!av), rxop.startWith(false));
+    ready$.subscribe(ready => ui.submitResponse.disabled = !ready);
+
+    const submit$ = watchButton(ui.submitResponse);
+    submit$.subscribe(_ => {
+        setStatus('');
+        ui.submitResponse.disabled = true;
+    });
+
+    const parts$ = slog('parts@@', rxjs.combineLatest(acct$, response$, phloLimit$));
+    const tx$ = rxjs.zip(submit$, parts$).pipe(
+        rxop.flatMap(([_submit, [account, response, phloLimit]]) =>
+            slog('tx$ runDeploy', rxjs.from(runDeploy(response, { account, phloLimit }, { rnodeWeb, setStatus })
                 .catch(err => {
                     console.log({ err });
-                    setStatus(`${err}`);
-                });
+                    setStatus(`${err.message.replace('MetaMask Message Signature:', '')}`);
+                })))));
+    slog('tx$', tx$);
+
+    const init = obs => obs.pipe(rxop.startWith(null));
+    const progress$ = rxjs.combineLatest(init(acct$), init(votes$), init(submit$), init(tx$)).pipe(
+        rxop.map(goals => 100 * goals.filter(g => !!g).length / goals.length),
+        rxop.distinctUntilChanged(),
+    );
+    controlProgress(progress$, ui.progressbar);
+}
+
+function controlProgress(progress$, progressbar) {
+    progress$.subscribe(pct => {
+        entries({ class: `progress-bar w-${pct}`, role: 'progressbar', 'aria-valuenow': `${pct}`})
+            .forEach(([name, value]) => progressbar.setAttribute(name, value));
+        progressbar.textContent = `${pct}%`;
     });
 }
 
@@ -228,6 +262,8 @@ function runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus }) {
     const misc = { name: 'testNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
     const node = getNodeUrls({ ...misc, ...testNet.hosts[0] }); // TODO: get next validator?
 
+    // TODO: refactor to use rclient.js; return sig / deployId as well.
+
     // appSendDeploy has a strange API: only sends the returned data to the log.
     // at least the log is handled with ocap discipline so we can interpose what we need!
     let deployReturnData;
@@ -281,7 +317,7 @@ function builder(createElement) {
  * @param { Observable<string> } agendaURI$
  * @param { Element } questionList
  * @param { { rnodeHttp: any, render: Renderer  }} powers
- * @returns { Observable<{[qid: string]: REVAddress?}> }
+ * @returns {{ ballot$: Observable<QAs>, votes$: Observable<{[qid: string]: REVAddress?}> }}
  */
 function controlQAs(agendaURI$, questionList, { rnodeHttp, render }) {
     const misc = { name: 'testNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
@@ -312,10 +348,11 @@ function controlQAs(agendaURI$, questionList, { rnodeHttp, render }) {
     });
 
     const withTarget = (votes, target) => (radio => ({...votes, [radio.name]: radio.value }))(check.theInput(target));
-    return rxjs.fromEvent(questionList, 'change').pipe(
+    const votes$ = rxjs.fromEvent(questionList, 'change').pipe(
         rxop.scan((votes, event) => withTarget(votes, event.target), {}),
         rxop.map(votes => filterValues(votes, addr => addr.length > 0))
     );
+    return { ballot$, votes$ };
 }
 
 /**

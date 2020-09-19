@@ -28,7 +28,7 @@ export const tourSteps = [
     content: "Do you have a REV Address registered with the coop? If not, see the meeting notice for instructions."
   },
   {
-    element: "#signIn",
+    element: "#signingIn",
     content: "Press <b>Sign In</b> to connect to Metamask. Choose the ethereum account corresponding to your REV address."
   },
   {
