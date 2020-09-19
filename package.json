@@ -39,6 +39,7 @@
     "plugins": []
   },
   "dependencies": {
+    "@tgrospic/rnode-client-js": "file:.yalc/@tgrospic/rnode-client-js",
     "blakejs": "^1.1.0",
     "bs58": "^4.0.1",
     "elliptic": "^6.5.3",

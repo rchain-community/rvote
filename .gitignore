@@ -1,4 +1,7 @@
 # Logs
+.yalc/
+vendor/
+*.lock
 logs
 *.log
 npm-debug.log*

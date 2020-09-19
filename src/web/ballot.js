@@ -363,7 +363,7 @@ function controlQAs(agendaURI$, questionList, { rnodeHttp, render }) {
  * @param {{ render: Renderer }} io
  * @returns { Element }
  */
-function renderQuestion(id, qix, { shortDesc, docLink, yesAddr, noAddr }, { render }) {
+function renderQuestion(id, qix, { shortDesc, docLink, yesAddr, noAddr, abstainAddr }, { render }) {
     const html = htm.bind(render);
 
     const name = `q${qix}`;
@@ -372,7 +372,7 @@ function renderQuestion(id, qix, { shortDesc, docLink, yesAddr, noAddr }, { rend
     const radio = (value, props = {}) =>
         check.theInput(render('input', { type: 'radio', name, value, title: value, ...props }));
 
-    const answers = [radio(noAddr), radio('', {checked: 'checked'}), radio(yesAddr)];
+    const answers = [radio(noAddr), radio(abstainAddr, {checked: 'checked'}), radio(yesAddr)]; //radio('', {checked: 'checked'})
 
     const question = html`
       <tr><td>${id}</td>
@@ -392,7 +392,7 @@ function logged(label, x) {
 }
 
 /**
- * @typedef {{ shortDesc: string, docLink?: string, yesAddr: string, noAddr: string }} QInfo
+ * @typedef {{ shortDesc: string, docLink?: string, yesAddr: string, noAddr: string, abstainAddr: string  }} QInfo
  * @typedef {{[refID: string]: QInfo}} QAs
  *
  * @type { QAs }
@@ -402,17 +402,20 @@ const testQuestions = {
         "shortDesc": "The Item of Business I want to propose is to provide all new members with stickers and t-shirts with the RChain logo on it as part of their membership onboarding package.",
         "docLink": "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#member-swag",
         "yesAddr": "11112i8bYVDYcm4MSbY3d1As28uY151xoMS7AyiTvZ2YmNJ8Nw13v9",
+        "abstainAddr": "111184Ab7raMAoVy6fX8JuoPFB5PggfrEWfzXE4WMzTKioFwmQMsa",
         "noAddr": "11112uGayGEi57D44Drq3V4iw5WWyfXbcVvsDangRTE7TaR3J4U4FD"
     },
     "Board: DaD": {
         "shortDesc": "Daffy Duck for Board Member",
         "docLink": "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#board-dad",
         "yesAddr": "1111TnFUN7eZBWXp3QQACQRRxpcS5uH5Bpf67vikWhA5e3F6ikAmU",
+        "abstainAddr": "11112nT2XooHcCVQLEAsEJhQm6boCS5B7XQ1DBmw6ex3xveiCWRWAx",
         "noAddr": "11112Cwtg2Bs4WUAYrXhL9xZXXSXr9Gn62Cty39RhUaBnqjrKkqwAZ"
     },
     "Board: DoD": {
         "shortDesc": "Donald Duck for Board Member",
         "docLink": "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#board-dod",
+        "abstainAddr": "11113Y89LxqCmjDK9PUDi1dfsEcjAHbBW7mQ3Zw2yqqiwSUibaTkq",
         "yesAddr": "1111rbdV9Lsw6DyMSq8ySXDacX7pRUxmVGoYho9gGtfZcQYFdAN42",
         "noAddr": "1111JoeZHDYXqyAgo89VaidQnp7W7M9pvdkFUJTqEBU7SHKx6WF2z"
     },
@@ -420,12 +423,14 @@ const testQuestions = {
         "shortDesc": "Wile E. Coyote for Board Member",
         "docLink": "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#board-wec",
         "yesAddr": "11112gUFvJR6JBDYJURETaWUBpEDa1EyjgRHFncEfQ4hGECnciPnhw",
+        "abstainAddr": "1111pKehMgsPBAiqzCSkSekXP4aUXMjY5DvtSXcz72ATP7Pm3RK9o",
         "noAddr": "11112aoa6NLYomYZro566XZVGEXyCDqeqDcp8Pzg81Ckuws6SexC99"
     },
     "Board: RR": {
         "shortDesc": "Road Runner for Board Member",
         "docLink": "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#board-rr",
         "yesAddr": "1111krbAKSbyGA9vfa7w4K2pKAxZZn6qjaVEduDLWotDZ8HLt2aXR",
+        "abstainAddr": "11112CgGiNg3DdMDsYz7UikeSxh7CfFdEbDYzmoJLfS4vx3uZjm55V",
         "noAddr": "1111swBFUPVRwR4ugkDBCvrLwPeR1621B1cHQf3cAkNxt3Zad2eac"
     }
 };
