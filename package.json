@@ -27,7 +27,7 @@
   "scripts": {
     "realclean": "rm -rf dist build node_modules web_modules",
     "start": "snowpack dev --polyfill-node",
-    "build": "snowpack build --polyfill-node",
+    "build": "snowpack build --polyfill-node;snowpack --reload --polyfill-node",
     "format": "prettier --write \"src/**/*.js\"",
     "lint": "prettier --check \"src/**/*.js\""
   },
