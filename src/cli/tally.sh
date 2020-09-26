@@ -1,18 +1,18 @@
 #!/bin/bash
-#usage: ./tally.sh [ballotfile] [votersfile] [transaction-server:port]
+#usage: ./tally.sh [ballotfile] [votersfile] [timestamp] [transaction-server:port]
 # https://github.com/rchain-community/rv2020/issues/35
 # an account is counted only once for a choice.
 # The case of a person voting for multiple choices the most recent is used.
 debug=echo  # set this value of debug last for debug ON
-#debug=:     # set this value of debug last for debug OFF
+debug=:     # set this value of debug last for debug OFF
 ballot=${1-../web/ballotexample.json}
 voters=${2-voters}
-server=${2-kc-strip.madmode.com:7070}
+timestamp=${3-$(date +%s)000} # current timestamp default = seconds since epic times 1000
+server=${4-kc-strip.madmode.com:7070}
 shortDescs=$(cat "$ballot"|jq -r '.|.[].shortDesc')
 yesAddrs=$(cat "$ballot"|jq -r '.|.[].yesAddr')
 noAddrs=$(cat "$ballot"|jq -r '.|.[].noAddr')
 abstainAddrs=$(cat "$ballot"|jq -r '.|.[].abstainAddr')
-timestamp=159959156003900 # 100 times current for now. blocknumber not easy to get
 for n in $(seq $(echo "$shortDescs"|wc -l)); do
   desc=$(echo "$shortDescs"|sed -n "${n}"p)
   yesAddr=$(echo "$yesAddrs"|sed -n "${n}"p)
@@ -36,7 +36,7 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   double=$(printf "$yesVotes\n$noVotes\n$abstainVotes\n"|sort|uniq -d)
   printf "$yesVotes\n$noVotes\n" >>/tmp/voters
   if [ "$double" != "" ]; then
-    $debug "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr"
+    $debug "  $yes yes votes $yesAddr";$debug "  $no no votes $noAddr"
     $debug  ALERT: "$double" voted both yes and no or abstain.
     for voter in $double; do let found=0
      for acct in $(curl -s http://"$server"/api/transfer/"$voter"| jq -r '.|.[].toAddr'); do
