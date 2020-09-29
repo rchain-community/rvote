@@ -192,7 +192,7 @@ export function lookup_ballot_user_rho(acct, balloturi, votersuri) {
           lookup!( \`${votersuri}\` , *valueCh) |
           for (@accts <- valueCh) {
               match accts {
-                  { "11112Ju55SSchudsqD719JL6XEtq25nyGrPJboW8LGEMKo3K1JE7kh" | rest } => {
+                  { "${acct}" | rest } => {
                       return!({"registered": true ,"ballot": ballot})
                   }
                   { _ } => {
