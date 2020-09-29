@@ -162,7 +162,7 @@ function hashCode(s) {
 }
 
 /**
- * @param {string} uri
+ * @param {string} balloturi
  * @param { string } httpUrl
  * @param {{ rnodeHttp: any, setStatus: (s: string) => void}} powers
  * @returns { Promise<any> }
@@ -183,13 +183,13 @@ async function registryLookup(balloturi, revAddr, votersuri, httpUrl, { rnodeHtt
 
 /** @type {(uri: string) => string } */
 export function lookup_ballot_user_rho(acct, balloturi, votersuri) {
-    return `new return ,//(`rho:rchain:deployId`),
+    return `new return ,
     lookup(`rho:registry:lookup`)
   in {
     new valueCh in {
       lookup!( \`${balloturi}\ , *valueCh) |
       for (@ballot <- valueCh) {
-          lookup!( \`${registerreduri}\` , *valueCh) |
+          lookup!( \`${votersuri}\` , *valueCh) |
           for (@accts <- valueCh) {
               match accts {
                   { "11112Ju55SSchudsqD719JL6XEtq25nyGrPJboW8LGEMKo3K1JE7kh" | rest } => {
