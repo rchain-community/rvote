@@ -11,7 +11,7 @@ import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
 import { transferMulti_rho } from '../rho/transfer-multi';
 import { lookup_rho } from '../rho/lookup';
 
-const voteruri = "rho:id:1ri71weozwuoanef9zit5p7ooafkmkzhkwo6phgaourcknbmi6ke7t";
+const voteruri = "rho:id:kiijxigqydnt7ds3w6w3ijdszswfysr3hpspthuyxz4yn3ksn4ckzf";
 
 const DUST = 1;
 
@@ -184,21 +184,14 @@ async function registryLookup(balloturi, revAddr, votersuri, httpUrl, { rnodeHtt
 /** @type {(uri: string) => string } */
 export function lookup_ballot_user_rho(acct, balloturi, votersuri) {
     return `new return ,
-    lookup(`rho:registry:lookup`)
+    lookup(\`rho:registry:lookup\`)
   in {
     new valueCh in {
-      lookup!( \`${balloturi}\ , *valueCh) |
+      lookup!( \`${balloturi}\` , *valueCh) |
       for (@ballot <- valueCh) {
           lookup!( \`${votersuri}\` , *valueCh) |
-          for (@accts <- valueCh) {
-              match accts {
-                  { "${acct}" | rest } => {
-                      return!({"registered": true ,"ballot": ballot})
-                  }
-                  { _ } => {
-                      return!({"registered": false ,"ballot": ballot})
-                  }
-              }
+          for (@accts <- valueCh) {   
+            return!({"registered": accts.contain("${acct}") ,"ballot": ballot})
           }
       }
   }`
