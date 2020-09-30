@@ -125,37 +125,12 @@
         </address>
       </div>
     </div>
-<script type="module">
-import { ethereumAddress } from './_dist_/vendor/rnode-client-js/src/eth/eth-wrapper.js';
-
-import { buildUI } from './_dist_/web/ballot.js';
-
-window.addEventListener('DOMContentLoaded', (event) => {
-  buildUI({
-    ethereumAddress,
-    fetch: window.fetch,
-    now: Date.now,
-    createElement: tag => document.createElement(tag),
-    getElementById: id => document.getElementById(id),
-    querySelectorAll: selector => document.querySelectorAll(selector),
-  });
-});
-</script>
+<script src="main.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
             integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
             integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
             integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-
-<script type="module">
-import Shepherd from 'shepherd.js';
-
-import { addTour } from './_dist_/web/tour-help.js';
-
-window.addEventListener('DOMContentLoaded', (event) => {
-  addTour((...args) => new Shepherd.Tour(...args));
-});
-</script>
   </body>
 </html>
