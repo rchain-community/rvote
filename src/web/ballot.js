@@ -11,7 +11,7 @@ import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
 import { transferMulti_rho } from '../rho/transfer-multi';
 import { lookup_rho } from '../rho/lookup';
 
-const voteruri = "rho:id:kiijxigqydnt7ds3w6w3ijdszswfysr3hpspthuyxz4yn3ksn4ckzf";
+const votersuri = "rho:id:kiijxigqydnt7ds3w6w3ijdszswfysr3hpspthuyxz4yn3ksn4ckzf";
 
 const DUST = 1;
 
@@ -100,8 +100,9 @@ export function buildUI({ ethereumAddress, getElementById, querySelectorAll, cre
         const misc = { name: 'testNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
         const node = getNodeUrls({ ...misc, ...testNet.readOnlys[0] });
         const { rnodeHttp } = rnodeWeb;
-        registryLookup(ui.agendaURI.value,  node.httpUrl, { rnodeHttp, setStatus }).then(qas => {
-            showQuestions(qas, ui.questionList, { createElement });
+        ballotVoterLookup(ui.agendaURI.value, state.account.revAddr, votersuri,  node.httpUrl, { rnodeHttp, setStatus }).then(qas => {
+            showQuestions(rhoExprToJS(qas.ballot), ui.questionList /*, { createElement } */ );
+            setStatus(rhoExprToJS(qas.registered) ? 'Verified registered voter' : 'ACCOUNT NOT REGISTERED');
             const controls = querySelectorAll('fieldset input[type="radio"]');
             controls.forEach(radio => {
                 radio.addEventListener('change', _ => { ui.response.value = response(state.account, controls); });
@@ -164,24 +165,31 @@ function hashCode(s) {
 /**
  * @param {string} balloturi
  * @param { string } httpUrl
- * @param {{ rnodeHttp: any, setStatus: (s: string) => void}} powers
+ * @param {string} votersuri
  * @returns { Promise<any> }
  */
-async function registryLookup(balloturi, revAddr, votersuri, httpUrl, { rnodeHttp, setStatus }) {
+async function ballotVoterLookup(balloturi, revAddr, votersuri, httpUrl, { rnodeHttp, setStatus }) {
     // return Promise.resolve(testQuestions);
 
     console.log('looking up agenda on chain...');
     const code = lookup_ballot_user_rho(revAddr, balloturi, votersuri);
-
     const { expr } = await rnodeHttp(httpUrl, 'explore-deploy', code);
-    const [{ ExprTuple: { data: [{ ExprBool: { data: ok }}, result]}}] = expr;
-    if (!ok) {
+    console.log(code);
+    console.log(expr);
+    const [{ ExprMap: { data: result}}] = expr;
+    if (!result) {
         throw new Error(JSON.stringify(result));
     }
+    console.log(rhoExprToJS(result))
     return rhoExprToJS(result);
 }
 
-/** @type {(uri: string) => string } */
+/**
+ * @param {string} acct
+ * @param {string} balloturi
+ * @param {string} votersuri
+ * @returns { string }
+ */
 export function lookup_ballot_user_rho(acct, balloturi, votersuri) {
     return `new return ,
     lookup(\`rho:registry:lookup\`)
@@ -191,10 +199,10 @@ export function lookup_ballot_user_rho(acct, balloturi, votersuri) {
       for (@ballot <- valueCh) {
           lookup!( \`${votersuri}\` , *valueCh) |
           for (@accts <- valueCh) {   
-            return!({"registered": accts.contain("${acct}") ,"ballot": ballot})
+            return!({"registered": accts.contains("${acct}") ,"ballot": ballot})
           }
       }
-  }`
+    }}`
 }
 
 
