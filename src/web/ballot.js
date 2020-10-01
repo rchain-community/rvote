@@ -186,15 +186,23 @@ export function buildUI({
  * @typedef {{ revAddr: string, ethAddr: string, name: string }} Account
  */
 function showAccount(info, imgHolder) {
-  // First remove the '0x' and convert the 8 digit hex number to
-  // decimal with i.e. `parseInt('e30a34bc, 16)` to generate a
-  // "jazzicon".
-  // -- Parker Sep 2018
-  //    https://www.reddit.com/r/ethdev/comments/9fwffj/wallet_ui_trick_mock_the_metamask_account_icon_by/
   console.log(info);
-  imgHolder.setAttribute("title", info.revAddr);
-  const seed = parseInt(info.ethAddr.slice(0, 8), 16);
-  vizHash(seed, imgHolder);
+  imgHolder.setAttribute('title', info.revAddr);
+  vizHash(ethJazzSeed(info.ethAddr), imgHolder);
+}
+
+/**
+ * First remove the '0x' and convert the 8 digit hex number to
+ * decimal with i.e. `parseInt('e30a34bc, 16)` to generate a
+ * "jazzicon".
+ * -- Parker Sep 2018
+ *    https://www.reddit.com/r/ethdev/comments/9fwffj/wallet_ui_trick_mock_the_metamask_account_icon_by/
+ *
+ * @param {string} ethAddr
+ * @returns { number }
+ */
+function ethJazzSeed(ethAddr) {
+  return parseInt(ethAddr.slice(0, 8), 16);
 }
 
 /** @type { (seed: number, holder: Element) => void } */
