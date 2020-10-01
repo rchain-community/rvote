@@ -2,7 +2,7 @@
   "name": "rv2020",
   "version": "0.4.0",
   "description": "RChain Voting dApp (Alpha)",
-  "main": "src/web/ballot.html",
+  "main": "./src/web/ballot.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rchain-community/rv2020.git"
@@ -22,22 +22,16 @@
   "homepage": "https://github.com/rchain-community/rv2020#readme",
   "devDependencies": {
     "prettier": "^2.1.1",
-    "snowpack": "^2.10.3"
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   },
   "scripts": {
     "realclean": "rm -rf dist build node_modules web_modules",
-    "start": "snowpack dev --polyfill-node",
-    "build": "snowpack build --polyfill-node",
-    "fix": "snowpack --reload --polyfill-node",
+    "start": "webpack-dev-server --open",
+    "build": "webpack",
     "format": "prettier --write \"src/**/*.js\"",
     "lint": "prettier --check \"src/**/*.js\""
-  },
-  "snowpack": {
-    "mount": {
-      "public": "/",
-      "src": "/_dist_"
-    },
-    "plugins": []
   },
   "dependencies": {
     "blakejs": "^1.1.0",
