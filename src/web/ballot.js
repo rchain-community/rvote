@@ -1,7 +1,7 @@
 // @ts-check
-import jazzicon from "jazzicon";
-import m from "mithril"; // WARNIN: Ambient access to Dom
-import htm from "htm";
+import jazzicon from 'jazzicon';
+import m from 'mithril'; // WARNING: Ambient access to Dom
+import htm from 'htm';
 
 import { makeRNodeWeb } from "../vendor/rnode-client-js/src/rnode-web";
 import {
@@ -24,9 +24,15 @@ const DUST = 1;
 
 const { entries } = Object;
 
-const html = htm.bind(m);
+const html = htm.bind(m); // WARNING: Ambient access to Dom
 
 const check = {
+  /**
+   * @param {T?} x
+   * @param { string= } context
+   * @returns { T }
+   * @template T
+   */
   notNull(x, context) {
     if (!x) {
       throw new Error(`null/undefined ${context}`);
@@ -59,6 +65,13 @@ const check = {
   },
 };
 
+/** @type { (form: Element) => void } */
+const turnOffSubmit = (form) => {
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+  });
+};
+
 /**
  * @param {{
  *  getElementById: typeof document.getElementById,
@@ -81,42 +94,26 @@ export function buildUI({
 
   const theElt = (id) => check.notNull(getElementById(id));
   const ui = {
-    ballotForm: theElt("ballotForm"),
-    signIn: check.theButton(theElt("signIn")),
-    addrViz: theElt("addrViz"),
-    questionList: theElt("questionList"),
-    response: check.theTextArea(theElt("response")),
-    agendaURI: check.theInput(theElt("agendaURI")),
-    agendaUriViz: theElt("agendaUriViz"),
-    submitResponse: theElt("submitResponse"),
-    phloLimit: check.theInput(theElt("phloLimit")),
-    deployStatus: theElt("deployStatus"),
+    signIn: check.theButton(theElt('signIn')),
+    addrViz: theElt('addrViz'),
+    questionList: theElt('questionList'),
+    response: check.theTextArea(theElt('response')),
+    agendaURI: check.theInput(theElt('agendaURI')),
+    agendaUriViz: theElt('agendaUriViz'),
+    submitResponse: theElt('submitResponse'),
+    phloLimit: check.theInput(theElt('phloLimit')),
+    deployStatus: theElt('deployStatus'),
   };
 
   /** @type {{ account?: Account }} */
   const state = { account: undefined };
 
-  /** @type { (form: Element) => void } */
-  const turnOffSubmit = (form) => {
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-    });
-  };
-  turnOffSubmit(ui.ballotForm);
+  turnOffSubmit(theElt('ballotForm'));
 
-  ui.signIn.addEventListener("click", (_) =>
-    ethereumAddress().then((ethAddr) => {
-      const revAddr = getAddrFromEth(ethAddr);
-      state.account = {
-        revAddr,
-        name: `gov ${revAddr.slice(0, 8)}`,
-        ethAddr: ethAddr.replace(/^0x/, ""),
-      };
-      showAccount(state.account, ui.addrViz);
-
-      updateQuestions();
-    })
-  );
+  m.mount(theElt('accountControl'), AccountControl(ethereumAddress));
+  const agenda = check.theInput(theElt('agendaURI')).value;
+  const ac = InputHash('Agenda URI:', agenda);
+  m.mount(theElt('agendaControl'), ac);
 
   const pmt = () => ({
     account: state.account,
@@ -163,12 +160,8 @@ export function buildUI({
       });
   }
 
-  vizHash(hashCode(ui.agendaURI.value), ui.agendaUriViz);
-  ui.agendaURI.addEventListener("change", (_) =>
-    vizHash(hashCode(ui.agendaURI.value), ui.agendaUriViz)
-  );
-  ui.submitResponse.addEventListener("click", (_) => {
-    setStatus("");
+  ui.submitResponse.addEventListener('click', (_) => {
+    setStatus('');
     runDeploy(ui.response.value, pmt(), { rnodeWeb, setStatus }).catch(
       (err) => {
         console.log({ err });
@@ -178,38 +171,83 @@ export function buildUI({
   });
 }
 
+const { freeze } = Object;
+
+const unDom = (elt) => m.trust(elt.outerHTML);
+const vizHash = (seed, size = 40) => unDom(jazzicon(size, seed));
+
 /**
  * Show Account
- * @param { Account } info
- * @param { Element } imgHolder
+ * @param { () => Promise<string> } ethereumAddress
+ * @param { number= } size
  *
  * @typedef {{ revAddr: string, ethAddr: string, name: string }} Account
  */
-function showAccount(info, imgHolder) {
-  console.log(info);
-  imgHolder.setAttribute('title', info.revAddr);
-  vizHash(ethJazzSeed(info.ethAddr), imgHolder);
+function AccountControl(ethereumAddress) {
+  /** @type {Account?} */
+  let account = null;
+
+  function signIn(_event) {
+    ethereumAddress().then((ethAddr) => {
+      const revAddr = getAddrFromEth(ethAddr);
+      account = {
+        revAddr,
+        name: `gov ${revAddr.slice(0, 8)}`,
+        ethAddr: ethAddr.replace(/^0x/, ''),
+      };
+      console.log(account);
+      m.redraw();
+      //@@@ updateQuestions();
+    });
+  }
+
+  /**
+   * First remove the '0x' and convert the 8 digit hex number to
+   * decimal with i.e. `parseInt('e30a34bc, 16)` to generate a
+   * "jazzicon".
+   * -- Parker Sep 2018
+   *    https://www.reddit.com/r/ethdev/comments/9fwffj/wallet_ui_trick_mock_the_metamask_account_icon_by/
+   * @type { (a: string) => number }
+   */
+  const ethJazzSeed = (ethAddr) => parseInt(ethAddr.slice(0, 8), 16);
+
+  return freeze({
+    view() {
+      console.log({ account, vizHash });
+
+      const markup =
+        account === null
+          ? html`<button class="navbar-right" onclick=${signIn}>
+              Sign In
+            </button>`
+          : html`Signed in as ${vizHash(ethJazzSeed(account.ethAddr))}`;
+      console.log(markup);
+      return markup;
+    },
+  });
 }
 
 /**
- * First remove the '0x' and convert the 8 digit hex number to
- * decimal with i.e. `parseInt('e30a34bc, 16)` to generate a
- * "jazzicon".
- * -- Parker Sep 2018
- *    https://www.reddit.com/r/ethdev/comments/9fwffj/wallet_ui_trick_mock_the_metamask_account_icon_by/
  *
- * @param {string} ethAddr
- * @returns { number }
+ * @param {string} init
  */
-function ethJazzSeed(ethAddr) {
-  return parseInt(ethAddr.slice(0, 8), 16);
-}
+function InputHash(label, init) {
+  let uri = init;
 
-/** @type { (seed: number, holder: Element) => void } */
-function vizHash(seed, holder, size = 40) {
-  const el = jazzicon(size, seed);
-  holder.innerHTML = "";
-  holder.appendChild(el);
+  return freeze({
+    view() {
+      return html`${label}
+        <input
+          onchange=${(ev) => {
+            uri = ev.target.value;
+          }}
+          size="60"
+          class="coop"
+          value=${uri}
+        />
+        ${vizHash(hashCode(uri))} `;
+    },
+  });
 }
 
 /** @type { (s: string) => number } */

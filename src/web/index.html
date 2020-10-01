@@ -49,9 +49,11 @@
         <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0"
           aria-valuemax="100">25%</div>
       </div>
-
-      <button id="signIn" class="navbar-right">Sign In</button>
-      <p class="navbar-text navbar-right">Signed in as <span id="addrViz" class="btn vizHash">...</span>
+      <p class="navbar-text navbar-right">
+        <span id="accountControl">
+          <button id="signIn" class="navbar-right">Sign In</button>
+          Signed in as <span id="addrViz" class="btn vizHash">...</span>
+        </span>
         <br />
         <em id="deployStatus">...</em>
       </p>
@@ -146,7 +148,7 @@
                 </tr>
               </tbody>
             </table>
-            <label>
+            <label id="agendaControl">
               Agenda URI:
               <input id="agendaURI" size="60" class="coop"
                 value="rho:id:5rcmyxwu8r7yywjz4qqg4ij3pox3d96joeky1gczdpf3fkaujejdxr" />
