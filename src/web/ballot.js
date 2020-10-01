@@ -1,30 +1,35 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable camelcase */
+/* global HTMLButtonElement, HTMLInputElement, HTMLTextAreaElement */
 // @ts-check
 import jazzicon from 'jazzicon';
 import m from 'mithril'; // WARNING: Ambient access to Dom
 import htm from 'htm';
 
-import { makeRNodeWeb } from "../vendor/rnode-client-js/src/rnode-web";
+import { makeRNodeWeb } from '../vendor/rnode-client-js/src/rnode-web';
 import {
   makeRNodeActions,
   rhoExprToJS,
-} from "../vendor/rnode-client-js/src/web/rnode-actions";
+} from '../vendor/rnode-client-js/src/web/rnode-actions';
 import {
   testNet,
   getNodeUrls,
-} from "../vendor/rnode-client-js/src/rchain-networks";
-import { getAddrFromEth } from "../vendor/rnode-client-js/src/rev-address";
+} from '../vendor/rnode-client-js/src/rchain-networks';
+import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
 
-import { transferMulti_rho } from "../rho/transfer-multi";
-import { lookup_rho } from "../rho/lookup";
+import { transferMulti_rho } from '../rho/transfer-multi';
 
-const votersuri =
-  "rho:id:kiijxigqydnt7ds3w6w3ijdszswfysr3hpspthuyxz4yn3ksn4ckzf";
+const VOTERS_URI =
+  'rho:id:kiijxigqydnt7ds3w6w3ijdszswfysr3hpspthuyxz4yn3ksn4ckzf';
 
 const DUST = 1;
 
-const { entries } = Object;
+const { freeze, entries } = Object;
 
 const html = htm.bind(m); // WARNING: Ambient access to Dom
+
+/** @type {(elt: HTMLElement) => unknown } */
+const unDom = (elt) => m.trust(elt.outerHTML);
 
 const check = {
   /**
@@ -43,7 +48,7 @@ const check = {
   /** @type { (elt: unknown) => HTMLButtonElement } */
   theButton(elt) {
     if (!(elt instanceof HTMLButtonElement)) {
-      throw new Error("not Button");
+      throw new Error('not Button');
     }
     return elt;
   },
@@ -51,7 +56,7 @@ const check = {
   /** @type { (elt: unknown) => HTMLInputElement } */
   theInput(elt) {
     if (!(elt instanceof HTMLInputElement)) {
-      throw new Error("not input");
+      throw new Error('not input');
     }
     return elt;
   },
@@ -59,7 +64,7 @@ const check = {
   /** @type { (elt: unknown) => HTMLTextAreaElement } */
   theTextArea(elt) {
     if (!(elt instanceof HTMLTextAreaElement)) {
-      throw new Error("not input");
+      throw new Error('not input');
     }
     return elt;
   },
@@ -75,129 +80,166 @@ const turnOffSubmit = (form) => {
 /**
  * @param {{
  *  getElementById: typeof document.getElementById,
- *  querySelectorAll: typeof document.querySelectorAll,
- *  createElement: typeof document.createElement,
  *  fetch: typeof window.fetch,
  *  now: typeof Date.now,
  *  ethereumAddress: () => Promise<string>,
  *  }} powers
+ *
+ * @typedef {{[refID: string]: { shortDesc: string, docLink?: string, yesAddr: string, noAddr: string, abstainAddr: string }}} QAs
  */
-export function buildUI({
-  ethereumAddress,
-  getElementById,
-  querySelectorAll,
-  createElement,
-  fetch,
-  now,
-}) {
+export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
   const rnodeWeb = makeRNodeWeb({ fetch, now });
 
   const theElt = (id) => check.notNull(getElementById(id));
   const ui = {
-    signIn: check.theButton(theElt('signIn')),
-    addrViz: theElt('addrViz'),
-    questionList: theElt('questionList'),
-    response: check.theTextArea(theElt('response')),
-    agendaURI: check.theInput(theElt('agendaURI')),
-    agendaUriViz: theElt('agendaUriViz'),
     submitResponse: theElt('submitResponse'),
     phloLimit: check.theInput(theElt('phloLimit')),
     deployStatus: theElt('deployStatus'),
   };
 
-  /** @type {{ account?: Account }} */
-  const state = { account: undefined };
-
   turnOffSubmit(theElt('ballotForm'));
 
-  m.mount(theElt('accountControl'), AccountControl(ethereumAddress));
-  const agenda = check.theInput(theElt('agendaURI')).value;
-  const ac = InputHash('Agenda URI:', agenda);
-  m.mount(theElt('agendaControl'), ac);
+  /** @type { Account? } */
+  let account = null;
+  let agenda = check.theInput(theElt('agendaURI')).value;
+  let status = '';
+  /** @type { QAs? } */
+  let questions = null;
+  /** @type {{[id: string]: string}?} */
+  const answers = {};
 
-  const pmt = () => ({
-    account: state.account,
-    phloLimit: 100000000 * parseFloat(ui.phloLimit.value),
-  });
-  /** @type { (status: string) => void } */
-  const setStatus = (status) => {
-    ui.deployStatus.textContent = status;
+  const state = {
+    // @ts-ignore why doesn't esnext work in jsconfig.json?
+    get account() {
+      return account;
+    },
+    // @ts-ignore
+    set account(value) {
+      account = value;
+      state.agenda = agenda;
+    },
+    registered: undefined,
+    // @ts-ignore
+    get status() {
+      return status;
+    },
+    // @ts-ignore
+    set status(value) {
+      status = value;
+      m.redraw();
+    },
+    // @ts-ignore
+    get agenda() {
+      return agenda;
+    },
+    // @ts-ignore
+    set agenda(value) {
+      agenda = value;
+      getQuestions().then(({ qas, registered }) => {
+        questions = qas;
+        state.registered = registered; // TODO: display
+        m.redraw();
+      });
+    },
+    // @ts-ignore
+    get questions() {
+      return questions;
+    },
+    answers: new Proxy(answers, {
+      get(_t, prop) {
+        if (typeof prop !== 'string') {
+          throw new TypeError(String(prop));
+        }
+        return answers[prop];
+      },
+      set(_t, prop, value) {
+        if (typeof prop !== 'string') {
+          throw new TypeError(String(prop));
+        }
+        if (value > '') {
+          answers[prop] = value;
+        } else {
+          delete answers[prop];
+        }
+        m.redraw();
+        return true;
+      },
+    }),
+    // @ts-ignore
+    get response() {
+      if (!(account && answers)) {
+        return '';
+      }
+      const choiceAddrs = Object.values(answers);
+      return transferMulti_rho(account.revAddr, choiceAddrs, DUST);
+    },
+    phloLimit: 0.05,
   };
-  function updateQuestions() {
-    setStatus("");
-    const misc = { name: "testNet", http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
+
+  function getQuestions() {
+    state.status = '';
+    const misc = { name: 'testNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
     const node = getNodeUrls({ ...misc, ...testNet.readOnlys[0] });
     const { rnodeHttp } = rnodeWeb;
-    ballotVoterLookup(
+    return ballotVoterLookup(
       ui.agendaURI.value,
       state.account.revAddr,
-      votersuri,
+      VOTERS_URI,
       node.httpUrl,
-      { rnodeHttp, setStatus }
-    )
-      .then((qas) => {
-        showQuestions(
-          rhoExprToJS(qas.ballot),
-          ui.questionList /*, { createElement } */
-        );
-        setStatus(
-          rhoExprToJS(qas.registered)
-            ? "Verified registered voter"
-            : "ACCOUNT NOT REGISTERED"
-        );
-        const controls = querySelectorAll('fieldset input[type="radio"]');
-        controls.forEach((radio) => {
-          radio.addEventListener("change", (_) => {
-            ui.response.value = response(state.account, controls);
-          });
-        });
-      })
-      .catch((err) => {
-        console.log({ err });
-        setStatus(
-          `${err && typeof err === "object" && err.message ? err.message : err}`
-        );
-      });
+      { rnodeHttp },
+    ).catch((err) => {
+      console.log({ err });
+      state.error = `${
+        err && typeof err === 'object' && err.message ? err.message : err
+      }`;
+    });
   }
 
+  m.mount(theElt('accountControl'), AccountControl(state, ethereumAddress));
+  m.mount(theElt('agendaControl'), AgendaControl(state));
+  m.mount(theElt('responseControl'), ResponseControl(state));
+  m.mount(theElt('questionList'), QuestionsControl(state));
+
   ui.submitResponse.addEventListener('click', (_) => {
-    setStatus('');
-    runDeploy(ui.response.value, pmt(), { rnodeWeb, setStatus }).catch(
-      (err) => {
-        console.log({ err });
-        setStatus(`${err}`);
-      }
-    );
+    state.status = '';
+    runDeploy(
+      state.response,
+      {
+        account: state.account,
+        phloLimit: 100000000 * state.phloLimit,
+      },
+      {
+        rnodeWeb,
+        setStatus: (s) => {
+          state.status = s;
+        },
+      },
+    ).catch((err) => {
+      console.log({ err });
+      state.status = `${err}`;
+    });
   });
 }
 
-const { freeze } = Object;
-
-const unDom = (elt) => m.trust(elt.outerHTML);
 const vizHash = (seed, size = 40) => unDom(jazzicon(size, seed));
 
 /**
  * Show Account
  * @param { () => Promise<string> } ethereumAddress
- * @param { number= } size
+ * @param {{ account: Account? }} state
  *
  * @typedef {{ revAddr: string, ethAddr: string, name: string }} Account
  */
-function AccountControl(ethereumAddress) {
-  /** @type {Account?} */
-  let account = null;
-
+function AccountControl(state, ethereumAddress) {
   function signIn(_event) {
     ethereumAddress().then((ethAddr) => {
       const revAddr = getAddrFromEth(ethAddr);
-      account = {
+      state.account = {
         revAddr,
         name: `gov ${revAddr.slice(0, 8)}`,
         ethAddr: ethAddr.replace(/^0x/, ''),
       };
-      console.log(account);
       m.redraw();
-      //@@@ updateQuestions();
     });
   }
 
@@ -213,39 +255,32 @@ function AccountControl(ethereumAddress) {
 
   return freeze({
     view() {
-      console.log({ account, vizHash });
-
       const markup =
-        account === null
+        state.account === null
           ? html`<button class="navbar-right" onclick=${signIn}>
               Sign In
             </button>`
-          : html`Signed in as ${vizHash(ethJazzSeed(account.ethAddr))}`;
+          : html`Signed in as ${vizHash(ethJazzSeed(state.account.ethAddr))}<br />
+              <small><input readonly value=${state.account.revAddr} /></small>`;
       console.log(markup);
       return markup;
     },
   });
 }
 
-/**
- *
- * @param {string} init
- */
-function InputHash(label, init) {
-  let uri = init;
-
+function AgendaControl(state) {
   return freeze({
     view() {
-      return html`${label}
+      return html`Agenda URI:
         <input
           onchange=${(ev) => {
-            uri = ev.target.value;
+            state.agenda = ev.target.value;
           }}
           size="60"
           class="coop"
-          value=${uri}
+          value=${state.agenda}
         />
-        ${vizHash(hashCode(uri))} `;
+        ${vizHash(hashCode(state.agenda))} `;
     },
   });
 }
@@ -254,15 +289,18 @@ function InputHash(label, init) {
 function hashCode(s) {
   // ack: bryc Aug 31, 2018
   // https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0#gistcomment-2694461
-  for (var i = 0, h = 0; i < s.length; i++)
+  let h = 0;
+  for (let i = 0; i < s.length; i += 1)
+    // eslint-disable-next-line no-bitwise
     h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
   return h;
 }
 
 /**
  * @param {string} balloturi
- * @param { string } httpUrl
+ * @param { string } revAddr
  * @param {string} votersuri
+ * @param { string } httpUrl
  * @returns { Promise<any> }
  */
 async function ballotVoterLookup(
@@ -270,13 +308,13 @@ async function ballotVoterLookup(
   revAddr,
   votersuri,
   httpUrl,
-  { rnodeHttp, setStatus }
+  { rnodeHttp },
 ) {
   // return Promise.resolve(testQuestions);
 
-  console.log("looking up agenda on chain...");
+  console.log('looking up agenda on chain...');
   const code = lookup_ballot_user_rho(revAddr, balloturi, votersuri);
-  const { expr } = await rnodeHttp(httpUrl, "explore-deploy", code);
+  const { expr } = await rnodeHttp(httpUrl, 'explore-deploy', code);
   console.log(code);
   console.log(expr);
   const [
@@ -319,7 +357,7 @@ export function lookup_ballot_user_rho(acct, balloturi, votersuri) {
  * @returns { Promise<{ args: any[], cost: number, rawData: any }> }
  */
 function runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus }) {
-  const misc = { name: "testNet", http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
+  const misc = { name: 'testNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
   const node = getNodeUrls({ ...misc, ...testNet.hosts[0] }); // TODO: get next validator?
 
   // appSendDeploy has a strange API: only sends the returned data to the log.
@@ -327,7 +365,7 @@ function runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus }) {
   let deployReturnData;
   const { appSendDeploy } = makeRNodeActions(rnodeWeb, {
     log(label, info, ...rest) {
-      if (label === "DEPLOY RETURN DATA") {
+      if (label === 'DEPLOY RETURN DATA') {
         deployReturnData = info;
       }
       console.log(label, info, ...rest);
@@ -339,98 +377,56 @@ function runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus }) {
     (result) => {
       setStatus(result);
       return deployReturnData;
-    }
+    },
   );
 }
 
 /**
- * @param {QAs} qas
- * @param { Element } questionList
+ * @param {{questions?: QAs, answers?: {[id: string]: string}}} state
  */
-function showQuestions(qas, questionList) {
-  questionList.innerHTML = "";
-
-  const markup = entries(qas).map(
-    ([id, { shortDesc, docLink, yesAddr, noAddr, abstainAddr }], qix) => {
-      const name = `q${qix}`;
-      /** @type { (value: string, props?: Object) => any } */
-      const radio = (value, props = {}) => html` <td class="choice">
-        <input type="radio" ...${{ name, value, title: value, ...props }} />
-      </td>`;
-      return html`
+function QuestionsControl(state) {
+  /** @type {(qas: QAs) => Vnode<any, any> } */
+  const markup = (qas) =>
+    entries(qas).map(
+      ([id, { shortDesc, docLink, yesAddr, noAddr, abstainAddr }], qix) => {
+        const name = `q${qix}`;
+        /** @type { (value: string) => any } */
+        const radio = (value) => html` <td class="choice">
+          <input
+            type="radio"
+            ...${{ name, value, title: value }}
+            ...${state.answers[id] === value ? { checked: true } : {}}
+            onclick=${(ev) => {
+              state.answers[id] = ev.target.value;
+            }}
+          />
+        </td>`;
+        return html`
           <tr><td>${id}</td>
           <td>${shortDesc}
            ${
              docLink
                ? html`<br />see: <a href=${docLink} target="_blank">${id}</a>`
-               : ""
+               : ''
            }</td>
-          ${radio(noAddr)} ${radio(abstainAddr, {
-        checked: "checked",
-      })} ${radio(yesAddr)}
+
+          ${radio(noAddr)} ${radio(abstainAddr)} ${radio(yesAddr)}
           </dd>`;
-    }
-  );
-  m.render(questionList, markup);
+      },
+    );
+
+  return freeze({
+    view: () => markup(state.questions || {}),
+  });
 }
 
 /**
- * @typedef {{[refID: string]: { shortDesc: string, docLink?: string, yesAddr: string, noAddr: string, abstainAddr: string }}} QAs
- * @type { QAs }
+ * @param {{ response: string }} state
  */
-const testQuestions = {
-  "Board: WEC": {
-    yesAddr: "11112gUFvJR6JBDYJURETaWUBpEDa1EyjgRHFncEfQ4hGECnciPnhw",
-    noAddr: "11112aoa6NLYomYZro566XZVGEXyCDqeqDcp8Pzg81Ckuws6SexC99",
-    shortDesc: "Wile E. Coyote for Board Member",
-    docLink:
-      "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#board-wec",
-    abstainAddr: "1111pKehMgsPBAiqzCSkSekXP4aUXMjY5DvtSXcz72ATP7Pm3RK9o",
-  },
-  "Board: DaD": {
-    yesAddr: "1111TnFUN7eZBWXp3QQACQRRxpcS5uH5Bpf67vikWhA5e3F6ikAmU",
-    noAddr: "11112Cwtg2Bs4WUAYrXhL9xZXXSXr9Gn62Cty39RhUaBnqjrKkqwAZ",
-    shortDesc: "Daffy Duck for Board Member",
-    docLink:
-      "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#board-dad",
-    abstainAddr: "11112nT2XooHcCVQLEAsEJhQm6boCS5B7XQ1DBmw6ex3xveiCWRWAx",
-  },
-  "Member Swag": {
-    yesAddr: "11112i8bYVDYcm4MSbY3d1As28uY151xoMS7AyiTvZ2YmNJ8Nw13v9",
-    noAddr: "11112uGayGEi57D44Drq3V4iw5WWyfXbcVvsDangRTE7TaR3J4U4FD",
-    shortDesc:
-      "The Item of Business I want to propose is to provide all new members with stickers and t-shirts with the RChain logo on it as part of their membership onboarding package.",
-    docLink:
-      "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#member-swag",
-    abstainAddr: "111184Ab7raMAoVy6fX8JuoPFB5PggfrEWfzXE4WMzTKioFwmQMsa",
-  },
-  "Board: DoD": {
-    yesAddr: "1111rbdV9Lsw6DyMSq8ySXDacX7pRUxmVGoYho9gGtfZcQYFdAN42",
-    noAddr: "1111JoeZHDYXqyAgo89VaidQnp7W7M9pvdkFUJTqEBU7SHKx6WF2z",
-    shortDesc: "Donald Duck for Board Member",
-    docLink:
-      "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#board-dod",
-    abstainAddr: "11113Y89LxqCmjDK9PUDi1dfsEcjAHbBW7mQ3Zw2yqqiwSUibaTkq",
-  },
-  "Board: RR": {
-    yesAddr: "1111krbAKSbyGA9vfa7w4K2pKAxZZn6qjaVEduDLWotDZ8HLt2aXR",
-    noAddr: "1111swBFUPVRwR4ugkDBCvrLwPeR1621B1cHQf3cAkNxt3Zad2eac",
-    shortDesc: "Road Runner for Board Member",
-    docLink:
-      "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#board-rr",
-    abstainAddr: "11112CgGiNg3DdMDsYz7UikeSxh7CfFdEbDYzmoJLfS4vx3uZjm55V",
-  },
-};
-
-/** @type {(account: { revAddr: string }, controls: NodeListOf<Element> ) => string} */
-function response(account, controls) {
-  const choiceAddrs = Array.from(controls)
-    .map((radio) => check.theInput(radio)) // filter rather than throw?
-    .reduce(
-      (acc, cur, _ix, _src) =>
-        cur.checked && cur.value > "" ? [...acc, cur] : acc,
-      []
-    )
-    .map((radio) => radio.value);
-  return transferMulti_rho(account.revAddr, choiceAddrs, DUST);
+function ResponseControl(state, attrs = { rows: 4, cols: 80 }) {
+  return freeze({
+    view() {
+      return html`<textarea readonly ...${attrs}>${state.response}</textarea>`;
+    },
+  });
 }
