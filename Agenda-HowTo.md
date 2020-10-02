@@ -10,7 +10,8 @@ _Conveniently, JSON syntax is included in rholang._
  *   shortDesc: string,
  *   docLink?: string,
  *   yesAddr: string,
- *   noAddr: string
+ *   noAddr: string,
+ *   abstainAddr: string,
  * }}} QAs
  * @type { QAs }
  */
@@ -19,6 +20,7 @@ const testQuestions = {
         "shortDesc": "The Item of Business I want to propose is to provide all new members with stickers and t-shirts with the RChain logo on it as part of their membership onboarding package.",
         "docLink": "https://gist.github.com/dckc/ca240e5336d0ee3e4f5cf31c4f629a30#member-swag",
         "yesAddr": "11112i8bYVDYcm4MSbY3d1As28uY151xoMS7AyiTvZ2YmNJ8Nw13v9",
+        "abstainAddr": "111184Ab7raMAoVy6fX8JuoPFB5PggfrEWfzXE4WMzTKioFwmQMsa",
         "noAddr": "11112uGayGEi57D44Drq3V4iw5WWyfXbcVvsDangRTE7TaR3J4U4FD"
     },
     ...
