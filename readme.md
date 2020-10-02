@@ -1,29 +1,42 @@
 # rv2020 - RChain Voting
 
-Exploration into an on-chain record of RChain Cooperative business.
+The goal is to develop a voting dApp for use by coop members to vote for board of directors (BOD) and Items of Business (IOB) during the annual RChain membership meeting in October 2020.
 
-## Goal
+![Voting in Rholang](https://user-images.githubusercontent.com/150986/94964103-d3e17e80-04be-11eb-8ee5-a714860520f5.png)
 
-The voting dapp should be used by coop members to vote for board of directors (BOD) and Items of Business (IOB) during the annual RChain membership meeting in October 2020.
+- [Voting in Rholang by dckc \- Slides](https://docs.google.com/presentation/d/1LLwejP0QdhHwhjYd-LFIPBblj1owjBGHBgL_EWh80V8/edit#slide=id.p)
+  - [Sep 30 presentation recording](https://www.youtube.com/watch?v=XY-kyfojbGQ)
+- [demo in SEP 9 Community Debrief 195 \- YouTube](https://youtu.be/SszdCWVDFFM?t=1006)
+
+## Getting Started
+
+Try the beta at https://rv2020-beta.netlify.app/
+
+Or run it locally:
+
+```
+git clone https://github.com/rchain-community/rv2020
+cd rv2020
+npm install
+npm start
+```
+
+_See CONTRIBUTING.md for more on design and development._
 
 ## Requirements and Discussion
 
-See issues as well as
-  - [initial brainstorming document](https://docs.google.com/document/d/1jfARb33suC_7AkICblTOFTmKN2mvTu9r7cFRPDKZ6hw/edit#)
-  - [RChat Requirements and Design Discussion Log](https://docs.google.com/document/d/1PsPSvUBDQw2EV-L-K52Fmiy01_VtyesIKLMp6Mm-XGw/edit)
-  - [RChat Log](https://docs.google.com/document/d/1rDAXC6TcFr4JS7eQti3jjFnf0FJGzwLpq9pnBaLHa30/edit#heading=h.v4jq7ifo127j)
-  - [#rchat discord channel](https://discord.com/channels/375365542359465989/717821191728922684)
- 
+See issues and milestones as well as
+
+- [RChat Log](https://docs.google.com/document/d/1rDAXC6TcFr4JS7eQti3jjFnf0FJGzwLpq9pnBaLHa30/edit#heading=h.v4jq7ifo127j)
+- [#rchat discord channel](https://discord.com/channels/375365542359465989/717821191728922684)
+
+earlier:
+
+- [initial brainstorming document](https://docs.google.com/document/d/1jfARb33suC_7AkICblTOFTmKN2mvTu9r7cFRPDKZ6hw/edit#)
+- [RChat Requirements and Design Discussion Log](https://docs.google.com/document/d/1PsPSvUBDQw2EV-L-K52Fmiy01_VtyesIKLMp6Mm-XGw/edit)
 
 ## Timeline
 
-*   October 24th - annual general membership (AGM) meeting
+- October 24th - annual general membership (AGM) meeting
 
 _see also issue #26 etc._
-
-
-## Methods
-
-Various ways of integrating zulip are being explored as of Jun 17. (demo to appear in [communit debriefs](https://www.youtube.com/watch?v=YW15Fp7q12M&list=PLf2bbiic5ZjCVy9t4vhz4cQTSS6vLQC5R))
-
-_see issues list_
