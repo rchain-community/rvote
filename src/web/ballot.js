@@ -140,6 +140,10 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
           }
           const { ballot: qas, registered } = result;
           state.questions = qas;
+          // default to abstain for all questions
+          entries(qas).forEach(([id, { abstainAddr }]) => {
+            answers[id] = abstainAddr;
+          });
           state.registered = registered; // TODO: display
           state.event = {
             label: registered
