@@ -24,7 +24,7 @@ const VOTERS_URI =
 
 const DUST = 1;
 
-const { freeze, entries } = Object;
+const { freeze, entries, values } = Object;
 
 const html = htm.bind(m); // WARNING: Ambient access to Dom
 
@@ -91,11 +91,6 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
   const rnodeWeb = makeRNodeWeb({ fetch, now });
 
   const theElt = (id) => check.notNull(getElementById(id));
-  const ui = {
-    submitResponse: theElt('submitResponse'),
-    phloLimit: check.theInput(theElt('phloLimit')),
-    deployStatus: theElt('deployStatus'),
-  };
 
   turnOffSubmit(theElt('ballotForm'));
 
@@ -106,7 +101,7 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
   /** @type { QAs? } */
   let questions = null;
   /** @type {{[id: string]: string}?} */
-  const answers = {};
+  let answers = {};
 
   const state = {
     // @ts-ignore why doesn't esnext work in jsconfig.json?
@@ -126,6 +121,7 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
     // @ts-ignore
     set status(value) {
       status = value;
+      theElt('deployStatus').textContent = value; // kludge? make control?
       m.redraw();
     },
     // @ts-ignore
@@ -167,13 +163,13 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
     }),
     // @ts-ignore
     get response() {
-      if (!(account && answers)) {
+      if (!(account && values(answers).length > 0)) {
         return '';
       }
-      const choiceAddrs = Object.values(answers);
+      const choiceAddrs = values(answers);
       return transferMulti_rho(account.revAddr, choiceAddrs, DUST);
     },
-    phloLimit: 0.05,
+    maxFee: 0.05,
   };
 
   function getQuestions() {
@@ -189,24 +185,19 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
       { rnodeHttp },
     ).catch((err) => {
       console.log({ err });
-      state.error = `${
+      state.status = `${
         err && typeof err === 'object' && err.message ? err.message : err
       }`;
     });
   }
 
-  m.mount(theElt('accountControl'), AccountControl(state, ethereumAddress));
-  m.mount(theElt('agendaControl'), AgendaControl(state));
-  m.mount(theElt('responseControl'), ResponseControl(state));
-  m.mount(theElt('questionList'), QuestionsControl(state));
-
-  ui.submitResponse.addEventListener('click', (_) => {
+  function submitResponse(_ev) {
     state.status = '';
     runDeploy(
       state.response,
       {
         account: state.account,
-        phloLimit: 100000000 * state.phloLimit,
+        phloLimit: 100000000 * state.maxFee,
       },
       {
         rnodeWeb,
@@ -218,7 +209,26 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
       console.log({ err });
       state.status = `${err}`;
     });
+  }
+
+  const submitControl = freeze({
+    view() {
+      const disabled = !(account && state.response.length > 0);
+      return html`<input
+        type="submit"
+        ...${disabled}
+        value="Sign and Submit"
+        onclick=${submitResponse}
+      />`;
+    },
   });
+
+  m.mount(theElt('accountControl'), AccountControl(state, ethereumAddress));
+  m.mount(theElt('agendaControl'), AgendaControl(state));
+  m.mount(theElt('responseControl'), ResponseControl(state));
+  m.mount(theElt('questionList'), QuestionsControl(state));
+  m.mount(theElt('phloLimit'), MaxFeeControl(state));
+  m.mount(theElt('submitControl'), submitControl);
 }
 
 const vizHash = (seed, size = 40) => unDom(jazzicon(size, seed));
@@ -262,7 +272,6 @@ function AccountControl(state, ethereumAddress) {
             </button>`
           : html`Signed in as ${vizHash(ethJazzSeed(state.account.ethAddr))}<br />
               <small><input readonly value=${state.account.revAddr} /></small>`;
-      console.log(markup);
       return markup;
     },
   });
@@ -385,7 +394,7 @@ function runDeploy(code, { account, phloLimit }, { rnodeWeb, setStatus }) {
  * @param {{questions?: QAs, answers?: {[id: string]: string}}} state
  */
 function QuestionsControl(state) {
-  /** @type {(qas: QAs) => Vnode<any, any> } */
+  /** @type {(qas: QAs) => any } */
   const markup = (qas) =>
     entries(qas).map(
       ([id, { shortDesc, docLink, yesAddr, noAddr, abstainAddr }], qix) => {
@@ -427,6 +436,26 @@ function ResponseControl(state, attrs = { rows: 4, cols: 80 }) {
   return freeze({
     view() {
       return html`<textarea readonly ...${attrs}>${state.response}</textarea>`;
+    },
+  });
+}
+
+/**
+ * @param {{ maxFee: number }} state
+ */
+function MaxFeeControl(state) {
+  return freeze({
+    view() {
+      return html`<small
+        >Max transaction fee:
+        <input
+          id="phloLimit"
+          type="number"
+          value=${state.maxFee}
+          onchange=${(ev) => {
+            state.maxFee = parseFloat(ev.target.value);
+          }}
+      /></small>`;
     },
   });
 }
