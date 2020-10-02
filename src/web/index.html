@@ -45,14 +45,13 @@
           <img alt="RChain Community" src="https://avatars1.githubusercontent.com/u/43198800?s=88&v=4">
         </a>
       </div>
-      <div class="progress" style="width: 50%">
+      <div id="progress-bar" class="progress" style="width: 50%">
         <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0"
           aria-valuemax="100">25%</div>
       </div>
       <p class="navbar-text navbar-right">
         <span id="accountControl">
           <button id="signIn" class="navbar-right">Sign In</button>
-          Signed in as <span id="addrViz" class="btn vizHash">...</span>
         </span>
         <br />
         <em id="deployStatus">...</em>
@@ -148,21 +147,15 @@
                 </tr>
               </tbody>
             </table>
+            <input type="hidden" id="agendaURI" value="rho:id:5rcmyxwu8r7yywjz4qqg4ij3pox3d96joeky1gczdpf3fkaujejdxr" />
             <label id="agendaControl">
               Agenda URI:
-              <input id="agendaURI" size="60" class="coop"
-                value="rho:id:5rcmyxwu8r7yywjz4qqg4ij3pox3d96joeky1gczdpf3fkaujejdxr" />
-              <span id="agendaUriViz" class="btn vizHash coop"></span>
             </label>
             <div class="card">
               <div class="card-body">
                 <h3>Sign and Submit</h3>
                 <p>Your response, in rholang:</p>
                 <div id="responseControl"><textarea rows="4" cols="80"></textarea></div>
-                <div class="setting">
-                  <label id="txFee"><small>Max transaction fee: <input id="phloLimit" type="number"
-                        value="0.05" /></small></label><br />
-                </div>
                 <p>
                   <em>For a full explanation of this rholang code,
                     see <a
@@ -170,6 +163,10 @@
                       in Rholang</a> presentation
                     (with <a href="https://www.youtube.com/watch?v=XY-kyfojbGQ">video recording</a>).</em>
                 </p>
+                <div class="setting" id="txInfo">
+                  <label id="txFee"><small>Max transaction fee: <input id="phloLimit" type="number"
+                        value="0.05" /></small></label><br />
+                </div>
                 <span id="submitControl">
                   <input id="submitResponse" type="submit" value="Sign and Submit" />
                 </span>
