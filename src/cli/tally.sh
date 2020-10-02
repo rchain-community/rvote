@@ -59,4 +59,4 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   echo  "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr"
 done
 #cat /tmp/voters|sort|uniq>voters #for testing only
-# cat voters |sed '1,$s/^/"/;1,$s/$/",/;$s/,$/\]/;1s/^/\[/' # acct text list to json list
+# cat voters |sed '1,$s/^/"/;1,$s/$/",/;$s/,$/\)/;1s/^/Set\(/' # acct text list to json list
