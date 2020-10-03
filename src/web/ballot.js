@@ -485,7 +485,12 @@ function QuestionsControl(state) {
     );
 
   return freeze({
-    view: () => markup(state.questions || {}),
+    view: () =>
+      markup(
+        state.questions || {
+          Notice: { shortDesc: 'Stand by for questions...' },
+        },
+      ),
   });
 }
 

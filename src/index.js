@@ -14,8 +14,10 @@ window.addEventListener('DOMContentLoaded', (_event) => {
     getElementById: (id) => document.getElementById(id),
     querySelectorAll: (selector) => document.querySelectorAll(selector),
   });
-});
 
-window.addEventListener('DOMContentLoaded', (_event) => {
-  addTour((...args) => new Shepherd.Tour(...args));
+  console.log('adding tour...');
+  addTour((...args) => new Shepherd.Tour(...args), {
+    $: (selector) => document.querySelector(selector),
+    $all: (selector) => document.querySelectorAll(selector),
+  });
 });
