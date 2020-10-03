@@ -20,7 +20,7 @@ const jq = JSON.parse;
 async function main(argv, { fsp, http, echo }) {
   // console.log(argv);
   // TODO: consider docopt if this gets more complex
-  const ballot = argv.length >= 3 ? argv[2] : 'ballotexample.json';
+  const ballot = argv.length >= 3 ? argv[2] : '../web/ballotexample.json';
   const server = argv.length >= 4 ? argv[3] : 'kc-strip.madmode.com:7070';
 
   const ballotData = JSON.parse(await fsp.readFile(ballot, 'utf8'));
