@@ -45,6 +45,12 @@ async function main(argv, { fsp, http, echo }) {
     curl: whichCurl,
   });
 
+  if (argv.includes('--save')) {
+    const dest = argv.slice(-1)[0];
+    await fsp.writeFile(dest, JSON.stringify(txByAddr, null, 2));
+    return;
+  }
+
   const perItem = tally(ballotData, txByAddr, { echo });
   console.log(perItem);
 }
@@ -94,7 +100,7 @@ const testSuite = [
 
 // TODO: move this from ./src to ./test
 /**
- * @typedef {{[refID: string]: { shortDesc: string, docLink?: string, yesAddr: string, noAddr: string }}} QAs
+ * @typedef {{[refID: string]: { shortDesc: string, docLink?: string, yesAddr: string, noAddr: string, abstainAddr: string }}} QAs
  * @param {QAs} ballotData
  */
 async function runTests(ballotData, { fsp }) {
@@ -144,7 +150,7 @@ async function runTests(ballotData, { fsp }) {
  */
 async function download(ballotData, server, io) {
   const choiceAddrs = Object.values(ballotData)
-    .map(({ yesAddr, noAddr }) => [yesAddr, noAddr])
+    .map(({ yesAddr, noAddr, abstainAddr }) => [yesAddr, noAddr, abstainAddr])
     .flat();
   console.log(
     `downloading transactions from ${choiceAddrs.length} choices listed in the ballot...`,
