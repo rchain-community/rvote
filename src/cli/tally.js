@@ -13,9 +13,16 @@ const { assert } = require('console');
 
 const jq = JSON.parse;
 
+/** @type { (items: string[]) => string[] } */
+const uniq = (items) => Array.from(new Set(items).values());
+
 /**
  * @param {string[]} argv
- * @param {{ fsp: any, http: any, echo: (txt: string) => void }} powers
+ * @param {{
+ *   fsp: typeof import('fs').promises,
+ *   http: typeof import('http'),
+ *   echo: (txt: string) => void
+ * }} io
  */
 async function main(argv, { fsp, http, echo }) {
   // console.log(argv);
@@ -31,19 +38,24 @@ async function main(argv, { fsp, http, echo }) {
     runTests(ballotData, { fsp });
     return;
   } else if (argv.includes('--cache')) {
-    whichCurl = cachingCurl(',cache', { fsp });
+    whichCurl = cachingCurl(',cache', { fsp, http });
   }
 
-  const perItem = await tally(ballotData, server, { curl: whichCurl, echo });
+  const { voteData, voterData } = await download(ballotData, server, {
+    curl: whichCurl,
+  });
+
+  const perItem = tally(ballotData, voteData, voterData, { echo });
   console.log(perItem);
 }
 
-function cachingCurl(dirname, { fsp }) {
+function cachingCurl(dirname, { fsp, http }) {
   const toCache = (url) => `${dirname}/${url.slice(-20)}`;
 
-  return async (url, { http }) => {
+  return async (url) => {
+    console.log('cachingCurl', { url, fn: toCache(url) });
     const contents = await nodeCurl(url, { http });
-    assert(url.match('/api/transfer/'));
+    assert(url.match('/api/transfer/') && !url.match('undefined'));
     await fsp.writeFile(toCache(url), contents);
     return contents;
   };
@@ -91,8 +103,12 @@ async function runTests(ballotData, { fsp }) {
     let result = 'pass';
     const { dirname, expected } = testCase;
     const curl = curlFromCache(dirname, { fsp });
-    const actual = await tally(ballotData, 'TEST_SERVER', {
+
+    const { voteData, voterData } = await download(ballotData, 'TEST_SERVER', {
       curl,
+    });
+
+    const actual = tally(ballotData, voteData, voterData, {
       echo: console.log,
     });
     // console.log(JSON.stringify({ actual, expected }, null, 2));
@@ -123,19 +139,32 @@ async function runTests(ballotData, { fsp }) {
 /**
  * @param {QAs} ballotData
  * @param {string} server
- * @param {{ curl: (url: string) => Promise<string>, echo: (txt: string) => void }} powers
+ * @param {{ curl: (url: string) => Promise<string> }} io
  */
-async function tally(ballotData, server, { curl, echo }) {
+async function download(ballotData, server, io) {
+  const voteData = await voteTransactions(ballotData, server, io);
+  const voters = Object.values(voteData)
+    .map(({ yes, no }) =>
+      [yes, no].map((txs) => txs.map((tx) => tx.fromAddr)).flat(),
+    )
+    .flat();
+  const voterData = await voterTransactions(uniq(voters), server, io);
+  return { voteData, voterData };
+}
+
+/**
+ * @param {QAs} ballotData
+ * @param {{[id: string]: { yes: TX[], no: TX[]}}} voteData
+ * @param {{[id: string]: TX[]}} voterData
+ * @param {{ echo: (txt: string) => void }} io
+ */
+function tally(ballotData, voteData, voterData, { echo }) {
   // console.log('ballot:', ballotData);
 
   // const lastblock = '???????'; // when election is over
 
-  const voteData = await voteTransactions(ballotData, server, { curl });
-
   const perItem = {};
 
-  /** @type { (items: string[]) => string[] } */
-  const uniq = (items) => Array.from(new Set(items).values());
   /** @type { (as: string[], bs: string[]) => Set<string> } */
   const intersection = (as, bs) =>
     ((bss) => new Set(as.filter((x) => bss.has(x))))(new Set(bs));
@@ -155,9 +184,8 @@ async function tally(ballotData, server, { curl, echo }) {
     const double = Array.from(intersection(yesVotes, noVotes));
     if (double.length !== 0) {
       echo(` ALERT: ${double} voted both yes and no.`);
-      const doubleVotes = await voterTransactions(double, server, { curl });
       for (const voter of double) {
-        for (const acct of doubleVotes[voter].map((tx) => tx.toAddr)) {
+        for (const acct of voterData[voter].map((tx) => tx.toAddr)) {
           if (acct === yesAddr) {
             // echo(`yes found`)
             perItem[id].no = no -= 1;
@@ -180,19 +208,23 @@ async function tally(ballotData, server, { curl, echo }) {
  * @typedef {{ fromAddr: string, toAddr: string }} TX
  * @param {QAs} ballotData
  * @param {string} server
- * @param {{ curl: (url: string) => Promise<string> }} powers
+ * @param {{ curl: (url: string) => Promise<string> }} io
  * @returns {Promise<{[id: string]: { yes: TX[], no: TX[] }}>}
  */
 async function voteTransactions(ballotData, server, { curl }) {
   /** @type { {[id: string]: { yes: TX[], no: TX[] }} } */
   const votes = {};
+
+  console.log('downloading transactions to addresses listed in the ballot...');
   for (const [id, item] of Object.entries(ballotData)) {
     const { yesAddr, noAddr } = item;
 
-    votes[id] = {
-      yes: jq(await curl(`http://${server}/api/transfer/${yesAddr}`)),
-      no: jq(await curl(`http://${server}/api/transfer/${noAddr}`)),
-    };
+    const [yes, no] = await Promise.all(
+      [yesAddr, noAddr].map((addr) =>
+        curl(`http://${server}/api/transfer/${addr}`).then(jq),
+      ),
+    );
+    votes[id] = { yes, no };
   }
   return votes;
 }
@@ -204,12 +236,18 @@ async function voteTransactions(ballotData, server, { curl }) {
  * @returns { Promise<{[voter: string]: TX[] }>}
  */
 async function voterTransactions(fromAddrs, server, { curl }) {
-  /** @type { {[voter: string]: TX[] } } */
-  const byVoter = {};
-  for (const voter of fromAddrs) {
-    byVoter[voter] = jq(await curl(`http://${server}/api/transfer/${voter}`));
-  }
-  return byVoter;
+  console.log(`downloading transactions from ${fromAddrs.length} voters...`);
+
+  return Object.fromEntries(
+    await Promise.all(
+      fromAddrs.map((voter) =>
+        curl(`http://${server}/api/transfer/${voter}`).then((txt) => [
+          voter,
+          jq(txt),
+        ]),
+      ),
+    ),
+  );
 }
 
 /**
