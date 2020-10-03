@@ -53,7 +53,15 @@ function curlFromCache(dirname, { fsp }) {
   const toCache = (url) => `../../test/${dirname}/${url.slice(-20)}`;
   const curl = async (url, _powers) => {
     // console.log('look ma, no network!', url);
-    return fsp.readFile(toCache(url), 'utf8');
+    try {
+      const content = await fsp.readFile(toCache(url), 'utf8');
+      return content;
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        return '[]';
+      }
+      throw err;
+    }
   };
   return curl;
 }
