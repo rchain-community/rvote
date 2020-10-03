@@ -41,11 +41,11 @@ async function main(argv, { fsp, http, echo }) {
     whichCurl = cachingCurl(',cache', { fsp, http });
   }
 
-  const { voteData, voterData } = await download(ballotData, server, {
+  const txByAddr = await download(ballotData, server, {
     curl: whichCurl,
   });
 
-  const perItem = tally(ballotData, voteData, voterData, { echo });
+  const perItem = tally(ballotData, txByAddr, { echo });
   console.log(perItem);
 }
 
@@ -104,11 +104,11 @@ async function runTests(ballotData, { fsp }) {
     const { dirname, expected } = testCase;
     const curl = curlFromCache(dirname, { fsp });
 
-    const { voteData, voterData } = await download(ballotData, 'TEST_SERVER', {
+    const txByAddr = await download(ballotData, 'TEST_SERVER', {
       curl,
     });
 
-    const actual = tally(ballotData, voteData, voterData, {
+    const actual = tally(ballotData, txByAddr, {
       echo: console.log,
     });
     // console.log(JSON.stringify({ actual, expected }, null, 2));
@@ -140,25 +140,32 @@ async function runTests(ballotData, { fsp }) {
  * @param {QAs} ballotData
  * @param {string} server
  * @param {{ curl: (url: string) => Promise<string> }} io
+ * @returns {Promise<{[revAddr: string]: TX[]}>}
  */
 async function download(ballotData, server, io) {
-  const voteData = await voteTransactions(ballotData, server, io);
-  const voters = Object.values(voteData)
-    .map(({ yes, no }) =>
-      [yes, no].map((txs) => txs.map((tx) => tx.fromAddr)).flat(),
-    )
+  const choiceAddrs = Object.values(ballotData)
+    .map(({ yesAddr, noAddr }) => [yesAddr, noAddr])
     .flat();
-  const voterData = await voterTransactions(uniq(voters), server, io);
-  return { voteData, voterData };
+  console.log(
+    `downloading transactions from ${choiceAddrs.length} choices listed in the ballot...`,
+  );
+  const voteData = await getTransactions(choiceAddrs, server, io);
+  const voters = uniq(
+    Object.values(voteData)
+      .map((txs) => txs.map((tx) => [tx.fromAddr, tx.toAddr]).flat())
+      .flat(),
+  );
+  console.log(`downloading transactions from ${voters.length} voters...`);
+  const voterData = await getTransactions(voters, server, io);
+  return { ...voteData, ...voterData };
 }
 
 /**
  * @param {QAs} ballotData
- * @param {{[id: string]: { yes: TX[], no: TX[]}}} voteData
- * @param {{[id: string]: TX[]}} voterData
+ * @param {{[addr: string]: TX[]}} txByAddr
  * @param {{ echo: (txt: string) => void }} io
  */
-function tally(ballotData, voteData, voterData, { echo }) {
+function tally(ballotData, txByAddr, { echo }) {
   // console.log('ballot:', ballotData);
 
   // const lastblock = '???????'; // when election is over
@@ -173,9 +180,9 @@ function tally(ballotData, voteData, voterData, { echo }) {
     const { shortDesc: desc, yesAddr, noAddr } = item;
     echo(desc);
 
-    const yesVotes = uniq(voteData[id].yes.map((tx) => tx.fromAddr));
+    const yesVotes = uniq(txByAddr[yesAddr].map((tx) => tx.fromAddr));
     let yes = yesVotes.length;
-    const noVotes = uniq(voteData[id].no.map((tx) => tx.fromAddr));
+    const noVotes = uniq(txByAddr[noAddr].map((tx) => tx.fromAddr));
     let no = noVotes.length;
     perItem[id] = { yes, no };
     echo(`  ${yes} yes votes ${yesAddr}`);
@@ -185,7 +192,7 @@ function tally(ballotData, voteData, voterData, { echo }) {
     if (double.length !== 0) {
       echo(` ALERT: ${double} voted both yes and no.`);
       for (const voter of double) {
-        for (const acct of voterData[voter].map((tx) => tx.toAddr)) {
+        for (const acct of txByAddr[voter].map((tx) => tx.toAddr)) {
           if (acct === yesAddr) {
             // echo(`yes found`)
             perItem[id].no = no -= 1;
@@ -205,44 +212,19 @@ function tally(ballotData, voteData, voterData, { echo }) {
 }
 
 /**
- * @typedef {{ fromAddr: string, toAddr: string }} TX
- * @param {QAs} ballotData
- * @param {string} server
- * @param {{ curl: (url: string) => Promise<string> }} io
- * @returns {Promise<{[id: string]: { yes: TX[], no: TX[] }}>}
- */
-async function voteTransactions(ballotData, server, { curl }) {
-  /** @type { {[id: string]: { yes: TX[], no: TX[] }} } */
-  const votes = {};
-
-  console.log('downloading transactions to addresses listed in the ballot...');
-  for (const [id, item] of Object.entries(ballotData)) {
-    const { yesAddr, noAddr } = item;
-
-    const [yes, no] = await Promise.all(
-      [yesAddr, noAddr].map((addr) =>
-        curl(`http://${server}/api/transfer/${addr}`).then(jq),
-      ),
-    );
-    votes[id] = { yes, no };
-  }
-  return votes;
-}
-
-/**
- * @param {string[]} fromAddrs
+ * @param {string[]} revAddrs
  * @param {string} server
  * @param {{ curl: (url: string) => Promise<string> }} powers
- * @returns { Promise<{[voter: string]: TX[] }>}
+ * @returns { Promise<{[addr: string]: TX[] }>}
+ *
+ * @typedef {{ fromAddr: string, toAddr: string }} TX
  */
-async function voterTransactions(fromAddrs, server, { curl }) {
-  console.log(`downloading transactions from ${fromAddrs.length} voters...`);
-
+async function getTransactions(revAddrs, server, { curl }) {
   return Object.fromEntries(
     await Promise.all(
-      fromAddrs.map((voter) =>
-        curl(`http://${server}/api/transfer/${voter}`).then((txt) => [
-          voter,
+      revAddrs.map((addr) =>
+        curl(`http://${server}/api/transfer/${addr}`).then((txt) => [
+          addr,
           jq(txt),
         ]),
       ),
