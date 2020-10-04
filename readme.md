@@ -17,6 +17,7 @@ Or run it locally:
 ```
 git clone https://github.com/rchain-community/rv2020
 cd rv2020
+git submodule update --init
 npm install
 npm start
 ```

@@ -16,6 +16,7 @@ We try to use [`@ts-check`][tsc], that is: typescript checking of JSDoc comments
 ## RChain APIs
 
 We're using a fork of [@tgrospic/rnode-client-js][rcj] as a git submodule.
+Use `git submodule update --init`.
 
 We're also thinking about using an update of rchain-community/RChain-API.
 
