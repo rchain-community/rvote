@@ -20,7 +20,7 @@ import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
 import { transferMulti_rho } from '../rho/transfer-multi';
 
 const VOTERS_URI =
-  'rho:id:kiijxigqydnt7ds3w6w3ijdszswfysr3hpspthuyxz4yn3ksn4ckzf';
+  'rho:id:rho:id:y5p3tq6fe6tuj9cj5ujy5f9og6pnxnw4db987taks443newpf86ktj';
 
 const DUST = 1;
 const REV = 1e8;
@@ -457,7 +457,7 @@ function QuestionsControl(state) {
   /** @type {(qas: QAs) => any } */
   const markup = (qas) =>
     entries(qas).map(
-      ([id, { shortDesc, docLink, yesAddr, noAddr, abstainAddr }], qix) => {
+      ([id, { shortDesc, docLink, yesAddr, noAddr, choices, abstainAddr }], qix) => {
         const name = `q${qix}`;
         /** @type { (value: string) => any } */
         const radio = (value) => html` <td class="choice">
@@ -470,6 +470,78 @@ function QuestionsControl(state) {
             }}
           />
         </td>`;
+
+        if (choices) {
+          let choicesValid = false;
+          if (state.answers[id]) {
+            if (state.answers['abstain']) {
+              choicesValid = true;
+            } else if (
+              Object.values(state.answers[id]).filter((v, i, self) => {
+                return self.indexOf(v) === i;
+              }).length === choices.length
+            ) {
+              choicesValid = true;
+            }
+          }
+
+          return html`
+          <tr>
+            <td>${id}</td>
+            <td>
+            ${
+              choices.map(c => {
+                let val = "1";
+                if (state.answers[id][c.addr]) {
+                  val = state.answers[id][c.addr]
+                };
+                if (state.answers[id] && state.answers[id])
+                return html`
+                  <input
+                    type="number"
+                    value="${val}"
+                    min="1"
+                    max="${choices.length}"
+                    step="1"
+                    onchange=${e => {
+                      console.log(state.answers[id]);
+                      if (!state.answers[id]) {
+                        state.answers[id] = {};
+                      }
+                      delete state.answers[id]['abstain'];
+                      const rank = parseInt(e.target.value);
+                      if (rank > 0 && rank <= choices.length) {
+                        state.answers[id][`${c.addr}`] = rank;
+                      }
+                    }}
+                  />
+                  <span>${c.label}</span>
+                  <br />
+                `;
+              })
+            }
+            ${
+              choicesValid ?
+              '<p style="color:#3B3;">Choices saved</p>' :
+              '<p style="color:#B33;">Choices not filled properly, please go from 1 to ${choices.length}</p>'
+            }
+            </td>
+            <td>
+              <button
+                type="button"
+                onclick=${e => {
+                  if (!state.answers[id]) {
+                    state.answers[id] = {};
+                  }
+                  state.answers[id]['abstain'] = abstainAddr
+                }}
+              >
+                Abstain
+              </button>
+            </td>
+          </tr>
+          `;
+        }
         return html`
           <tr><td>${id}</td>
           <td>${shortDesc}

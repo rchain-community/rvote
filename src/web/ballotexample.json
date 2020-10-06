@@ -33,5 +33,14 @@
         "yesAddr": "1111krbAKSbyGA9vfa7w4K2pKAxZZn6qjaVEduDLWotDZ8HLt2aXR",
         "abstainAddr": "11112CgGiNg3DdMDsYz7UikeSxh7CfFdEbDYzmoJLfS4vx3uZjm55V",
         "noAddr": "1111swBFUPVRwR4ugkDBCvrLwPeR1621B1cHQf3cAkNxt3Zad2eac"
-    }
+    },
+    "Office Options": {
+        "shortDesc": "Office Space - please rank order",
+        "choices": [
+          { "label": "buy", "addr": "1111BWpxC6HPt2tYJbR2UvqrukC1WQ2G1sTPDaSafDZpKvS9RCWzA" },
+          { "label": "rent", "addr": "11119xg1RdBsPfNWFz24eanbcKtswQSfrPM9AFEryimY8Er8GR9Sq" },
+          { "label": "no property", "addr": "1111V5M6geByFPTGaPuSeKcRmEbqwgUEbpCuFQAqpfMAALK7gTkaf" }
+        ],
+        "abstainAddr": "1111PRHbbjPGUExCGCGRWxXoesNLfZrq7nt2swHQmrjhDfD5Md4La"
+      }
 }
