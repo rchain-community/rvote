@@ -489,6 +489,7 @@ function QuestionsControl(state) {
           <tr>
             <td>${id}</td>
             <td>
+            ${shortDesc}<br />
             ${
               choices.map(c => {
                 let val = "1";
@@ -502,6 +503,7 @@ function QuestionsControl(state) {
                     value="${val}"
                     min="1"
                     max="${choices.length}"
+                    size="2"
                     step="1"
                     onchange=${e => {
                       console.log(state.answers[id]);
@@ -514,7 +516,7 @@ function QuestionsControl(state) {
                         state.answers[id][`${c.addr}`] = rank;
                       }
                     }}
-                  />
+                  /> <nbsp />
                   <span>${c.label}</span>
                   <br />
                 `;
@@ -522,8 +524,8 @@ function QuestionsControl(state) {
             }
             ${
               choicesValid ?
-              '<p style="color:#3B3;">Choices saved</p>' :
-              '<p style="color:#B33;">Choices not filled properly, please go from 1 to ${choices.length}</p>'
+              html`<p style="color:#3B3;">Choices saved</p>` :
+              html`<p style="color:#B33;">Choices not filled properly, please go from 1 to ${choices.length}</p>`
             }
             </td>
             <td>
@@ -533,7 +535,7 @@ function QuestionsControl(state) {
                   if (!state.answers[id]) {
                     state.answers[id] = {};
                   }
-                  state.answers[id]['abstain'] = abstainAddr
+                  state.answers[id]/* ['abstain'] */ = abstainAddr
                 }}
               >
                 Abstain
