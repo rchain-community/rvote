@@ -4,13 +4,13 @@ deployerId(`rho:rchain:deployerId`),
 lookup(`rho:registry:lookup`), valueCh, loop in {
     lookup!( `rho:id:kiijxigqydnt7ds3w6w3ijdszswfysr3hpspthuyxz4yn3ksn4ckzf` , *valueCh) |
     for (@value <- valueCh) {
-        match("1111J5bVLwMGNroxr9DCQguJnzWR74o4H6Tb4rakexoHSzZcow47r", 1000000000, value) {
+        match("1111W2aAPyDR28uRL5UW7DSyPUkoozRSkqGjcFc32Q4Hui9StyTjQ", 1000000000, value) {
             (revAddrFrom, amount, toAddrs) => {
                 new loop, RevVaultCh in {
                     new ret, loop in {
                         lookup!(`rho:rchain:revVault`, *RevVaultCh) |
                         for (@(_, RevVault) <- RevVaultCh ) {
-                            new vaultCh, revVaultkeyCh, txfr1
+                            new vaultCh, revVaultkeyCh
                             in {
                                     @RevVault!("findOrCreate", revAddrFrom, *vaultCh) |
                                     @RevVault!("deployerAuthKey", *deployerId, *revVaultkeyCh) |
