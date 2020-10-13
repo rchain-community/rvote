@@ -2,7 +2,7 @@
   "name": "rv2020",
   "version": "0.4.0",
   "description": "RChain Voting dApp (Alpha)",
-  "main": "src/web/ballot.html",
+  "main": "./src/web/ballot.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rchain-community/rv2020.git"
@@ -21,22 +21,30 @@
   },
   "homepage": "https://github.com/rchain-community/rv2020#readme",
   "devDependencies": {
+    "css-loader": "^4.3.0",
+    "eslint": "^7.10.0",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.12.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.1.4",
     "prettier": "^2.1.1",
-    "snowpack": "^2.10.3"
+    "style-loader": "^1.2.1",
+    "typescript": "^4.0.3",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   },
   "scripts": {
     "realclean": "rm -rf dist build node_modules web_modules",
-    "start": "snowpack dev --polyfill-node",
-    "build": "snowpack build --polyfill-node",
-    "format": "prettier --write \"src/**/*.js\"",
-    "lint": "prettier --check \"src/**/*.js\""
-  },
-  "snowpack": {
-    "mount": {
-      "public": "/",
-      "src": "/_dist_"
-    },
-    "plugins": []
+    "start": "webpack-dev-server --open",
+    "build": "webpack",
+    "lint-fix": "npm run lint --fix",
+    "lint-check": "npm run lint",
+    "lint-xx": "npm run lint:types && npm run lint:eslint",
+    "lint": "npm run lint:eslint",
+    "lint:eslint": "eslint",
+    "lint:types": "tsc -p jsconfig.json"
   },
   "dependencies": {
     "blakejs": "^1.1.0",
@@ -45,6 +53,7 @@
     "ethereumjs-util": "^6.2.1",
     "google-protobuf": "^3.13.0",
     "htm": "^3.0.4",
+    "html-webpack-plugin": "^4.5.0",
     "jazzicon": "^1.5.0",
     "js-sha3": "^0.8.0",
     "mithril": "^2.0.4",

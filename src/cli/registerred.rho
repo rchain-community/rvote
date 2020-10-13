@@ -1,0 +1,19 @@
+new return ,//(`rho:rchain:deployId`),
+  lookup(`rho:registry:lookup`)
+in {
+  new valueCh in {
+    lookup!( `rho:id:5rcmyxwu8r7yywjz4qqg4ij3pox3d96joeky1gczdpf3fkaujejdxr` , *valueCh) |
+    for (@ballot <- valueCh) {
+        lookup!( `rho:id:1ri71weozwuoanef9zit5p7ooafkmkzhkwo6phgaourcknbmi6ke7t` , *valueCh) |
+        for (@accts <- valueCh) {
+            match accts {
+                { "11112Ju55SSchudsqD719JL6XEtq25nyGrPJboW8LGEMKo3K1JE7kh" | rest } => {
+                    return!({"registered": true ,"ballot": ballot})
+                }
+                { _ } => {
+                    return!({"registered": false ,"ballot": ballot})
+                }
+            }
+        }
+    }
+}
