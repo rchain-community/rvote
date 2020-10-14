@@ -28,7 +28,7 @@ export const transferMulti_rho = (revAddrFrom, txs) =>
             for (@vault <- vaultCh; key <- revVaultkeyCh) {
               match vault {
                 (true, vault) => {
-                  @ListOps!("parMap", toAddrs, *txfr1, *deployId) |
+                  @ListOps!("parMap", txs, *txfr1, *deployId) |
                   contract txfr1(@[revAddrTo, amount], return) = {
                     new vaultTo in {
                       @RevVault!("findOrCreate", revAddrTo, *vaultTo) |
