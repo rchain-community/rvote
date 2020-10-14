@@ -484,9 +484,12 @@ function QuestionsControl(state) {
         />
       </td>`;
 
-      if ('choices' in question) {
-        const choices = question.choices;
-        const answer = state.answers[id];
+      const qLink = docLink
+        ? html`<br />see: <a href=${docLink} target="_blank">${id}</a>`
+        : '';
+
+      /** @type {(choices: { label: string, addr: string}[], answer: string | number[]) => any } */
+      const rankedRow = (choices, answer) => {
         const rankings = Array.isArray(answer) ? answer : [];
         const inRange = rankings.filter((r) => r >= 1 && r <= choices.length);
         const complete =
@@ -512,9 +515,10 @@ function QuestionsControl(state) {
           <tr>
             <td>${id}</td>
             <td>
-              ${shortDesc}<br />
-              ${choices.map(({ label }, ix) => {
-                return html`
+              ${shortDesc}
+              <br />
+              ${choices.map(
+                ({ label }, ix) => html`
                   <label>
                     <input
                       type="number"
@@ -532,27 +536,29 @@ function QuestionsControl(state) {
                     ${nbsp} ${label}</label
                   >
                   <br />
-                `;
-              })}
-              ${feedback}
+                `,
+              )}
+              ${feedback}<br />
+              ${qLink}
             </td>
             <td></td>
             <td>${control(abstainAddr, 'checkbox')}</td>
+            <td></td>
           </tr>
         `;
-      }
-      const { yesAddr, noAddr } = question;
-      return html`
-          <tr><td>${id}</td>
-          <td>${shortDesc}
-           ${
-             docLink
-               ? html`<br />see: <a href=${docLink} target="_blank">${id}</a>`
-               : ''
-           }</td>
+      };
+
+      if ('choices' in question) {
+        return rankedRow(question.choices, state.answers[id]);
+      } else {
+        const { yesAddr, noAddr } = question;
+        return html`<tr>
+          <td>${id}</td>
+          <td>${shortDesc}<br />${qLink}</td>
 
           ${control(noAddr)} ${control(abstainAddr)} ${control(yesAddr)}
-          </dd>`;
+        </tr>`;
+      }
     });
 
   return freeze({
@@ -562,7 +568,8 @@ function QuestionsControl(state) {
           Notice: {
             shortDesc: 'Stand by for questions...',
             abstainAddr: '',
-            choices: [],
+            yesAddr: '',
+            noAddr: '',
           },
         },
       ),
