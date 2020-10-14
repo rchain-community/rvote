@@ -457,7 +457,10 @@ function QuestionsControl(state) {
   /** @type {(qas: QAs) => any } */
   const markup = (qas) =>
     entries(qas).map(
-      ([id, { shortDesc, docLink, yesAddr, noAddr, choices, abstainAddr }], qix) => {
+      (
+        [id, { shortDesc, docLink, yesAddr, noAddr, choices, abstainAddr }],
+        qix,
+      ) => {
         const name = `q${qix}`;
         /** @type { (value: string) => any } */
         const radio = (value) => html` <td class="choice">
@@ -486,62 +489,62 @@ function QuestionsControl(state) {
           }
 
           return html`
-          <tr>
-            <td>${id}</td>
-            <td>
-            ${shortDesc}<br />
-            ${
-              choices.map(c => {
-                let val = "1";
-                if (state.answers[id][c.addr]) {
-                  val = state.answers[id][c.addr]
-                };
-                if (state.answers[id] && state.answers[id])
-                return html`
-                  <input
-                    type="number"
-                    value="${val}"
-                    min="1"
-                    max="${choices.length}"
-                    size="2"
-                    step="1"
-                    onchange=${e => {
-                      console.log(state.answers[id]);
-                      if (!state.answers[id]) {
-                        state.answers[id] = {};
-                      }
-                      delete state.answers[id]['abstain'];
-                      const rank = parseInt(e.target.value);
-                      if (rank > 0 && rank <= choices.length) {
-                        state.answers[id][`${c.addr}`] = rank;
-                      }
-                    }}
-                  /> <nbsp />
-                  <span>${c.label}</span>
-                  <br />
-                `;
-              })
-            }
-            ${
-              choicesValid ?
-              html`<p style="color:#3B3;">Choices saved</p>` :
-              html`<p style="color:#B33;">Choices not filled properly, please go from 1 to ${choices.length}</p>`
-            }
-            </td>
-            <td>
-              <button
-                type="button"
-                onclick=${e => {
-                  if (!state.answers[id]) {
-                    state.answers[id] = {};
+            <tr>
+              <td>${id}</td>
+              <td>
+                ${shortDesc}<br />
+                ${choices.map((c) => {
+                  let val = '1';
+                  if (state.answers[id][c.addr]) {
+                    val = state.answers[id][c.addr];
                   }
-                  state.answers[id]/* ['abstain'] */ = abstainAddr
-                }}
-              >
-                Abstain
-              </button>
-            </td>
-          </tr>
+                  if (state.answers[id] && state.answers[id])
+                    return html`
+                      <input
+                        type="number"
+                        value="${val}"
+                        min="1"
+                        max="${choices.length}"
+                        size="2"
+                        step="1"
+                        onchange=${(e) => {
+                          console.log(state.answers[id]);
+                          if (!state.answers[id]) {
+                            state.answers[id] = {};
+                          }
+                          delete state.answers[id].abstain;
+                          const rank = parseInt(e.target.value, 10);
+                          if (rank > 0 && rank <= choices.length) {
+                            state.answers[id][`${c.addr}`] = rank;
+                          }
+                        }}
+                      />
+                      <nbsp />
+                      <span>${c.label}</span>
+                      <br />
+                    `;
+                })}
+                ${choicesValid
+                  ? html`<p style="color:#3B3;">Choices saved</p>`
+                  : html`<p style="color:#B33;">
+                      Choices not filled properly, please go from 1 to
+                      ${choices.length}
+                    </p>`}
+              </td>
+              <td>
+                <button
+                  type="button"
+                  onclick=${(e) => {
+                    if (!state.answers[id]) {
+                      state.answers[id] = {};
+                    }
+                    state.answers[id] /* ['abstain'] */ = abstainAddr;
+                  }}
+                >
+                  Abstain
+                </button>
+              </td>
+            </tr>
           `;
         }
         return html`
