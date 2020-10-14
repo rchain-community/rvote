@@ -1,14 +1,19 @@
 // Rholang code to transfer REVs
 // https://github.com/rchain/rchain/blob/3eca061/rholang/examples/vault_demo/3.transfer_funds.rho
+
+function lit(v) {
+  return JSON.stringify(v, null, 2);
+}
+
 /**
  * @param {String} revAddrFrom
  * @param {String[]} revAddrTo
  * @param {number} amount
  * @returns { string }
  */
-export const transferMulti_rho = (revAddrFrom, revAddrTo, amount) =>
- `match(${lit(revAddrFrom)}, ${lit(amount)}, ${lit(revAddrTo)}) {
-    (revAddrFrom, amount, toAddrs) => {
+export const transferMulti_rho = (revAddrFrom, txs) =>
+  `match(${lit(revAddrFrom)}, ${lit(txs)}) {
+    (revAddrFrom, txs) => {
   new rl(\`rho:registry:lookup\`), RevVaultCh, ListOpsCh in {
     rl!(\`rho:rchain:revVault\`, *RevVaultCh) |
     rl!(\`rho:lang:listOps\`, *ListOpsCh) |
@@ -24,7 +29,7 @@ export const transferMulti_rho = (revAddrFrom, revAddrTo, amount) =>
               match vault {
                 (true, vault) => {
                   @ListOps!("parMap", toAddrs, *txfr1, *deployId) |
-                  contract txfr1(@revAddrTo, return) = {
+                  contract txfr1(@[revAddrTo, amount], return) = {
                     new vaultTo in {
                       @RevVault!("findOrCreate", revAddrTo, *vaultTo) |
                       for (_ <- vaultTo) {
@@ -44,7 +49,3 @@ export const transferMulti_rho = (revAddrFrom, revAddrTo, amount) =>
 }
 }
 `;
-
-function lit(v) {
-  return JSON.stringify(v, null, 2);
-}

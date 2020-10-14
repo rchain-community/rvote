@@ -86,7 +86,10 @@ const turnOffSubmit = (form) => {
  *  ethereumAddress: () => Promise<string>,
  *  }} powers
  *
- * @typedef {{[refID: string]: { shortDesc: string, docLink?: string, yesAddr: string, noAddr: string, abstainAddr: string }}} QAs
+ * @typedef {{ yesAddr: string, noAddr: string }} YesNoQuestion
+ * @typedef {{ choices: { label: string, addr: string }[] }} RankOrderQuestion
+ * @typedef { {shortDesc: string, docLink?: string, abstainAddr: string} & (YesNoQuestion | RankOrderQuestion )} Question
+ * @typedef {{[refID: string]: Question }} QAs
  * @typedef {{label: string, info?: any, rest?: any[], timestamp?: number }} LogEvent
  */
 export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
@@ -100,7 +103,7 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
     /** @type { Account? } */
     let account = null;
     let agenda = check.theInput(theElt('agendaURI')).value;
-    /** @type {{[id: string]: string}?} */
+    /** @type {{[id: string]: string | number[] }?} */
     const answers = {};
     return {
       /** @type {LogEvent[]} */
@@ -165,7 +168,7 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
             throw new TypeError(String(prop));
           }
           state.events = []; // re-enable Submit
-          if (value > '') {
+          if (Array.isArray(value) || value > '') {
             answers[prop] = value;
           } else {
             delete answers[prop];
@@ -178,8 +181,16 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
         if (!(account && values(answers).length > 0)) {
           return '';
         }
-        const choiceAddrs = values(answers);
-        return transferMulti_rho(account.revAddr, choiceAddrs, DUST);
+        /** @type { (entry: [string, string | number[]]) => [string, number][] } */
+        const eachQ = ([qid, answer]) =>
+          typeof answer === 'string'
+            ? [[answer, DUST]]
+            : answer.map((rank) => [
+                state.questions[qid].choices[rank - 1].addr,
+                rank,
+              ]);
+        const choiceTxs = entries(answers).map(eachQ).flat();
+        return transferMulti_rho(account.revAddr, choiceTxs);
       },
       // @ts-ignore
       get percent() {
@@ -451,103 +462,87 @@ function runDeploy(code, { account, phloLimit }, { rnodeWeb, log }) {
 }
 
 /**
- * @param {{questions?: QAs, answers?: {[id: string]: string}}} state
+ * @param {{questions?: QAs, answers?: {[id: string]: string | number[] }}} state
  */
 function QuestionsControl(state) {
+  const nbsp = '\xa0';
+
   /** @type {(qas: QAs) => any } */
   const markup = (qas) =>
-    entries(qas).map(
-      (
-        [id, { shortDesc, docLink, yesAddr, noAddr, choices, abstainAddr }],
-        qix,
-      ) => {
-        const name = `q${qix}`;
-        /** @type { (value: string) => any } */
-        const radio = (value) => html` <td class="choice">
-          <input
-            type="radio"
-            ...${{ name, value, title: value }}
-            ...${state.answers[id] === value ? { checked: true } : {}}
-            onclick=${(ev) => {
-              state.answers[id] = ev.target.value;
-            }}
-          />
-        </td>`;
+    entries(qas).map(([id, question], qix) => {
+      const { shortDesc, docLink, abstainAddr } = question;
+      const name = `q${qix}`;
+      /** @type { (value: string, ty?: string) => any } */
+      const control = (value, ty = 'radio') => html` <td class="choice">
+        <input
+          type="${ty}"
+          ...${{ name, value, title: value }}
+          ...${state.answers[id] === value ? { checked: true } : {}}
+          onclick=${(ev) => {
+            state.answers[id] = ev.target.value;
+          }}
+        />
+      </td>`;
 
-        if (choices) {
-          let choicesValid = false;
-          if (state.answers[id]) {
-            if (state.answers['abstain']) {
-              choicesValid = true;
-            } else if (
-              Object.values(state.answers[id]).filter((v, i, self) => {
-                return self.indexOf(v) === i;
-              }).length === choices.length
-            ) {
-              choicesValid = true;
-            }
-          }
+      if ('choices' in question) {
+        const choices = question.choices;
+        const answer = state.answers[id];
+        const rankings = Array.isArray(answer) ? answer : [];
+        const inRange = rankings.filter((r) => r >= 1 && r <= choices.length);
+        const complete =
+          inRange.length === choices.length &&
+          new Set(rankings).size === choices.length;
+        const status =
+          // eslint-disable-next-line no-nested-ternary
+          typeof answer === 'string'
+            ? 'abstaining'
+            : complete
+            ? 'ok'
+            : 'incomplete';
 
-          return html`
-            <tr>
-              <td>${id}</td>
-              <td>
-                ${shortDesc}<br />
-                ${choices.map((c) => {
-                  let val = '1';
-                  if (state.answers[id][c.addr]) {
-                    val = state.answers[id][c.addr];
-                  }
-                  if (state.answers[id] && state.answers[id])
-                    return html`
-                      <input
-                        type="number"
-                        value="${val}"
-                        min="1"
-                        max="${choices.length}"
-                        size="2"
-                        step="1"
-                        onchange=${(e) => {
-                          console.log(state.answers[id]);
-                          if (!state.answers[id]) {
-                            state.answers[id] = {};
-                          }
-                          delete state.answers[id].abstain;
-                          const rank = parseInt(e.target.value, 10);
-                          if (rank > 0 && rank <= choices.length) {
-                            state.answers[id][`${c.addr}`] = rank;
-                          }
-                        }}
-                      />
-                      <nbsp />
-                      <span>${c.label}</span>
-                      <br />
-                    `;
-                })}
-                ${choicesValid
-                  ? html`<p style="color:#3B3;">Choices saved</p>`
-                  : html`<p style="color:#B33;">
-                      Choices not filled properly, please go from 1 to
-                      ${choices.length}
-                    </p>`}
-              </td>
-              <td>
-                <button
-                  type="button"
-                  onclick=${(e) => {
-                    if (!state.answers[id]) {
-                      state.answers[id] = {};
-                    }
-                    state.answers[id] /* ['abstain'] */ = abstainAddr;
-                  }}
-                >
-                  Abstain
-                </button>
-              </td>
-            </tr>
-          `;
-        }
+        const feedback = {
+          abstaining: '',
+          ok: html`<p style="color:#3B3;">ranking complete</p>`,
+          incomplete: html`<p style="color:#B33;">
+            Choices not filled properly, please go from 1 to ${choices.length}
+          </p>`,
+        }[status];
+
         return html`
+          <tr>
+            <td>${id}</td>
+            <td>
+              ${shortDesc}<br />
+              ${choices.map(({ label }, ix) => {
+                return html`
+                  <label>
+                    <input
+                      type="number"
+                      value="${rankings[ix]}"
+                      min="1"
+                      max="${choices.length}"
+                      size="2"
+                      step="1"
+                      onchange=${(ev) => {
+                        console.log('change answer', state.answers[id]);
+                        rankings[ix] = parseInt(ev.target.value, 10);
+                        state.answers[id] = rankings;
+                      }}
+                    />
+                    ${nbsp} ${label}</label
+                  >
+                  <br />
+                `;
+              })}
+              ${feedback}
+            </td>
+            <td></td>
+            <td>${control(abstainAddr, 'checkbox')}</td>
+          </tr>
+        `;
+      }
+      const { yesAddr, noAddr } = question;
+      return html`
           <tr><td>${id}</td>
           <td>${shortDesc}
            ${
@@ -556,16 +551,19 @@ function QuestionsControl(state) {
                : ''
            }</td>
 
-          ${radio(noAddr)} ${radio(abstainAddr)} ${radio(yesAddr)}
+          ${control(noAddr)} ${control(abstainAddr)} ${control(yesAddr)}
           </dd>`;
-      },
-    );
+    });
 
   return freeze({
     view: () =>
       markup(
         state.questions || {
-          Notice: { shortDesc: 'Stand by for questions...' },
+          Notice: {
+            shortDesc: 'Stand by for questions...',
+            abstainAddr: '',
+            choices: [],
+          },
         },
       ),
   });
