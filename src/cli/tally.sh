@@ -11,8 +11,8 @@ ballot=${1-../web/ballotexample.json}
 voters=${2-voters}
 timestamp=${3-$(date +%s)000} # current timestamp default = seconds since epic times 1000
 if [ "$save" ]; then mkdir saved/"$save"; fi
-server=${4-kc-strip.madmode.com:7070}
-transactions="curl -s http://"$server"/api/transfer"
+server=${4-http://kc-strip.madmode.com:7070}
+transactions="curl -s "$server"/api/transfer"
 trans () {
   if [ "$save" ]; then
 	$transactions/"$1"|tee saved/"$save"/"$1"
@@ -82,6 +82,8 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   fi
   echo "$result"
 done
-if $failed; then echo  FAILED: results do not match for replay "$replay" >&2; fi
+if $failed; then echo  FAILED: results do not match for replay "$replay" >&2; 
+else echo SUCCESS: replay matched.
+fi
 #cat /tmp/voters|sort|uniq>voters #for testing only
 # cat voters |sed '1,$s/^/"/;1,$s/$/",/;$s/,$/\)/;1s/^/Set\(/' # acct text list to json list
