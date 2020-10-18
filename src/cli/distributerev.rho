@@ -1,0 +1,49 @@
+
+new return(`rho:rchain:deployId`), 
+deployerId(`rho:rchain:deployerId`),
+lookup(`rho:registry:lookup`), valueCh, loop in {
+    lookup!( `rho:id:kiijxigqydnt7ds3w6w3ijdszswfysr3hpspthuyxz4yn3ksn4ckzf` , *valueCh) |
+    for (@value <- valueCh) {
+        match("1111W2aAPyDR28uRL5UW7DSyPUkoozRSkqGjcFc32Q4Hui9StyTjQ", 1000000000, value) {
+            (revAddrFrom, amount, toAddrs) => {
+                new loop, RevVaultCh in {
+                    new ret, loop in {
+                        lookup!(`rho:rchain:revVault`, *RevVaultCh) |
+                        for (@(_, RevVault) <- RevVaultCh ) {
+                            new vaultCh, revVaultkeyCh
+                            in {
+                                    @RevVault!("findOrCreate", revAddrFrom, *vaultCh) |
+                                    @RevVault!("deployerAuthKey", *deployerId, *revVaultkeyCh) |
+                                    for (@vault <- vaultCh; key <- revVaultkeyCh) {
+                                        match vault {
+                                            (true, vault) => {
+                                                loop!(value)|
+                                                contract loop (set) = {  
+                                                    match ( *set ) {
+                                                        Set(revAddrTo, ...rest) => {
+                                                            new vaultTo in {
+                                                                @RevVault!("findOrCreate", revAddrTo, *vaultTo) |
+                                                                for (_ <- vaultTo) {
+                                                                    @vault!("transfer", revAddrTo, amount, *key, *return)
+                                                                } |
+                                                           return!(revAddrTo)
+                                                            } |
+                                                            loop!(rest)
+                                                        }
+                                                    } 
+
+                                            }
+                                            // err => {
+                                            //     return!((false, "REV vault cannot be found or created."))
+                                            // }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+  }
