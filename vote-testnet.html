@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Election 2020 - RChain</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="http://localhost:8080/_dist_/vendor/rnode-client-js/src/web/favicon.ico" />
+  <style>
+    body {
+      padding-top: 120px;
+    }
+
+    .coop {
+      background: #eba3bb;
+      /* reddish for RChain */
+    }
+
+    #agendaUriViz {
+      border: 2px dotted red;
+    }
+
+    #deployStatus {
+      background: lightyellow
+    }
+
+    .setting {
+      text-align: right
+    }
+
+    table td.choice {
+      text-align: center;
+    }
+  </style>
+  <link rel="stylesheet" href="https://shepherdjs.dev/dist/css/shepherd.css" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous" />
+   <link rel="shortcut icon" href="https://rchain.coop/assets/favicon-red.png" />
+
+</head>
+
+<body>
+  <nav class="navbar fixed-top navbar-light bg-light">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="https://github.com/rchain-community/">
+          <img alt="RChain Community" src="https://rchain.coop/assets/platform/RChainHero1991.png" width="80px">
+        </a>
+      </div>
+      <div id="progress-bar" class="progress" style="width: 20%">
+        <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
+          aria-valuemax="100">25%</div>
+      </div>
+      <p class="navbar-text navbar-right">
+        <span id="accountControl">
+          <button id="signIn" class="navbar-right">Sign In</button>
+        </span>
+        <button id='helpTour' class="btn btn-info" title="Help">?</button>
+        <br />
+        <em id="deployStatus">...</em>
+      </p>
+
+    </div>
+  </nav>
+  <div class="app container">
+    <div class="testNet">
+      <div>
+        <h4>RChain Annual Meeting 2020 Ballot <sup>(TESTNET)</sup></h4>
+      </div>
+      <ol id="helpSteps" style="display: none"><small>
+
+          <li>Thank you for beta-testing this RChain Governance dApp.</li>
+          <li><a href="index.html#meetingNotice"></a>Do you have a REV Address registered with the coop? If not, see the
+            <a href="https://blog.rchain.coop/2020/07/09/notice-of-annual-meeting-2020/">meeting notice</a> for
+            instructions.
+          </li>
+          <li>
+            <a href="index.html#accountControl"></a>Press <b>Sign In</b> to connect to Metamask (or compatible tool). Choose the
+            ethereum account corresponding to your REV address.
+            <p>
+              See <cite>
+                <a href="https://medium.com/@jimscarver/using-metamask-with-rchain-2f05311976f">
+                  Using MetaMask with RChain</a>
+              </cite> for more information.
+            </p>
+
+          </li>
+          <li><a href="index.html#questionList"></a>Once you are signed in, after a short pause to get the ballot from RChain,
+            the questions are presented
+            along with links for more information.
+
+          </li>
+          <li><a href="index.html#responseControl"></a>As you choose your responses, the rholang transactions representing your
+            responses will be prepared for
+            you.
+            <p>For a full explanation of this rholang code,
+              see <a
+                href="https://docs.google.com/presentation/d/1LLwejP0QdhHwhjYd-LFIPBblj1owjBGHBgL_EWh80V8/edit?usp=sharing">Voting
+                in Rholang</a> presentation
+              (with <a href="https://www.youtube.com/watch?v=XY-kyfojbGQ">video recording</a>).</p>
+
+          </li>
+          <li><a href="index.html#txInfo"></a>Voting, like all RChain transactions, incurs a small charge. (The coop
+            offset this charge with a 100 REV
+            reward for those who registered before July 31, 2020.) Be sure you have enough in your account to cover the
+            max transaction fee.
+
+          </li>
+          <li><a href="index.html#submitControl"></a>When you are ready, press <b>Sign and Submit</b>. This will bring up
+            metamask in order to sign your
+            rholang response.
+
+          </li>
+          <li><a href="index.html#deployStatus"></a>Confirm that your transactions succeeded. It could fail if you don't have
+            any REV.</li>
+        </small></smalla>
+      </ol>
+      <p>For background, see</p>
+      <ul>
+        <li><cite><a href="https://blog.rchain.coop/2020/10/19/notice-of-annual-meeting-2020-2/" id="meetingNotice">Voters Guide</a></cite></li>
+      </ul>
+      <form id='ballotForm'>
+        <fieldset class="panel panel-default">
+          <div class="panel-body">
+            <br />
+            <table class="table table-condensed table-hover table-bordered">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Short Description</th>
+                  <th>Oppose</th>
+                  <th>Abstain</th>
+                  <th>Support</th>
+                </tr>
+              </thead>
+              <tbody id="questionList">
+                <tr>
+                  <td>Notice</td>
+                  <td>Stand by for questions...
+                  </td>
+                  <td><input type="radio" class="choice" /></td>
+                  <td><input type="radio" class="choice" checked /></td>
+                  <td><input type="radio" class="choice" /></td>
+                </tr>
+              </tbody>
+            </table>
+            <input type="hidden" id="agendaURI" value="rho:id:dbcukt4zspyxh5oaah6gk8hmf9eye1nw37aqjikac4hsc5k6ux4356" />
+            <label id="agendaControl">
+              Agenda URI:
+            </label>
+            <div class="card">
+              <div class="card-body">
+                <h3>Sign and Submit</h3>
+                <p>Your response, in rholang:</p>
+                <div id="responseControl"><textarea rows="4" cols="80"></textarea></div>
+                <p>
+                  <em>For a full explanation of this rholang code,
+                    see <a href="https://blog.rchain.coop/2020/10/07/rchain-voting-in-rholang/">Voting
+                      in Rholang</a> presentation
+                    (<a
+                      href="https://docs.google.com/presentation/d/1LLwejP0QdhHwhjYd-LFIPBblj1owjBGHBgL_EWh80V8/edit?usp=sharing">slides</a>).</em>
+                </p>
+                <div class="setting" id="txInfo">
+                  <label id="txFee"><small>Max transaction fee: <input id="phloLimit" type="number"
+                        value="0.05" /></small></label><br />
+                </div>
+                <span id="submitControl">
+                  <input id="submitResponse" type="submit" value="Sign and Submit" />
+                </span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+      <p>For additional support, visit the <a href="https://discord.com/channels/375365542359465989/748649980201271416">#agm-2020</a> channel on RChain Discord.</p>
+      <hr />
+      <address>
+        Oct 2020 by Dan Connolly, Jim Whitescarver, and the <a href="https://github.com/rchain-community/">RChain Community</a><br />
+        <small>RCHAIN is a registered trademark of <a href="https://rchain.coop">RChain Cooperative</a>.<br />
+        <a href="https://github.com/rchain/legaldocs/blob/master/Form%20of%20Privacy%20Policy.pdf">Privacy terms and conditions</a></small>
+      </address>
+    </div>
+  </div>
+  <script src="http://localhost:8080/main.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+    integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+    crossorigin="anonymous"></script>
+<script src="bundle.js"></script></body>
+
+</html>
