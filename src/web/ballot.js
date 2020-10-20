@@ -20,7 +20,7 @@ import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
 import { transferMulti_rho } from '../rho/transfer-multi';
 
 const VOTERS_URI =
-  'rho:id:kiijxigqydnt7ds3w6w3ijdszswfysr3hpspthuyxz4yn3ksn4ckzf';
+  'rho:id:pozxcy5myxx4wkwywf6u35u4146wtdpdjstq4g7aft67t1tt8bgpqh';
 
 const DUST = 1;
 const REV = 1e8;
@@ -263,11 +263,11 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
         return html``;
       }
       const { label, info } = state.event;
-      if (!info ) {
+      if (!info) {
         return html`${label}`;
       }
-      if ( label === 'RESULT') {
-        return html`${"VOTE SUCCESSFULLY REGISTERED !"}`;
+      if (label === 'RESULT') {
+        return html`${'VOTE SUCCESSFULLY REGISTERED !'}`;
       }
       if (label === 'STATUS' && info.startsWith('Checking')) {
         return html`${info.slice(0, 20)}${state.events.length - 5}`;
