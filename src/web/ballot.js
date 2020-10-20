@@ -274,8 +274,11 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
         return html``;
       }
       const { label, info } = state.event;
-      if (!info || label === 'RESULT') {
+      if (!info ) {
         return html`${label}`;
+      }
+      if ( label === 'RESULT') {
+        return html`${"VOTE SUCCESSFULLY REGISTERED !"}`;
       }
       if (label === 'STATUS' && info.startsWith('Checking')) {
         return html`${info.slice(0, 20)}${state.events.length - 5}`;

@@ -10,6 +10,7 @@ debug=:     # set this value of debug last for debug OFF
 ballot=${1-../web/ballotexample.json}
 voters=${2-voters}
 timestamp=${3-$(date +%s)000} # current timestamp default = seconds since epic times 1000
+cond="sele"
 if [ "$save" ]; then mkdir saved/"$save"; fi
 server=${4-http://kc-strip.madmode.com:7070}
 transactions="curl -s "$server"/api/transfer"
@@ -42,7 +43,7 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   for acct in $noVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let no=no-1;fi
   done
-  abstainVotes=$(curl -s http://"$server"/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
+  abstainVotes=$(curl -s http://"$server"/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"| sort -u)
   $debug  "$yesVotes" yesVotes
   $debug  "$noVotes" novotes
   $debug  "$abstainVotes" abstainvotes
