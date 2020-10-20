@@ -32,17 +32,17 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   noAddr=$(echo "$noAddrs"|sed -n "${n}"p)
   abstainAddr=$(echo "$abstainAddrs"|sed -n "${n}"p)
   echo  "$desc"
-  yesVotes=$(trans "$yesAddr"| jq -r ".[] | select(.deploy.timestamp < $timestamp) | .fromAddr"|sort -u)
+  yesVotes=$(curl -s http://"$server"/api/transfer/"$yesAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   yes=$(echo "$yesVotes"|wc -l)
   for acct in $yesVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let yes=yes-1;fi
   done
-  noVotes=$(trans "$noAddr"| jq -r ".[] | select(.deploy.timestamp < $timestamp) | .fromAddr"|sort -u)
+  noVotes=$(curl -s http://"$server"/api/transfer/"$noAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   no=$(echo "$noVotes"|wc -l)
   for acct in $noVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let no=no-1;fi
   done
-  abstainVotes=$(trans "$abstainAddr"| jq -r ".[] | select(.deploy.timestamp < $timestamp) | .fromAddr"|sort -u)
+  abstainVotes=$(curl -s http://"$server"/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   $debug  "$yesVotes" yesVotes
   $debug  "$noVotes" novotes
   $debug  "$abstainVotes" abstainvotes
@@ -82,8 +82,10 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   fi
   echo "$result"
 done
-if $failed; then echo  FAILED: results do not match for replay "$replay" >&2; 
-else echo SUCCESS: replay matched.
+if [ "replay" ]; then
+  if $failed; then echo  FAILED: results do not match for replay "$replay" >&2; 
+  else echo SUCCESS: replay matched.
+  fi
 fi
 #cat /tmp/voters|sort|uniq>voters #for testing only
 # cat voters |sed '1,$s/^/"/;1,$s/$/",/;$s/,$/\)/;1s/^/Set\(/' # acct text list to json list
