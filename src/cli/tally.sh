@@ -1,7 +1,5 @@
 #!/bin/bash
-#usage: ./tally.sh [ballotfile] [votersfile] [timestamp] [transaction-server:port]
-#usage: save=xxx ./tally.sh [ballotfile] [votersfile] [timestamp] [transaction-server:port]
-#usage: replay=xxx ./tally.sh [ballotfile] [votersfile] [timestamp] [transaction-server:port]
+#usage: ./tally.sh [ballotfile] [votersfile] [starttime] [endtime]] [transaction-server:port]
 # https://github.com/rchain-community/rv2020/issues/35
 # an account is counted only once for a choice.
 # The case of a person voting for multiple choices the most recent is used.
@@ -9,10 +7,11 @@ debug=echo  # set this value of debug last for debug ON
 debug=:     # set this value of debug last for debug OFF
 ballot=${1-../web/ballotexample.json}
 voters=${2-voters}
-timestamp=${3-$(date +%s)000} # current timestamp default = seconds since epic times 1000
-cond="sele"
+starttime=${3-0}
+endtime=${4-$(date +%s)000} # current timestamp default = seconds since epic times 1000
+cond="select((.deploy.timestamp < $endtime) and .deploy.timestamp > $starttime)"
 if [ "$save" ]; then mkdir saved/"$save"; fi
-server=${4-http://kc-strip.madmode.com:7070}
+server=${5-http://kc-strip.madmode.com:7070}
 transactions="curl -s "$server"/api/transfer"
 trans () {
   if [ "$save" ]; then
@@ -33,17 +32,17 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   noAddr=$(echo "$noAddrs"|sed -n "${n}"p)
   abstainAddr=$(echo "$abstainAddrs"|sed -n "${n}"p)
   echo  "$desc"
-  yesVotes=$(curl -s http://"$server"/api/transfer/"$yesAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
+  yesVotes=$(curl -s $server/api/transfer/"$yesAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   yes=$(echo "$yesVotes"|wc -l)
   for acct in $yesVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let yes=yes-1;fi
   done
-  noVotes=$(curl -s http://"$server"/api/transfer/"$noAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
+  noVotes=$(curl -s $server/api/transfer/"$noAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   no=$(echo "$noVotes"|wc -l)
   for acct in $noVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let no=no-1;fi
   done
-  abstainVotes=$(curl -s http://"$server"/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"| sort -u)
+  abstainVotes=$(curl -s $server/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"| sort -u)
   $debug  "$yesVotes" yesVotes
   $debug  "$noVotes" novotes
   $debug  "$abstainVotes" abstainvotes
@@ -83,7 +82,7 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   fi
   echo "$result"
 done
-if [ "replay" ]; then
+if [ "$replay" ]; then
   if $failed; then echo  FAILED: results do not match for replay "$replay" >&2; 
   else echo SUCCESS: replay matched.
   fi
