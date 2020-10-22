@@ -16,19 +16,21 @@ shortDescs=$(cat "$ballot"|jq -r '.|.[].shortDesc')
 yesAddrs=$(cat "$ballot"|jq -r '.|.[].yesAddr')
 noAddrs=$(cat "$ballot"|jq -r '.|.[].noAddr')
 abstainAddrs=$(cat "$ballot"|jq -r '.|.[].abstainAddr')
-for n in $(seq $(echo "$shortDescs"|wc -l)); do
+for n in $(seq $(echo "$shortDescs"|sed '/^$/d'|wc -l)); do
   desc=$(echo "$shortDescs"|sed -n "${n}"p)
   yesAddr=$(echo "$yesAddrs"|sed -n "${n}"p)
   noAddr=$(echo "$noAddrs"|sed -n "${n}"p)
   abstainAddr=$(echo "$abstainAddrs"|sed -n "${n}"p)
   echo  "$desc"
   yesVotes=$(curl -s "$server"/api/transfer/"$yesAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
-  yes=$(echo "$yesVotes"|wc -l)
+  yes=$(echo "$yesVotes"|sed '/^$/d'|wc -l)
   for acct in $yesVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let yes=yes-1;fi
   done
   noVotes=$(curl -s "$server"/api/transfer/"$noAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
-  no=$(echo "$noVotes"|wc -l)
+  no=$(echo "$noVotes"|sed '/^$/d'|wc -l)
+  abstainVotes=$(curl -s "$server"/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
+  abstain=$(echo "$abstainVotes"|sed '/^$/d'|wc -l)
   for acct in $noVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let no=no-1;fi
   done
@@ -36,6 +38,8 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   $debug  "$yesVotes" yesVotes
   $debug  "$noVotes" novotes
   $debug  "$abstainVotes" abstainvotes
+  #notdouble=$(printf "$yesVotes\n$noVotes\n$abstainVotes\n"|sort|uniq|sed '/^$/d'|wc -l)
+  #echo all $notdouble
   double=$(printf "$yesVotes\n$noVotes\n$abstainVotes\n"|sort|uniq -d)
   printf "$yesVotes\n$noVotes\n" >>/tmp/voters
   if [ "$double" != "" ]; then
@@ -45,21 +49,23 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
      for acct in $(curl -s "$server"/api/transfer/"$voter"| jq -r '.|.[].toAddr'); do
         #if [ "$found" == "0" ]; then found=1;: most recent vote remains; else
           if [  "$acct" = "$yesAddr" ]; then $debug yes found
-            no=$(grep -v "$voter" <(echo "$noVotes")|wc -l)
+            no=$(grep -v "$voter" <(echo "$noVotes")|sed '/^$/d'|wc -l)
             break
           elif [ "$acct" = "$noAddr" ]; then $debug  no found;
-            yes=$(grep -v "$voter" <(echo "$yesVotes")|wc -l)
+            yes=$(grep -v "$voter" <(echo "$yesVotes")|sed '/^$/d'|wc -l)
             break
           elif [ "$acct" = "$abstainAddr" ]; then $debug abstain found; 
-            no=$(grep -v "$voter" <(echo "$noVotes")|wc -l)
-            yes=$(grep -v "$voter" <(echo "$yesVotes")|wc -l)
+            no=$(grep -v "$voter" <(echo "$noVotes")|sed '/^$/d'|wc -l)
+            yes=$(grep -v "$voter" <(echo "$yesVotes")|sed '/^$/d'|wc -l)
             break
           fi
         #fi
       done
     done
   fi
-  echo  "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr"
+  echo  "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr";
+  echo "  $abstain abstain votes"
+  let total=$yes+$no+$abstain; echo "  $total total"
 done
 #cat /tmp/voters|sort|uniq>voters #for testing only
 # cat voters |sed '1,$s/^/"/;1,$s/$/",/;$s/,$/\)/;1s/^/Set\(/' # acct text list to json list
