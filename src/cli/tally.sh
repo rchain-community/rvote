@@ -7,10 +7,11 @@ debug=echo  # set this value of debug last for debug ON
 debug=:     # set this value of debug last for debug OFF
 ballot=${1-../web/ballotexample.json}
 voters=${2-voters}
-starttime=${3-0}
+starttime=${3-1603306799000} # 2020-10-21 14:00 EDT
 endtime=${4-$(date +%s)000} # current timestamp default = seconds since epic times 1000
+endtime=1603526399000 # 2020-10-24 22:00 PDT
 cond="select((.deploy.timestamp < $endtime) and .deploy.timestamp > $starttime)"
-server=${5-kc-strip.madmode.com:7070}
+server=${5-https://status.rchain.coop}
 shortDescs=$(cat "$ballot"|jq -r '.|.[].shortDesc')
 yesAddrs=$(cat "$ballot"|jq -r '.|.[].yesAddr')
 noAddrs=$(cat "$ballot"|jq -r '.|.[].noAddr')
@@ -21,17 +22,17 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
   noAddr=$(echo "$noAddrs"|sed -n "${n}"p)
   abstainAddr=$(echo "$abstainAddrs"|sed -n "${n}"p)
   echo  "$desc"
-  yesVotes=$(curl -s http://"$server"/api/transfer/"$yesAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
+  yesVotes=$(curl -s "$server"/api/transfer/"$yesAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   yes=$(echo "$yesVotes"|wc -l)
   for acct in $yesVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let yes=yes-1;fi
   done
-  noVotes=$(curl -s http://"$server"/api/transfer/"$noAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
+  noVotes=$(curl -s "$server"/api/transfer/"$noAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   no=$(echo "$noVotes"|wc -l)
   for acct in $noVotes; do
           if grep -q "$acct" voters; then : ok; else echo $acct not registered; let no=no-1;fi
   done
-  abstainVotes=$(curl -s http://"$server"/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
+  abstainVotes=$(curl -s "$server"/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   $debug  "$yesVotes" yesVotes
   $debug  "$noVotes" novotes
   $debug  "$abstainVotes" abstainvotes
@@ -41,7 +42,7 @@ for n in $(seq $(echo "$shortDescs"|wc -l)); do
     $debug "  $yes yes votes $yesAddr";$debug "  $no no votes $noAddr"
     $debug  ALERT: "$double" voted both yes and no or abstain.
     for voter in $double; do let found=0
-     for acct in $(curl -s http://"$server"/api/transfer/"$voter"| jq -r '.|.[].toAddr'); do
+     for acct in $(curl -s "$server"/api/transfer/"$voter"| jq -r '.|.[].toAddr'); do
         #if [ "$found" == "0" ]; then found=1;: most recent vote remains; else
           if [  "$acct" = "$yesAddr" ]; then $debug yes found
             no=$(grep -v "$voter" <(echo "$noVotes")|wc -l)
