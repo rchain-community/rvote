@@ -16,7 +16,7 @@ def main(argv, cwd, connect, build_opener):
     [txf, db] = argv[1:3]
 
     node = Observer(build_opener(), OBSERVER)
-    voters = Registry.lookup(node, VOTERS)
+    voters = Registry.lookup_set(node, VOTERS)
     ballot = Registry.lookup(node, AGENDA)
 
     log.info('in: %s out: %s', json, db)
@@ -50,14 +50,34 @@ class Observer:
 
 class Registry:
     @classmethod
-    def lookup(cls, node: Observer, target: str) -> str:
-        term = f'''
-        new return, lookup(`rho:registry:lookup`) in {{
+    def lookup_rho(cls, target):
+        return f'''
+        new return, lookup(`rho:registry:lookup`), ch in {{
             lookup!(`{target}`, *return)
         }}
         '''
+
+    @classmethod
+    def lookup_set_rho(cls, target):
+        return f'''
+        new return, lookup(`rho:registry:lookup`), ch in {{
+            lookup!(`{target}`, *ch) |
+            for (@addrs <- ch) {{
+                return!(addrs.toList())
+            }}
+        }}
+        '''
+
+    @classmethod
+    def lookup(cls, node: Observer, target: str) -> str:
         log.info('looking up %s', target)
-        info = node.exploratoryDeploy(term)
+        info = node.exploratoryDeploy(cls.lookup_rho(target))
+        return RhoExpr.parse(info['expr'][0])
+
+    @classmethod
+    def lookup_set(cls, node: Observer, target: str) -> str:
+        log.info('looking up set %s', target)
+        info = node.exploratoryDeploy(cls.lookup_set_rho(target))
         return RhoExpr.parse(info['expr'][0])
 
 
