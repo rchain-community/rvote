@@ -34,5 +34,5 @@ order by choice.qid, qty desc
 ;
 
 select qid, prop, addr from choice order by qid, prop;
-select * from valid_votes order by fromAddr, qid;
+select qid, prop, toAddr, fromAddr, amount, timestamp from valid_votes order by qid, prop;
 select * from tally;
