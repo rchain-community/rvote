@@ -7,11 +7,22 @@ debug=echo  # set this value of debug last for debug ON
 debug=:     # set this value of debug last for debug OFF
 ballot=${1-../web/ballotexample.json}
 voters=${2-voters}
-starttime=${3-1603306799000} # 2020-10-21 14:00 EDT
-endtime=${4-$(date +%s)000} # current timestamp default = seconds since epic times 1000
-endtime=1603526399000 # 2020-10-24 22:00 PDT
+starttime=${3-1603306799000} # rchain 2020 AGM starttime
+#endtime=${4-$(date +%s)000} # current timestamp default = seconds since epic times 1000
+endtime=${4-1603526399000} # endtime of rchain 2020 AGM
 cond="select((.deploy.timestamp < $endtime) and .deploy.timestamp > $starttime)"
+if [ "$save" ]; then mkdir saved/"$save"; fi
 server=${5-https://status.rchain.coop}
+transactions="curl -s "$server"/api/transfer"
+trans () {
+  if [ "$save" ]; then
+	$transactions/"$1"|tee saved/"$save"/"$1"
+  elif [ "$replay" ]; then
+	cat saved/"$replay"/"$1"
+  else
+	$transactions/"$1"
+  fi
+}
 shortDescs=$(cat "$ballot"|jq -r '.|.[].shortDesc')
 yesAddrs=$(cat "$ballot"|jq -r '.|.[].yesAddr')
 noAddrs=$(cat "$ballot"|jq -r '.|.[].noAddr')
@@ -22,31 +33,22 @@ for n in $(seq $(echo "$shortDescs"|sed '/^$/d'|wc -l)); do
   noAddr=$(echo "$noAddrs"|sed -n "${n}"p)
   abstainAddr=$(echo "$abstainAddrs"|sed -n "${n}"p)
   echo  "$desc"
-  yesVotes=$(curl -s "$server"/api/transfer/"$yesAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
+  yesVotes=$(trans "$yesAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u|comm -12  - voters)
   yes=$(echo "$yesVotes"|sed '/^$/d'|wc -l)
-  for acct in $yesVotes; do
-          if grep -q "$acct" voters; then : ok; else echo $acct not registered; let yes=yes-1;fi
-  done
-  noVotes=$(curl -s "$server"/api/transfer/"$noAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
+  noVotes=$(trans "$noAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u|comm -12  - voters)
   no=$(echo "$noVotes"|sed '/^$/d'|wc -l)
-  abstainVotes=$(curl -s "$server"/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
+  abstainVotes=$(trans "$abstainAddr"| jq -r ".[] | $cond | .fromAddr"| sort -u|comm -12  - voters)
   abstain=$(echo "$abstainVotes"|sed '/^$/d'|wc -l)
-  for acct in $noVotes; do
-          if grep -q "$acct" voters; then : ok; else echo $acct not registered; let no=no-1;fi
-  done
-  abstainVotes=$(curl -s "$server"/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   $debug  "$yesVotes" yesVotes
   $debug  "$noVotes" novotes
   $debug  "$abstainVotes" abstainvotes
-  #notdouble=$(printf "$yesVotes\n$noVotes\n$abstainVotes\n"|sort|uniq|sed '/^$/d'|wc -l)
-  #echo all $notdouble
   double=$(printf "$yesVotes\n$noVotes\n$abstainVotes\n"|sort|uniq -d)
   printf "$yesVotes\n$noVotes\n" >>/tmp/voters
   if [ "$double" != "" ]; then
     $debug "  $yes yes votes $yesAddr";$debug "  $no no votes $noAddr"
-    $debug  ALERT: "$double" voted both yes and no or abstain.
+    echo  ALERT: "$double" voted both yes and no or abstain.
     for voter in $double; do let found=0
-     for acct in $(curl -s "$server"/api/transfer/"$voter"| jq -r '.|.[].toAddr'); do
+     for acct in $(trans "$voter"| jq -r '.|.[].toAddr'); do
         #if [ "$found" == "0" ]; then found=1;: most recent vote remains; else
           if [  "$acct" = "$yesAddr" ]; then $debug yes found
             no=$(grep -v "$voter" <(echo "$noVotes")|sed '/^$/d'|wc -l)
@@ -63,9 +65,28 @@ for n in $(seq $(echo "$shortDescs"|sed '/^$/d'|wc -l)); do
       done
     done
   fi
-  echo  "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr";
-  echo "  $abstain abstain votes"
-  let total=$yes+$no+$abstain; echo "  $total total"
+  let total=$yes+$no+$abstain
+  result=$(echo  "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr";
+  	echo "  $abstain abstain votes $abstainAddr";echo "  $total total")
+  new=$(echo "$yesVotes"|comm -12  - voters|wc -l);  if [ $yes != $new ]; then echo final yeses $yes do not match $new; fi
+  new=$(echo "$noVotes"|comm -12  - voters|wc -l);  if [ $no != $new ]; then echo final noes $no do not match $new; fi
+  new=$(echo "$abstainVotes"|comm -12  - voters|wc -l);  if [ $abstain != $new ]; then echo final abstains $abstain do not match $new; fi
+  failed=false
+  if [ "$save" ]; then
+	  echo "$result" > saved/"$save"/result$n
+  elif [ "$replay" ]; then
+	  if [ "$(cat saved/$replay/result$n)" != "$result" ]; then echo ERROR: results do not match for replay "$replay" "$n" >&2
+		  cat saved/$replay/result$n
+		  failed=true
+	  else $debug Replay "$replay" matched
+	  fi
+  fi
+  echo "$result"
 done
+if [ "$replay" ]; then
+  if $failed; then echo  FAILED: results do not match for replay "$replay" >&2; 
+  else echo SUCCESS: replay matched.
+  fi
+fi
 #cat /tmp/voters|sort|uniq>voters #for testing only
 # cat voters |sed '1,$s/^/"/;1,$s/$/",/;$s/,$/\)/;1s/^/Set\(/' # acct text list to json list
