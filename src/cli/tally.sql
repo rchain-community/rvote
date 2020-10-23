@@ -13,6 +13,7 @@ vote_cast as (
 latest as (
     select qid, fromAddr, max(timestamp) max_ts
     from vote_cast
+    where timestamp >= 1603306799000 -- AGM voting start time
     group by qid, fromAddr
 ),
 latest_vote as (
