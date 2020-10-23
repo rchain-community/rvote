@@ -21,24 +21,25 @@ const uniq = (items) => Array.from(new Set(items).values());
  * @param {{
  *   fsp: typeof import('fs').promises,
  *   http: typeof import('http'),
+ *   https: typeof import('https'),
  *   echo: (txt: string) => void
  * }} io
  */
-async function main(argv, { fsp, http, echo }) {
+async function main(argv, { fsp, http, https, echo }) {
   // console.log(argv);
   // TODO: consider docopt if this gets more complex
   const ballot = argv.length >= 3 ? argv[2] : '../web/ballotexample.json';
-  const server = argv.length >= 4 ? argv[3] : 'kc-strip.madmode.com:7070';
+  const server = argv.length >= 4 ? argv[3] : 'status.rchain.coop';
 
   const ballotData = JSON.parse(await fsp.readFile(ballot, 'utf8'));
 
-  let whichCurl = (url) => nodeCurl(url, { http });
+  let whichCurl = (url) => nodeCurl(url, { http: https });
 
   if (argv.includes('--test')) {
     runTests(ballotData, { fsp });
     return;
   } else if (argv.includes('--cache')) {
-    whichCurl = cachingCurl(',cache', { fsp, http });
+    whichCurl = cachingCurl(',cache', { fsp, http: https });
   }
 
   const txByAddr = await download(ballotData, server, {
@@ -229,7 +230,7 @@ async function getTransactions(revAddrs, server, { curl }) {
   return Object.fromEntries(
     await Promise.all(
       revAddrs.map((addr) =>
-        curl(`http://${server}/api/transfer/${addr}`).then((txt) => [
+        curl(`https://${server}/api/transfer/${addr}`).then((txt) => [
           addr,
           jq(txt),
         ]),
@@ -265,6 +266,7 @@ if (require.main === module) {
     fsp: require('fs').promises,
     // eslint-disable-next-line global-require
     http: require('http'),
+    https: require('https'),
     echo: console.log,
   }).catch((err) => console.error(err));
 }

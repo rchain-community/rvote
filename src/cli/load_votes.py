@@ -6,10 +6,10 @@ from urllib.request import OpenerDirector
 
 log = logging.getLogger(__name__)
 
-INDEX_SVC = 'kc-strip.madmode.com:7070'
-OBSERVER = 'https://observer.testnet.rchain.coop'
 AGENDA = 'rho:id:po68mejh9y9cx8n3htiejpqrjch9deq6rxhq45jnegsyyahrtmaxm5'
 VOTERS = 'rho:id:admzpibb3gxxp18idri7h6eneg4io6myfmcmjhufc6asy73bgrojop'
+INDEX_SVC = 'status.rchain.coop'
+OBSERVER = 'https://observer.services.mainnet.rchain.coop'
 
 
 def main(argv, cwd, connect, build_opener):
