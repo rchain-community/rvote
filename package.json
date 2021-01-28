@@ -58,6 +58,6 @@
     "js-sha3": "^0.8.0",
     "mithril": "^2.0.4",
     "ramda": "^0.26.1",
-    "shepherd.js": "^8.0.2"
+    "shepherd.js": "^8.1.0"
   }
 }
