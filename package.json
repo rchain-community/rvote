@@ -51,7 +51,7 @@
     "bs58": "^4.0.1",
     "elliptic": "^6.5.3",
     "ethereumjs-util": "^6.2.1",
-    "google-protobuf": "^3.13.0",
+    "google-protobuf": "^3.14.0",
     "htm": "^3.0.4",
     "html-webpack-plugin": "^4.5.1",
     "jazzicon": "^1.5.0",
