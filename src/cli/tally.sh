@@ -4,7 +4,7 @@
 # an account is counted only once for a choice.
 # The case of a person voting for multiple choices the most recent is used.
 debug=echo  # set this value of debug last for debug ON
-debug=:     # set this value of debug last for debug OFF
+#debug=:     # set this value of debug last for debug OFF
 ballot=${1-../web/ballotexample.json}
 voters=${2-voters}
 starttime=${3-0}

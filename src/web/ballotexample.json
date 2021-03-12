@@ -1,7 +1,9 @@
-"Q2 CEO Change: {
+{
+        "Q2 CEO Change": {
         "shortDesc": "The 2018 board meeting decided to have Greg step down as CEO when Q2 is complete.  The plan was to have 4 VPs to take the responsibilities. It in not clear we have the resources to implement the plan and are not certain it would be an improvement. It is proposed that the requirement be dropped and any reorganization be lwft to the board",
         "docLink": "https://discord.com/channels/375365542359465989/393462637100400650/81959229289345848",
-        "yesAddr": "11112i8bYVDYck4MSbY3d1As28uY151xoMS7AyiTvZ2YmNJ8Nw13v9",
-        "abstainAddr": "111184Ab7raMAony6fX8JuoPFB5PggfrEWfzXE4WMzTKioFwmQMsa",
-        "noAddr": "11112uGayGEi57D54Drq3V4iw5WWyfXbcVvsDangRTE7TaR3J4U4FD"
+        "yesAddr": "b252b7c0e1559a23222b5d641e080fcc8d93d58f285c3571101db62093c1cff9",
+        "abstainAddr": "1111sSXMHnMUr1B8LRmagVYpmprZBZLw4bdGnSCpd2yGvdo75bbL7",
+        "noAddr": "11112kgGAPb6ASN3VcGsdvAXdQeZ55UDxPsgxmwi87sGw8cb6yhwnh"
     }
+}
