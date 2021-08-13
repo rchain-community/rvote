@@ -34,13 +34,13 @@ for n in $(seq $(echo "$shortDescs"|sed '/^$/d'|wc -l)); do
   echo  "$desc"
   yesVotes=$(curl -s $server/api/transfer/"$yesAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   yes=$(echo "$yesVotes"|sed '/^$/d'|wc -l)
-  for acct in $yesVotes; do
-          if grep -q "$acct" voters; then : ok; else echo $acct not registered; let yes=yes-1;fi
+  for acct in $yesVotes; do :
+#          if grep -q "$acct" voters; then : ok; else echo $acct not registered; let yes=yes-1;fi
   done
   noVotes=$(curl -s $server/api/transfer/"$noAddr"| jq -r ".[] | $cond | .fromAddr"|sort -u)
   no=$(echo "$noVotes"|sed '/^$/d'|wc -l)
-  for acct in $noVotes; do
-          if grep -q "$acct" voters; then : ok; else echo $acct not registered; let no=no-1;fi
+  for acct in $noVotes; do :
+#          if grep -q "$acct" voters; then : ok; else echo $acct not registered; let no=no-1;fi
   done
   abstainVotes=$(curl -s $server/api/transfer/"$abstainAddr"| jq -r ".[] | $cond | .fromAddr"| sort -u)
   $debug  "$yesVotes" yesVotes

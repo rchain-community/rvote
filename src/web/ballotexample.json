@@ -1,9 +1,37 @@
 {
-        "Q2 CEO Change": {
-        "shortDesc": "The 2018 board meeting decided to have Greg step down as CEO when Q2 is complete.  The plan was to have 4 VPs to take the responsibilities. It in not clear we have the resources to implement the plan and are not certain it would be an improvement. It is proposed that the requirement be dropped and any reorganization be lwft to the board",
-        "docLink": "https://discord.com/channels/375365542359465989/393462637100400650/81959229289345848",
-        "yesAddr": "b252b7c0e1559a23222b5d641e080fcc8d93d58f285c3571101db62093c1cff9",
-        "abstainAddr": "1111sSXMHnMUr1B8LRmagVYpmprZBZLw4bdGnSCpd2yGvdo75bbL7",
-        "noAddr": "11112kgGAPb6ASN3VcGsdvAXdQeZ55UDxPsgxmwi87sGw8cb6yhwnh"
+    "Board: KL": {
+      "yesAddr": "11112gUFvJR6JBDYJURETaWUBpEDa1EyjgRHFncEfQ4hGECnciPnhw",
+      "noAddr": "11112aoa6NLYomYZro566XZVGEXyCDqeqDcp8Pzg81Ckuws6SexC99",
+      "shortDesc": "Kane Luo for Board Member",
+      "docLink": "https://github.com/rchain/legaldocs/blob/master/2020%20Annual%20Meeting/candidate_statements.md#kane-luo",
+      "abstainAddr": "1111pKehMgsPBAiqzCSkSekXP4aUXMjY5DvtSXcz72ATP7Pm3RK9o"
+    },
+    "Board: GM": {
+      "yesAddr": "11112i8bYVDYcm4MSbY3d1As28uY151xoMS7AyiTvZ2YmNJ8Nw13v9",
+      "noAddr": "11112uGayGEi57D44Drq3V4iw5WWyfXbcVvsDangRTE7TaR3J4U4FD",
+      "shortDesc": "Greg Meredith for Board Member.",
+      "docLink": "https://github.com/rchain/legaldocs/blob/master/2020%20Annual%20Meeting/candidate_statements.md#greg-meredith",
+      "abstainAddr": "111184Ab7raMAoVy6fX8JuoPFB5PggfrEWfzXE4WMzTKioFwmQMsa"
+    },
+    "Monetary Policy": {
+      "yesAddr": "1111krbAKSbyGA9vfa7w4K2pKAxZZn6qjaVEduDLWotDZ8HLt2aXR",
+      "noAddr": "1111swBFUPVRwR4ugkDBCvrLwPeR1621B1cHQf3cAkNxt3Zad2eac",
+      "shortDesc": "Now that the mainnet has been operational for several months, the membership resolves that the board of directors should create and adopt an appropriate new monetary policy based on network security considerations such as ...",
+      "docLink": "https://github.com/rchain/Governance-Committee/issues/5",
+      "abstainAddr": "11112CgGiNg3DdMDsYz7UikeSxh7CfFdEbDYzmoJLfS4vx3uZjm55V"
+    },
+    "Board: CR": {
+      "yesAddr": "1111rbdV9Lsw6DyMSq8ySXDacX7pRUxmVGoYho9gGtfZcQYFdAN42",
+      "noAddr": "1111JoeZHDYXqyAgo89VaidQnp7W7M9pvdkFUJTqEBU7SHKx6WF2z",
+      "shortDesc": "Camila Remaley for Board Member",
+      "docLink": "https://github.com/rchain/legaldocs/blob/master/2020%20Annual%20Meeting/candidate_statements.md#camila-remaley",
+      "abstainAddr": "11113Y89LxqCmjDK9PUDi1dfsEcjAHbBW7mQ3Zw2yqqiwSUibaTkq"
+    },
+    "Board: RB": {
+      "yesAddr": "1111TnFUN7eZBWXp3QQACQRRxpcS5uH5Bpf67vikWhA5e3F6ikAmU",
+      "noAddr": "11112Cwtg2Bs4WUAYrXhL9xZXXSXr9Gn62Cty39RhUaBnqjrKkqwAZ",
+      "shortDesc": "Rao Bhamidipati for Board Member",
+      "docLink": "https://github.com/rchain/legaldocs/blob/master/2020%20Annual%20Meeting/candidate_statements.md#rao-bhamidipati",
+      "abstainAddr": "11112nT2XooHcCVQLEAsEJhQm6boCS5B7XQ1DBmw6ex3xveiCWRWAx"
     }
-}
+  }
