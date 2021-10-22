@@ -7,12 +7,13 @@ debug=echo  # set this value of debug last for debug ON
 debug=:     # set this value of debug last for debug OFF
 ballot=${1-../web/ballotexample.json}
 voters=${2-voters}
-starttime=${3-1603306799000} # rchain 2020 AGM starttime
+starttime=${3-1634869912038} # rchain 2021 AGM starttime
+endtime=${4-1635058800000} # endtime of rchain 2021 AGM
 #endtime=${4-$(date +%s)000} # current timestamp default = seconds since epic times 1000
-endtime=${4-1603526399000} # endtime of rchain 2020 AGM
 cond="select((.deploy.timestamp < $endtime) and .deploy.timestamp > $starttime)"
 if [ "$save" ]; then mkdir saved/"$save"; fi
 server=${5-https://status.rchain.coop}
+#server=${5-https://status.testnet.rchain.coop}
 transactions="curl -s "$server"/api/transfer"
 trans () {
   if [ "$save" ]; then
@@ -21,6 +22,7 @@ trans () {
 	cat saved/"$replay"/"$1"
   else
 	$transactions/"$1"
+	$debug $transactions/"$1" >&2
   fi
 }
 shortDescs=$(cat "$ballot"|jq -r '.|.[].shortDesc')
@@ -51,7 +53,8 @@ for n in $(seq $(echo "$shortDescs"|sed '/^$/d'|wc -l)); do
      for acct in $(trans "$voter"| jq -r '.|.[].toAddr'); do
         #if [ "$found" == "0" ]; then found=1;: most recent vote remains; else
           if [  "$acct" = "$yesAddr" ]; then $debug yes found
-            no=$(grep -v "$voter" <(echo "$noVotes")|sed '/^$/d'|wc -l)
+            #no=$(grep -v "$voter" <(echo "$noVotes")|sed '/^$/d'|wc -l)
+            abstain=$(grep -v "$voter" <(echo "$abstainVotes")|sed '/^$/d'|wc -l)
             break
           elif [ "$acct" = "$noAddr" ]; then $debug  no found;
             yes=$(grep -v "$voter" <(echo "$yesVotes")|sed '/^$/d'|wc -l)
@@ -66,11 +69,11 @@ for n in $(seq $(echo "$shortDescs"|sed '/^$/d'|wc -l)); do
     done
   fi
   let total=$yes+$no+$abstain
-  result=$(echo  "  $yes yes votes $yesAddr";echo "  $no no votes $noAddr";
+  result=$(echo  "  $yes yes votes $yesAddr";$debug "  $no no votes $noAddr";
   	echo "  $abstain abstain votes $abstainAddr";echo "  $total total")
-  new=$(echo "$yesVotes"|comm -12  - voters|wc -l);  if [ $yes != $new ]; then echo final yeses $yes do not match $new; fi
-  new=$(echo "$noVotes"|comm -12  - voters|wc -l);  if [ $no != $new ]; then echo final noes $no do not match $new; fi
-  new=$(echo "$abstainVotes"|comm -12  - voters|wc -l);  if [ $abstain != $new ]; then echo final abstains $abstain do not match $new; fi
+  new=$(echo "$yesVotes"|comm -12  - voters|wc -l);  if [ $yes != $new ]; then $debug final yeses $yes do not match $new; fi
+  new=$(echo "$noVotes"|comm -12  - voters|wc -l);  if [ $no != $new ]; then $debug final noes $no do not match $new; fi
+  new=$(echo "$abstainVotes"|comm -12  - voters|wc -l);  if [ $abstain != $new ]; then $debug final abstains $abstain do not match $new; fi
   failed=false
   if [ "$save" ]; then
 	  echo "$result" > saved/"$save"/result$n
