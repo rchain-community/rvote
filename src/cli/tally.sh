@@ -7,9 +7,9 @@ debug=echo  # set this value of debug last for debug ON
 debug=:     # set this value of debug last for debug OFF
 ballot=${1-../web/ballotexample.json}
 voters=${2-voters}
-starttime=${3-1603306799000} # rchain 2020 AGM starttime
-endtime=${4-1603526399000} # endtime of rchain 2020 AGM
-endtime=${4-$(date +%s)000} # current timestamp default = seconds since epic times 1000
+starttime=${3-1634869912038} # rchain 2021 AGM starttime
+endtime=${4-1635058800000} # endtime of rchain 2021 AGM
+#endtime=${4-$(date +%s)000} # current timestamp default = seconds since epic times 1000
 cond="select((.deploy.timestamp < $endtime) and .deploy.timestamp > $starttime)"
 if [ "$save" ]; then mkdir saved/"$save"; fi
 server=${5-https://status.rchain.coop}
