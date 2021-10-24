@@ -3,8 +3,8 @@
 # https://github.com/rchain-community/rv2020/issues/35
 # an account is counted only once for a choice.
 # The case of a person voting for multiple choices the most recent is used.
-debug=echo  # set this value of debug last for debug ON
 debug=:     # set this value of debug last for debug OFF
+#debug=echo  # set this value of debug last for debug ON
 ballot=${1-../web/ballotexample.json}
 voters=${2-voters}
 starttime=${3-1634869912038} # rchain 2021 AGM starttime
@@ -48,20 +48,25 @@ for n in $(seq $(echo "$shortDescs"|sed '/^$/d'|wc -l)); do
   printf "$yesVotes\n$noVotes\n" >>/tmp/voters
   if [ "$double" != "" ]; then
     $debug "  $yes yes votes $yesAddr";$debug "  $no no votes $noAddr"
-    echo  ALERT: "$double" voted both yes and no or abstain.
-    for voter in $double; do let found=0
+    $debug  ALERT: "$double" voted both yes and no or abstain.
+    for voter in $double; do let found=0 # WARNING last vote not determined, works for 2 coices only
      for acct in $(trans "$voter"| jq -r '.|.[].toAddr'); do
         #if [ "$found" == "0" ]; then found=1;: most recent vote remains; else
           if [  "$acct" = "$yesAddr" ]; then $debug yes found
             #no=$(grep -v "$voter" <(echo "$noVotes")|sed '/^$/d'|wc -l)
-            abstain=$(grep -v "$voter" <(echo "$abstainVotes")|sed '/^$/d'|wc -l)
+            abstainVotes=$(grep -v "$voter" <(echo "$abstainVotes")|sed '/^$/d')
+            abstain=$(echo "$abstainVotes"|sed '/^$/d'|wc -l)
             break
           elif [ "$acct" = "$noAddr" ]; then $debug  no found;
-            yes=$(grep -v "$voter" <(echo "$yesVotes")|sed '/^$/d'|wc -l)
+            #yes=$(grep -v "$voter" <(echo "$yesVotes")|sed '/^$/d'|wc -l)
+            yesVotes=$(grep -v "$voter" <(echo "$yesVotes")|sed '/^$/d')
+            yes=$(echo "$yesVotes"|sed '/^$/d'|wc -l)
             break
           elif [ "$acct" = "$abstainAddr" ]; then $debug abstain found; 
             no=$(grep -v "$voter" <(echo "$noVotes")|sed '/^$/d'|wc -l)
-            yes=$(grep -v "$voter" <(echo "$yesVotes")|sed '/^$/d'|wc -l)
+            #yes=$(grep -v "$voter" <(echo "$yesVotes")|sed '/^$/d'|wc -l)
+            yesVotes=$(grep -v "$voter" <(echo "$yesVotes")|sed '/^$/d')
+            yes=$(echo "$yesVotes"|sed '/^$/d'|wc -l)
             break
           fi
         #fi
@@ -79,7 +84,7 @@ for n in $(seq $(echo "$shortDescs"|sed '/^$/d'|wc -l)); do
 	  echo "$result" > saved/"$save"/result$n
   elif [ "$replay" ]; then
 	  if [ "$(cat saved/$replay/result$n)" != "$result" ]; then echo ERROR: results do not match for replay "$replay" "$n" >&2
-		  cat saved/$replay/result$n
+		  cat saved/$replay/result$n >&2
 		  failed=true
 	  else $debug Replay "$replay" matched
 	  fi
