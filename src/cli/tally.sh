@@ -48,7 +48,7 @@ for n in $(seq $(echo "$shortDescs"|sed '/^$/d'|wc -l)); do
   printf "$yesVotes\n$noVotes\n" >>/tmp/voters
   if [ "$double" != "" ]; then
     $debug "  $yes yes votes $yesAddr";$debug "  $no no votes $noAddr"
-    echo  ALERT: "$double" voted both yes and no or abstain.
+    $debug  ALERT: "$double" voted both yes and no or abstain.
     for voter in $double; do let found=0 # WARNING last vote not determined, works for 2 coices only
      for acct in $(trans "$voter"| jq -r '.|.[].toAddr'); do
         #if [ "$found" == "0" ]; then found=1;: most recent vote remains; else
