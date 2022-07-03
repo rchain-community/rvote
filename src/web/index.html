@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>Election 2020 - RChain</title>
+  <title>Election 2022 - RChain</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="./_dist_/vendor/rnode-client-js/src/web/favicon.ico" />
@@ -65,18 +65,13 @@
   <div class="app container">
     <div class="testNet">
       <div>
-        <h4>RChain Annual Meeting 2020 Ballot <sup>(TESTNET)</sup></h4>
+        <h4>RChain Special Meeting July 2022 Ballot <sup>(TESTNET)</sup></h4>
       </div>
       <ol id="helpSteps" style="display: none"><small>
 
-          <li>Thank you for beta-testing this RChain Governance dApp.</li>
-          <li><a href="#meetingNotice"></a>Do you have a REV Address registered with the coop? If not, see the
-            <a href="https://blog.rchain.coop/2020/07/09/notice-of-annual-meeting-2020/">meeting notice</a> for
-            instructions.
-          </li>
           <li>
             <a href="#accountControl"></a>Press <b>Sign In</b> to connect to Metamask (or compatible tool). Choose the
-            ethereum account corresponding to your REV address.
+            ethereum account corresponding to the REV address that you have registered with the Co-op.
             <p>
               See <cite>
                 <a href="https://medium.com/@jimscarver/using-metamask-with-rchain-2f05311976f">
@@ -85,6 +80,11 @@
             </p>
 
           </li>
+
+          <li><a href="#meetingNotice"></a>You will not be able to vote unless you are an ACTIVE Co-op member and 
+            have registered a voting REV address with the Co-op. (See your <u>Notice of Special Meeting</u> email)
+          </li>
+
           <li><a href="#questionList"></a>Once you are signed in, after a short pause to get the ballot from RChain,
             the questions are presented
             along with links for more information.
@@ -100,10 +100,8 @@
               (with <a href="https://www.youtube.com/watch?v=XY-kyfojbGQ">video recording</a>).</p>
 
           </li>
-          <li><a href="#txInfo"></a>Voting, like all RChain transactions, incurs a small charge. (The coop
-            offset this charge with a 100 REV
-            reward for those who registered before July 31, 2020.) Be sure you have enough in your account to cover the
-            max transaction fee.
+          <li><a href="#txInfo"></a>Voting, like all RChain transactions, incurs a small charge. 
+            Be sure you have enough in your account to cover the max transaction fee.
 
           </li>
           <li><a href="#submitControl"></a>When you are ready, press <b>Sign and Submit</b>. This will bring up
@@ -117,7 +115,7 @@
       </ol>
       <p>For background, see</p>
       <ul>
-        <li><cite><a href="https://blog.rchain.coop/2020/10/19/notice-of-annual-meeting-2020-2/" id="meetingNotice">Voters Guide</a></cite></li>
+        <li><cite><a href="https://vote.rchain.coop/" id="meetingNotice">vote.rchain.coop</a></cite></li>
       </ul>
       <form id='ballotForm'>
         <fieldset class="panel panel-default">
@@ -144,6 +142,18 @@
                 </tr>
               </tbody>
             </table>
+            <div>
+              <h4 id="commentary"><strong>Commentary</strong>:</h4>
+
+              <p>IOB 2 returns the token supply to its original intended value of 1B tokens. IOB 1 makes sure that 
+                the validator/staking rewards do not consume the entire token supply, but also keeps a limit on the 
+                amount that can be minted, ensuring that validator/staking rewards do not exceed 100M tokens over 
+                the lifetime of the protocol.</p>
+
+              <p>We will defer IOB 3 (Converting RChain Cooperative to a Limited Cooperative Association) to the 
+                annual general meeting (AGM) in October 2022.</p>
+            </div>
+
             <input type="hidden" id="agendaURI" value="rho:id:5bpjs3s68uigfebwrgmqympezjx11b5kpf3fgfh6au5nzspsdpumhi" />
             <label id="agendaControl">
               Agenda URI:
@@ -172,11 +182,11 @@
           </div>
         </fieldset>
       </form>
-      <p>For additional support, visit the <a href="https://discord.com/channels/375365542359465989/748649980201271416">#agm-2020</a> channel on RChain Discord.</p>
+      <p>For additional support, visit the <a href="https://discord.com/channels/375365542359465989/988981868647022692">#special-meeting</a> channel on RChain Discord.</p>
       <hr />
       <address>
-        Oct 2020 by Dan Connolly, Jim Whitescarver, and the <a href="https://github.com/rchain-community/">RChain Community</a><br />
-        <small>RCHAIN is a registered trademark of <a href="https://rchain.coop">RChain Cooperative</a>.<br />
+        2022 by Dan Connolly, Jim Whitescarver, and the <a href="https://github.com/rchain-community/">RChain Community</a><br />
+        <small>RCHAIN and REV are registered trademarks of <a href="https://rchain.coop">RChain Cooperative</a>.<br />
         <a href="https://github.com/rchain/legaldocs/blob/master/Form%20of%20Privacy%20Policy.pdf">Privacy terms and conditions</a></small>
       </address>
     </div>
