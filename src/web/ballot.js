@@ -480,7 +480,7 @@ function QuestionsControl(state) {
                : ''
            }</td>
 
-          ${radio(noAddr)} ${radio(abstainAddr)} ${radio(yesAddr)}
+          ${radio(abstainAddr)} ${radio(yesAddr)}
           </dd>`;
       },
     );
