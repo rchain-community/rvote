@@ -13,6 +13,7 @@ import {
 } from '../vendor/rnode-client-js/src/web/rnode-actions';
 import {
   mainNet,
+  testNet,
   getNodeUrls,
 } from '../vendor/rnode-client-js/src/rchain-networks';
 import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
@@ -20,7 +21,7 @@ import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
 import { transferMulti_rho } from '../rho/transfer-multi';
 
 const VOTERS_URI =
-  'rho:id:fy7q8f7sdz9gf7xe3hjjipq8edxpqiebk6mqtxbxm9s4oy71ezshhi';
+  'rho:id:zr9yi5xaswi1cpmdbqjp6ijxe94fnb8r13ofiea437mn8rps1h11sj';
 
 const DUST = 1;
 const REV = 1e8;
@@ -433,8 +434,8 @@ export function lookup_ballot_user_rho(acct, balloturi, votersuri) {
  * @returns { Promise<{ args: any[], cost: number, rawData: any }> }
  */
 function runDeploy(code, { account, phloLimit }, { rnodeWeb, log }) {
-  const misc = { name: 'mainNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
-  const node = getNodeUrls({ ...misc, ...mainNet.hosts[0] }); // TODO: get next validator?
+  const misc = { name: 'testNet', http: null, httpsAdmin: null }; // typechecker says we need these; runtime says we don't
+  const node = getNodeUrls({ ...misc, ...testNet.hosts[0] }); // TODO: get next validator?
 
   // appSendDeploy has a strange API: only sends the returned data to the log.
   // at least the log is handled with ocap discipline so we can interpose what we need!
