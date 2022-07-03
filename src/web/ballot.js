@@ -6,17 +6,14 @@ import jazzicon from 'jazzicon';
 import m from 'mithril'; // WARNING: Ambient access to Dom
 import htm from 'htm';
 
+import { rhoExprToJson, getAddrFromEth } from '@tgrospic/rnode-http-js'
 import { makeRNodeWeb } from '../vendor/rnode-client-js/src/rnode-web';
-import {
-  makeRNodeActions,
-  rhoExprToJS,
-} from '../vendor/rnode-client-js/src/web/rnode-actions';
+import { makeRNodeActions } from '../vendor/rnode-client-js/src/web/rnode-actions';
 import {
   mainNet,
   testNet,
   getNodeUrls,
 } from '../vendor/rnode-client-js/src/rchain-networks';
-import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
 
 import { transferMulti_rho } from '../rho/transfer-multi';
 
@@ -402,8 +399,8 @@ async function ballotVoterLookup(
   if (!result) {
     throw new Error(JSON.stringify(result));
   }
-  // console.log(rhoExprToJS(result));
-  return rhoExprToJS(result);
+  // console.log(rhoExprToJson(result));
+  return rhoExprToJson(result);
 }
 
 /**
@@ -420,7 +417,7 @@ export function lookup_ballot_user_rho(acct, balloturi, votersuri) {
       lookup!( \`${balloturi}\` , *valueCh) |
       for (@ballot <- valueCh) {
           lookup!( \`${votersuri}\` , *valueCh) |
-          for (@accts <- valueCh) {   
+          for (@accts <- valueCh) {
             return!({"registered": accts.contains("${acct}") ,"ballot": ballot})
           }
       }
