@@ -6,21 +6,19 @@ import jazzicon from 'jazzicon';
 import m from 'mithril'; // WARNING: Ambient access to Dom
 import htm from 'htm';
 
+import { rhoExprToJson, getAddrFromEth } from '@tgrospic/rnode-http-js'
 import { makeRNodeWeb } from '../vendor/rnode-client-js/src/rnode-web';
+import { makeRNodeActions } from '../vendor/rnode-client-js/src/web/rnode-actions';
 import {
-  makeRNodeActions,
-  rhoExprToJS,
-} from '../vendor/rnode-client-js/src/web/rnode-actions';
-import {
+  mainNet,
   testNet,
   getNodeUrls,
 } from '../vendor/rnode-client-js/src/rchain-networks';
-import { getAddrFromEth } from '../vendor/rnode-client-js/src/rev-address';
 
 import { transferMulti_rho } from '../rho/transfer-multi';
 
 const VOTERS_URI =
-  'rho:id:kiijxigqydnt7ds3w6w3ijdszswfysr3hpspthuyxz4yn3ksn4ckzf';
+  'rho:id:zr9yi5xaswi1cpmdbqjp6ijxe94fnb8r13ofiea437mn8rps1h11sj';
 
 const DUST = 1;
 const REV = 1e8;
@@ -263,11 +261,11 @@ export function buildUI({ ethereumAddress, getElementById, fetch, now }) {
         return html``;
       }
       const { label, info } = state.event;
-      if (!info ) {
+      if (!info) {
         return html`${label}`;
       }
-      if ( label === 'RESULT') {
-        return html`${"VOTE SUCCESSFULLY REGISTERED !"}`;
+      if (label === 'RESULT') {
+        return html`${'VOTE SUCCESSFULLY REGISTERED !'}`;
       }
       if (label === 'STATUS' && info.startsWith('Checking')) {
         return html`${info.slice(0, 20)}${state.events.length - 5}`;
@@ -401,8 +399,8 @@ async function ballotVoterLookup(
   if (!result) {
     throw new Error(JSON.stringify(result));
   }
-  // console.log(rhoExprToJS(result));
-  return rhoExprToJS(result);
+  // console.log(rhoExprToJson(result));
+  return rhoExprToJson(result);
 }
 
 /**
@@ -419,7 +417,7 @@ export function lookup_ballot_user_rho(acct, balloturi, votersuri) {
       lookup!( \`${balloturi}\` , *valueCh) |
       for (@ballot <- valueCh) {
           lookup!( \`${votersuri}\` , *valueCh) |
-          for (@accts <- valueCh) {   
+          for (@accts <- valueCh) {
             return!({"registered": accts.contains("${acct}") ,"ballot": ballot})
           }
       }
@@ -482,7 +480,7 @@ function QuestionsControl(state) {
                : ''
            }</td>
 
-          ${radio(noAddr)} ${radio(abstainAddr)} ${radio(yesAddr)}
+          ${radio(abstainAddr)} ${radio(yesAddr)}
           </dd>`;
       },
     );
