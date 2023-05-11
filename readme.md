@@ -15,7 +15,7 @@ Try the beta at https://rv2020-beta.netlify.app/
 Or run it locally:
 
 ```
-git clone https://github.com/rchain-community/rv2020
+git clone https://github.com/rchain-community/rvote
 cd rv2020
 git submodule update --init
 npm install
